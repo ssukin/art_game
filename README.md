@@ -16,7 +16,7 @@ Level 1 is styled as a paper-craft adventure: characters are flat cut-outs with 
 - **W** or **Up arrow**: jump, or climb up Mrs. Maple's ladder
 - **S** or **Down arrow**: climb down the ladder
 - **Space**: activate nearby doors, chests, signs and people; advance dialogue
-- **Q**: Dab's power — sniff out hidden doodles (they burst into coins)
+- **Q**: Buddy power — with Dab, sniff out hidden doodles (they burst into coins)
 - **I**: open or close Sarah's Pockets (inventory)
 - **R**: return to the Save Block
 
@@ -30,10 +30,10 @@ The inventory has four pockets: **Items**, **Keys**, **Buddy** (Dab) and **Hints
 
 Sarah starts in her bedroom (the bed is bouncy). Open the wardrobe, then walk into the Health Potion and Road Chest Key to pick them up. Open the front door with Space, then press Space again to go outside. On her first exit Sarah notices a gate that appeared overnight — locked, with the art festival on the other side.
 
-Along the road: a mailbox with a letter from the Festival Committee, a sign, and a flower that tells her the fountain is spraying the wrong way. Use the Road Chest Key on the chest to release a **Turnip**. Jump into the fountain's upward stream to ride it up and grab **Grandma's Chest Key**. The Save Block restores health (and has opinions). Another flower gives Sarah three coins. Climb the art crates onto Mrs. Maple's roof for the **Festival Pin**.
+Along the road: a mailbox with a letter from the Festival Committee and a flower that tells her the fountain is spraying the wrong way. Use the Road Chest Key on the chest to release a **Turnip**. Jump into the fountain's upward stream to ride it up and grab **Grandma's Chest Key**. The Save Block restores health (and has opinions). Another flower gives Sarah three coins. Climb the art crates onto Mrs. Maple's roof for the **Festival Pin**.
 
-Past Mrs. Maple's house, lightning rips the sky. The far end of the road loses its color, a flower turns gray and starts crying, and ink **Smudges** appear — stomp them, or lose 1 health if they touch you. Grab the ladder leaning against the tree and bring it to Mrs. Maple, who sets it against her shelf. Climb up and use Grandma's Chest Key to free **Dab**, Sarah's paintbrush little buddy.
+Past Mrs. Maple's house, lightning rips the sky. One flower at the far end of the road turns gray and starts crying, and ink **Smudges** appear — stomp them for a coin, or lose 1 health if they touch you. Grab the ladder leaning against the tree and bring it to Mrs. Maple, who sets it against her shelf. Climb up and use Grandma's Chest Key to free **Dab**, Sarah's paintbrush little buddy.
 
-Bring Dab to the gray flower to restore its color (and the whole road's). It gives Sarah the **Town Gate Key**. Return to the gate at the far left and unlock it to see: "Thanks for playing Level 1! Level 2 will be created soon!"
+Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gate Key**. Return to the gate at the far left and unlock it to see: "Thanks for playing Level 1! Level 2 will be created soon!"
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.

@@ -27,7 +27,7 @@
   <h1>Sarah and the Fading World — Level 1</h1>
   <canvas id="game" width="960" height="540" aria-label="Game screen"></canvas>
   <div class="controls">
-    <p class="help"><kbd>A</kbd><kbd>D</kbd> / arrows move · <kbd>W</kbd>/<kbd>↑</kbd> jump or climb · <kbd>S</kbd>/<kbd>↓</kbd> climb down · <kbd>Space</kbd> activate / talk · <kbd>Q</kbd> Dab power · <kbd>I</kbd> pockets · <kbd>R</kbd> back to Save Block</p>
+    <p class="help"><kbd>A</kbd><kbd>D</kbd> / arrows move · <kbd>W</kbd>/<kbd>↑</kbd> jump or climb · <kbd>S</kbd>/<kbd>↓</kbd> climb down · <kbd>Space</kbd> activate / talk · <kbd>Q</kbd> Buddy power · <kbd>I</kbd> pockets · <kbd>R</kbd> back to Save Block</p>
     <button class="button action" id="activate" disabled>Activate</button>
     <button class="button" id="inventory">Pockets</button>
   </div>
@@ -49,7 +49,7 @@ let scene="bedroom",camera=0,health=10,coins=0,time=0;
 let toastText="",toastTimer=0,invOpen=false,shake=0,flash=0,showEndScreen=false,endT=0;
 let doorOpen=false,closetOpen=false,potionCollected=false,roadChestKeyCollected=false,homeIntroSeen=false,residentDoorOpen=false,residentTalked=false,ladderCollected=false,ladderGiven=false,firstChestOpen=false,grandChestOpen=false,hasDab=false,checkpoint=1180,roofItemCollected=false,bedBounced=false;
 let stormStarted=false,stormDone=false,flowerTalked=false,firstFlowerTalked=false,bonusFlowerTalked=false,flowerRestored=false,fountainKeyCollected=false,gateKey=false,gateOpen=false,complete=false,saveTalked=false,mailRead=false;
-let gateAnim=0,tearT=0,grayT=0,restoreR=0,pulse=0,firstStomp=false,catTalk=0,signTalk=0,easelTalk=0;
+let gateAnim=0,tearT=0,grayT=0,restoreR=0,pulse=0,firstStomp=false,catTalk=0,easelTalk=0;
 let items=[],loot=[],parts=[];
 const dab={x:80,y:G-60};
 
@@ -77,7 +77,7 @@ const addItem=n=>{if(!items.includes(n))items.push(n)};
 const removeItem=n=>{items=items.filter(i=>i!==n)};
 function sayToast(t){toastText=t;toastTimer=3.4;live.textContent=t}
 function burst(x,y,n=14,colors=["#f4c84f","#e5577b","#17a398","#7cc6f2","#fff"]){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=120+Math.random()*220;parts.push({scene,x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-160,life:1+Math.random()*.6,rot:Math.random()*6,vr:(Math.random()-.5)*12,color:colors[i%colors.length]})}}
-function spill(x,y,type,name,dx){loot.push({scene,x,y,vx:dx??(Math.random()-.5)*180,vy:-320,type,name,got:false})}
+function spill(x,y,type,name,dx){loot.push({scene,x,y,vx:dx??(Math.random()-.5)*180,vy:-380,type,name,got:false,wait:.45})}
 function rr(x,y,w,h,r){g.beginPath();g.roundRect(x,y,w,h,r)}
 function circle(x,y,r){g.beginPath();g.arc(x,y,r,0,Math.PI*2)}
 function wrap(text,maxW,font){g.font=font;const out=[];for(const para of text.split("\n")){let line="";for(const w of para.split(" ")){const t=line?line+" "+w:w;if(line&&g.measureText(t).width>maxW){out.push(line);line=w}else line=t}out.push(line)}return out}
@@ -127,7 +127,6 @@ function speakerPos(who){
   if(who==="Mrs. Maple")return[217,G-80];
   if(who==="Mr. Biscuits")return[330,G-30];
   if(who==="Save Block")return[1201-camera,G-90];
-  if(who==="Sign")return[645-camera,G-110];
   if(who==="Flower"){const f=flowers.reduce((b,f)=>Math.abs(f.x-center())<Math.abs(b.x-center())?f:b);return[f.x-camera,G-90]}
   return null;
 }
@@ -166,7 +165,7 @@ function objective(){
   if(ladderCollected)return"Bring the ladder back to Mrs. Maple. It's folded flat in your pocket, as one does.";
   if(residentTalked)return"Find a ladder for Mrs. Maple. Trees are notorious ladder borrowers — check the far end of the road.";
   if(flowerTalked)return"Find Dab, the legendary little buddy. Old things hide in old chests — maybe ask a neighbor?";
-  if(stormDone)return"Something drained the color down the road. Investigate — and maybe pop into Mrs. Maple's blue house.";
+  if(stormDone)return"Something drained the color from a flower down the road. Investigate — and maybe pop into Mrs. Maple's blue house.";
   if(scene==="bedroom"&&!homeIntroSeen)return(potionCollected&&roadChestKeyCollected)?"Head out the front door. Space opens it; Space again steps outside.":"Grab your things from the wardrobe (walk into them), then head out the front door.";
   return"A gate appeared overnight to the left. Explore the road to the right to find out why.";
 }
@@ -182,7 +181,6 @@ function getInteract(){
     if(near(1515,50)&&onFloor())return[residentDoorOpen?"Go inside":"Knock on the door",()=>{if(!residentDoorOpen){residentDoorOpen=true;sayToast("Knock knock. The door opens itself. Very trusting neighborhood.")}else{scene="resident";s.x=93;s.y=G-s.h;residentDoorOpen=false;camera=0}}];
     if(near(595,24))return["Check the mailbox",mailbox];
     if(near(720))return["Talk to the flower",guideFlower];
-    if(near(645,22))return["Read the sign",sign];
     if(near(850)&&!firstChestOpen)return[has("Road Chest Key")?"Unlock the chest":"Inspect the chest",roadChest];
     if(near(1201,40))return["Talk to the Save Block",saveBlock];
     if(near(1280))return["Talk to the flower",bonusFlower];
@@ -209,7 +207,6 @@ function goOutside(){
 }
 function easel(){const lines=["Your masterpiece: \"Self-Portrait as a Teapot.\" Bold. Brave. Smudged three times.","The paint is 94% dry. The other 6% is on your elbow.","You whisper \"you're doing great\" to the painting. It is a painting. It does not reply."];sayToast(lines[easelTalk++%3])}
 function mailbox(){if(!mailRead){mailRead=true;start([["Letter","Dear Artist: the Town Art Festival begins at noon. Late entries will be judged personally by the Committee's cat, Mr. Biscuits, who hates everything."],["Letter","Warmly (but firmly), The Festival Committee. P.S. Please stop painting the ducks."],["Sarah","Not the cat. Anybody but the cat."]])}else sayToast("The mailbox is empty. It looks relieved.")}
-function sign(){const l=[["Sign","→ FOUNTAIN.   ← GATE (NEW?!).   ↑ SKY (PLEASE DON'T)."],["Sign","This sign has nothing else to say. It is, however, a sign of the times."]];start([l[Math.min(signTalk++,1)]])}
 function gate(){
   if(!gateKey){sayToast("Locked tight. The keyhole is shaped like a tiny flower. Suspiciously specific.");return}
   removeItem("Town Gate Key");gateOpen=true;complete=true;burst(255,G-120,30);
@@ -260,7 +257,7 @@ function sadFlower(){
   if(!flowerTalked){flowerTalked=true;const p=[
     ["Flower","*sniff* My color… it's gone! I'm gray! I look like a pencil sketch of myself!"],
     ["Sarah","Oh no. What happened?"],
-    ["Flower","The lightning! The sky ripped and all my yellow just… drained out. Like someone pulled a plug."],
+    ["Flower","The lightning! The sky ripped and all my yellow just… drained out. Only mine! Why only mine?! I'm very likable!"],
     ["Sarah","Could Dab help? The little buddy from the old stories?"],
     ["Flower","Dab brings color back to things! Dab lived around here ages ago, traveling with a legendary hero. But nobody's seen Dab in forever."],
     ["Flower","Please find Dab. And hurry — I'm crying so much I'm basically watering myself."]
@@ -268,7 +265,7 @@ function sadFlower(){
   if(!hasDab){sayToast("The flower sniffles. It needs Dab's color-restoring touch.");return}
   start([
     ["Dab","Color incoming! Everybody stand back! Especially you, gray grass. You know what you did."],
-    ["Narrator","SPLOOSH! A warm wash of color pours over the flower and rolls across the hills."]
+    ["Narrator","SPLOOSH! A warm wash of color pours back into the flower, petal by petal."]
   ],()=>{flowerRestored=true;burst(2800,G-60,40);
     start([
       ["Flower","I'm YELLOW again! I'd forgotten how good yellow feels! It feels like a sneeze, but nice!"],
@@ -322,7 +319,7 @@ function triggerStorm(){
     ["Narrator","KRAKA-THOOM!"],
     ["Narrator","A bolt of lightning tears across the sky like a page ripped out of a sketchbook."],
     ["Sarah","Whoa! Did the sky just… RIP?"],
-    ["Narrator","The tremor races down the road. Up ahead, the color drains right out of the world."],
+    ["Narrator","The tremor races down the road. Far ahead, one little flower's color drains right out of it."],
     ["Narrator","Also, some Smudges fell out of the tear. Stomp them. They're mostly ink and bad attitude."]
   ],()=>{stormDone=true;smudges=[[1900,2080],[2230,2450],[2520,2690]].map(([a,b],i)=>({x:(a+b)/2,min:a,max:b,dir:i%2?1:-1,alive:true,flat:0}))});
 }
@@ -492,16 +489,16 @@ function update(dt){
     if(center()>1650&&!stormStarted)triggerStorm();
     if(!roofItemCollected&&Math.abs(center()-1515)<30&&s.y+s.h<=250){roofItemCollected=true;addItem("Festival Pin");burst(1515,205,18);sayToast("Found the Festival Pin on the roof! You are now officially fancy.")}
     for(const m of smudges){if(!m.alive){m.flat=Math.min(1,m.flat+dt*3);continue}
-      if(flowerRestored){m.alive=false;burst(m.x,G-20,12,["#f4c84f","#e5577b","#7cc6f2"]);continue}
+      if(flowerRestored){m.alive=false;burst(m.x,G-20,12,["#f4c84f","#e5577b","#7cc6f2"]);spill(m.x,G-30,"coin",null,0);continue}
       m.x+=m.dir*60*dt;if(m.x<m.min||m.x>m.max){m.dir*=-1;m.x=clamp(m.x,m.min,m.max)}
       const top=G-32;if(s.x+s.w>m.x-20&&s.x<m.x+20&&s.y+s.h>top&&s.y<G){
-        if(s.vy>0&&oldFeet<=top+14){m.alive=false;s.vy=-430;burst(m.x,top,14,[INK,"#5b5277","#fff"]);spill(m.x,top,"coin",null,0);if(!firstStomp){firstStomp=true;sayToast("Stomped a Smudge! It's flat now. Well, flatter.")}}
+        if(s.vy>0&&oldFeet<=top+14){m.alive=false;s.vy=-430;burst(m.x,top,14,[INK,"#5b5277","#fff"]);spill(m.x,top-6,"coin",null,m.dir*70);if(!firstStomp){firstStomp=true;sayToast("Stomped a Smudge! It's flat now — and a coin pops out!")}}
         else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;
           if(health<=0){health=10;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}
     }
   }
-  for(const l of loot){if(l.got||l.scene!==scene)continue;l.vy+=1450*dt;l.x+=l.vx*dt;l.y+=l.vy*dt;if(l.y>G-14){l.y=G-14;l.vy=-l.vy*.35;if(Math.abs(l.vy)<60)l.vy=0;l.vx*=.85}
-    if(Math.abs(center()-l.x)<28&&l.y>s.y-10&&l.y<s.y+s.h+10){l.got=true;burst(l.x,l.y,6,["#f4c84f","#fff"]);if(l.type==="coin")coins++;else{addItem(l.name);sayToast(l.name==="Turnip"?"Got a Turnip! Why was it locked up? You're afraid to ask.":"Got "+l.name+"!")}}}
+  for(const l of loot){if(l.got||l.scene!==scene)continue;l.wait=Math.max(0,(l.wait||0)-dt);l.vy+=1450*dt;l.x+=l.vx*dt;l.y+=l.vy*dt;if(l.y>G-14){l.y=G-14;l.vy=-l.vy*.35;if(Math.abs(l.vy)<60)l.vy=0;l.vx*=.85}
+    if(l.wait<=0&&Math.abs(center()-l.x)<28&&l.y>s.y-10&&l.y<s.y+s.h+10){l.got=true;burst(l.x,l.y,6,["#f4c84f","#fff"]);if(l.type==="coin")coins++;else{addItem(l.name);sayToast(l.name==="Turnip"?"Got a Turnip! Why was it locked up? You're afraid to ask.":"Got "+l.name+"!")}}}
   if(!s.wasGround&&s.ground&&s.squash>.95)s.squash=.9;
   if(s.y>H+40){s.x=checkpoint;s.y=G-s.h;s.vy=0}
   camera=scene==="outside"?clamp(s.x-350,0,WORLD-W):0;
@@ -699,7 +696,6 @@ function drawGate(x){
   // arch frame
   cut(()=>{g.beginPath();g.moveTo(x-14,G);g.lineTo(x-14,top+20);g.quadraticCurveTo(x+81,top-50,x+176,top+20);g.lineTo(x+176,G);g.lineTo(x+150,G);g.lineTo(x+150,top+34);g.quadraticCurveTo(x+81,top-14,x+12,top+34);g.lineTo(x+12,G);g.closePath()},"#e9d79c",{edge:9});
   g.fillStyle="#d4bf7d";for(let yy=top+60;yy<G;yy+=36){g.fillRect(x-8,yy,16,18);g.fillRect(x+154,yy,16,18)}
-  g.font="bold 13px "+FONT;cut(()=>rr(x+26,top-40,110,26,13),"#fffdf6",{edge:5,shadow:false});g.fillStyle=INK;g.textAlign="center";g.fillText(gateOpen?"WELCOME!":"(NEW?!) GATE",x+81,top-22);g.textAlign="left";
 }
 function drawFountain(){
   const x=fountain.x;
@@ -713,7 +709,6 @@ function drawFountain(){
   // splashy top + floating key until collected
   cut(()=>{g.beginPath();g.arc(x-18,topY,12,0,7);g.arc(x,topY-10,15,0,7);g.arc(x+18,topY,12,0,7)},"#bfe6fb",{edge:5,line:2});
   if(!fountainKeyCollected)drawIcon("Grandma's Chest Key",x,topY-38+Math.sin(time*3)*5,.75);
-  g.fillStyle=INK;g.font="italic bold 12px "+FONT;g.textAlign="center";g.fillText("(water goes up now)",x,G+38);g.textAlign="left";
 }
 function drawChest(x,y,open,col="#b9693c"){
   cut(()=>rr(x,y+12,58,26,5),col,{edge:6});g.fillStyle="rgba(255,255,255,.2)";g.fillRect(x+4,y+20,50,5);
@@ -723,30 +718,24 @@ function drawChest(x,y,open,col="#b9693c"){
 function drawCrates(){for(let i=0;i<4;i++){const y=330+i*27.5;cut(()=>rr(1360,y,72,27,3),i%2?"#e0b06d":"#d39f5b",{edge:5,shadow:i===0})}
   g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("ART STUFF",1396,348);g.fillText("FRAGILE",1396,376);g.fillText("NO JUMPING",1396,403);g.fillText("(PLEASE)",1396,431);g.textAlign="left"}
 function drawMailbox(){cut(()=>rr(591,G-62,8,62,2),"#a8714a");cut(()=>{g.beginPath();g.moveTo(576,G-62);g.lineTo(576,G-80);g.arc(595,G-80,19,Math.PI,0);g.lineTo(614,G-62);g.closePath()},"#e5577b",{edge:6});if(!mailRead){cut(()=>rr(612,G-92,5,22,2),"#f4c84f",{edge:3,shadow:false});cut(()=>rr(612,G-92,14,9,2),"#f4c84f",{edge:3,shadow:false})}}
-function drawSign(){cut(()=>rr(642,G-80,7,80,2),"#a8714a");cut(()=>rr(612,G-110,70,40,6),"#fff3d6",{edge:6});g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("→ FOUNTAIN",647,G-94);g.fillText("← GATE?!",647,G-79);g.textAlign="left"}
 function drawLadderTree(){
   cut(()=>rr(2980,G-150,26,150,6),"#a8714a",{edge:8});
   for(const [dx,dy,r,col] of[[0,-190,52,"#4fae67"],[-42,-160,36,"#66bf72"],[42,-165,38,"#66bf72"],[0,-230,34,"#78c982"]])cut(()=>{g.beginPath();g.arc(2993+dx,G+dy,r,0,7)},col,{edge:8});
   g.fillStyle="#e5577b";for(const [dx,dy] of[[-20,-200],[22,-180],[-44,-150],[10,-232]]){circle(2993+dx,G+dy,5);g.fill()}
   if(!ladderCollected){g.save();g.translate(2958,G);g.rotate(.3);cut(()=>{g.beginPath();g.rect(-3,-130,6,130);g.rect(19,-130,6,130);for(let y=-115;y<0;y+=22)g.rect(0,y,22,5)},"#d39f5b",{edge:5});g.restore()}
 }
-function drawGrayOverlay(){
-  if(!stormDone&&!stormStarted)return;const start=2250,edge=WORLD-(WORLD-start)*grayT;
-  if(grayT<=0||restoreR>=1600)return;
-  g.save();g.globalCompositeOperation="saturation";g.fillStyle="#808080";g.beginPath();g.rect(edge,-50,WORLD-edge+50,H+100);if(restoreR>0){g.moveTo(2800+restoreR,G-60);g.arc(2800,G-60,restoreR,0,Math.PI*2,true)}g.fill("evenodd");g.restore();
-}
 function drawOutside(){
   drawOutsideBackground();
   g.save();g.translate(-camera,0);
   drawGround();
-  drawGate(180);drawHouse(360,300,210,140,"#ffe9c7","#e5577b","SARAH'S HOUSE",doorOpen);drawMailbox();drawSign();
+  drawGate(180);drawHouse(360,300,210,140,"#ffe9c7","#e5577b","SARAH'S HOUSE",doorOpen);drawMailbox();
   drawFountain();drawChest(821,G-38,firstChestOpen);
   sprite(1201,G-10+Math.sin(time*2)*3,50,50,drawSaveBody);groundShadow(1201,G+2,20);
   drawCrates();drawHouse(1430,300,170,140,"#e3f2ff","#3b8fd6","MRS. MAPLE'S",residentDoorOpen);
   if(!roofItemCollected)drawIcon("Festival Pin",1515,205+Math.sin(time*3)*4,.7);
   drawLadderTree();drawFlowers();
   for(const m of smudges){if(m.alive){groundShadow(m.x,G+2,18);sprite(m.x,G+2,46,36,drawSmudgeBody,{sx:m.dir>0?-1:1,sy:1+Math.sin(time*10)*.06})}else if(m.flat<1){sprite(m.x,G+2,46,36,drawSmudgeBody,{sy:Math.max(.05,.2-m.flat*.2),sx:1.4,alpha:1-m.flat})}}
-  drawLoot();drawDoodles();drawParticles();drawGrayOverlay();drawSarah();
+  drawLoot();drawDoodles();drawParticles();drawSarah();
   g.restore();
 }
 function wallpaper(c1,c2,kind){g.fillStyle=c1;g.fillRect(0,0,W,G);g.fillStyle=c2;if(kind==="stripes"){for(let x=0;x<W;x+=48)g.fillRect(x,0,22,G)}else{for(let y=30;y<G;y+=60)for(let x=(y/60%2)*40;x<W;x+=80){g.beginPath();g.moveTo(x,y-14);g.lineTo(x+12,y);g.lineTo(x,y+14);g.lineTo(x-12,y);g.fill()}}}
@@ -817,7 +806,7 @@ function drawHud(){
   g.save();g.translate(44,top+22);g.scale(1+Math.sin(time*5)*.04*(health<4?3:1),1);cut(()=>{g.beginPath();g.moveTo(0,10);g.bezierCurveTo(-18,-2,-10,-16,0,-7);g.bezierCurveTo(10,-16,18,-2,0,10)},"#e5577b",{edge:4,shadow:false});g.restore();
   g.fillStyle=INK;g.font="bold 22px "+FONT;g.fillText(health,66,top+30);g.font="bold 14px "+FONT;g.fillStyle="#7a7088";g.fillText("/ 10 HP",health>9?94:82,top+29);
   cut(()=>rr(196,top,104,44,22),"#fffdf6",{edge:7});drawCoin(220,top+22,11);g.fillStyle=INK;g.font="bold 22px "+FONT;g.fillText(coins,240,top+30);
-  if(hasDab){cut(()=>rr(310,top,124,44,22),"#fffdf6",{edge:7});sprite(332,top+40,30,56,drawDabBody,{sx:.6,sy:.6,rot:-.3,shadow:false});g.fillStyle=INK;g.font="bold 14px "+FONT;g.fillText("Q: sniff",350,top+28)}
+  if(hasDab){cut(()=>rr(310,top,124,44,22),"#fffdf6",{edge:7});sprite(332,top+40,30,56,drawDabBody,{sx:.6,sy:.6,rot:-.3,shadow:false});g.fillStyle=INK;g.font="bold 14px "+FONT;g.fillText("Q: Buddy",350,top+28)}
   cut(()=>rr(W-142,18,124,36,18),"#fffdf6",{edge:6});g.fillStyle=INK;g.font="bold 14px "+FONT;g.fillText("I: Pockets",W-122,41);
   if(toastTimer>0){const a=Math.min(1,toastTimer*3,(3.4-toastTimer)*6),y=H-24-a*40;g.save();g.globalAlpha=Math.min(1,a*1.2);const lines=wrap(toastText,W-220,"bold 17px "+FONT),h=20+lines.length*22;
     cut(()=>rr(90,y-h+30,W-180,h,16),"#2f2a4a",{edge:7});g.fillStyle="#fff4d6";g.textAlign="center";lines.forEach((l,i)=>g.fillText(l,W/2,y-h+56+i*22));g.textAlign="left";g.restore()}
