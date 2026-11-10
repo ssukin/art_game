@@ -1512,8 +1512,34 @@ const UNDER_W=3000;
 const UNDER_SIGNS=[[1085,"POTTER'S STUDIO — CLOSED FOR FESTIVAL. Gone upstairs to run the Clay Corner. Back soon! (Please do not lick the kiln.)"],
   [1500,"LOST & FOUND — CLOSED FOR FESTIVAL. If you found this sign, please return it. It's the only one we have."],
   [1900,"UNDERGROUND ARCADE — CLOSED FOR FESTIVAL. High score: \"KEVIN.\" Every game. Every machine. We're worried about Kevin."],
-  [2300,"MUSHROOM GROCER — CLOSED FOR FESTIVAL. Fresh fungus, fun guys. Opening soon (they grow fast)."],
+  [2305,"ALCHEMY SHOP — CLOSED FOR FESTIVAL. Bubbling resumes soon. Please do not drink anything you find on the doorstep. Especially if it winks."],
   [2760,"TUNNEL TO THE SEWERS — KEEP OUT. Construction coming soon. (Gus says hi.)"]];
+function drawAlchemyShop(x){
+  const cx=x+75;
+  // tower body with a rounded top
+  cut(()=>{g.beginPath();g.moveTo(x+6,G);g.lineTo(x+6,G-150);g.quadraticCurveTo(x+6,G-196,cx,G-198);g.quadraticCurveTo(x+144,G-196,x+144,G-150);g.lineTo(x+144,G);g.closePath()},"#3a2f5e",{edge:8});
+  g.fillStyle="rgba(255,255,255,.07)";for(let yy=G-180;yy<G;yy+=22)g.fillRect(x+14,yy,122,8);
+  g.fillStyle="#f4c84f";for(const [sx,sy] of[[x+24,G-170],[x+122,G-150],[x+30,G-110],[x+128,G-90]]){g.globalAlpha=.5+Math.sin(time*3+sx)*.4;star(sx,sy,3.5,1.4);g.fill()}g.globalAlpha=1;
+  // crooked witch-hat roof
+  cut(()=>{g.beginPath();g.moveTo(x-8,G-180);g.quadraticCurveTo(cx,G-200,x+158,G-180);g.lineTo(cx+18,G-292);g.quadraticCurveTo(cx+40,G-300,cx+44,G-286);g.lineTo(cx+10,G-270);g.closePath()},"#2b2540",{edge:8});
+  g.strokeStyle="#7cc488";g.lineWidth=4;g.beginPath();g.moveTo(x+4,G-186);g.quadraticCurveTo(cx,G-204,x+146,G-186);g.stroke();
+  cut(()=>{g.beginPath();g.arc(cx+46,G-292,8,.6,5.4);g.arc(cx+50,G-294,6,5.2,.9,true);g.closePath()},"#f4c84f",{edge:4,shadow:false});
+  // round glowing window with bottles
+  cut(()=>{g.beginPath();g.arc(cx,G-140,26,0,7)},"#7cf2c0",{edge:6});
+  g.save();g.globalAlpha=.35+Math.sin(time*2)*.15;g.fillStyle="#d8ffe9";circle(cx,G-140,20);g.fill();g.restore();
+  g.fillStyle="#2b2540";rr(cx-14,G-146,8,16,3);g.fill();g.fillRect(cx-12,G-150,4,5);rr(cx-2,G-152,10,22,4);g.fill();g.fillRect(cx+1,G-157,4,6);rr(cx+11,G-142,7,12,3);g.fill();
+  g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(cx-26,G-140);g.lineTo(cx+26,G-140);g.moveTo(cx,G-166);g.lineTo(cx,G-114);g.stroke();
+  // arched door
+  cut(()=>{g.beginPath();g.moveTo(cx-22,G);g.lineTo(cx-22,G-58);g.arc(cx,G-58,22,Math.PI,0);g.lineTo(cx+22,G);g.closePath()},"#5b2a6e",{edge:5,shadow:false});
+  g.fillStyle="#f4c84f";circle(cx+12,G-34,3);g.fill();
+  // name plate + closed sign
+  cut(()=>rr(cx-48,G-112,96,22,8),"#7cc488",{edge:5,shadow:false});g.fillStyle="#2b2540";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("ALCHEMY",cx,G-96);
+  g.save();g.translate(cx,G-70);g.rotate(Math.sin(time*1.5+x)*.05);cut(()=>rr(-36,0,72,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
+  // little cauldron outside, still bubbling
+  cut(()=>{g.beginPath();g.moveTo(x+150,G-30);g.quadraticCurveTo(x+148,G,x+170,G);g.quadraticCurveTo(x+192,G,x+190,G-30);g.closePath()},"#1b1730",{edge:5});
+  g.fillStyle="#7cf2c0";g.beginPath();g.ellipse(x+170,G-30,20,5,0,0,7);g.fill();
+  for(let i=0;i<3;i++){const k=(time*.8+i/3)%1;g.globalAlpha=1-k;g.fillStyle="#b6ffd9";circle(x+162+i*8,G-34-k*30,3+k*3);g.fill()}g.globalAlpha=1;
+}
 function drawFossil(){
   cut(()=>{g.beginPath();g.moveTo(2860,G);g.quadraticCurveTo(2870,G-170,2930,G-230);g.lineTo(3010,G-260);g.lineTo(3010,G);g.closePath()},"#7a5a3a",{edge:6});
   g.fillStyle="#6a4a2e";for(const [x,y,r] of[[2900,G-40,6],[2960,G-120,8],[2985,G-60,5],[2920,G-150,4],[2950,G-30,7]]){circle(x,y,r);g.fill()}
@@ -1829,7 +1855,7 @@ function drawUnder(){
   cut(()=>rr(1030,G-160,50,44,6),"#a6def5",{edge:5,shadow:false});g.fillStyle="#8d5a36";for(const [x,h] of[[1040,14],[1056,20],[1070,12]]){rr(x-5,G-116-h,10,h,4);g.fill()}
   cut(()=>rr(1095,G-96,46,96,5),"#8d5a36",{edge:5,shadow:false});
   g.save();g.translate(1118,G-74);g.rotate(Math.sin(time*1.5)*.05);cut(()=>rr(-34,0,68,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
-  shopFront(1430,140,"LOST & FOUND","#d6d0e8","#7a5c99");shopFront(1830,140,"ARCADE","#2f2a4a","#ff8fe8");shopFront(2230,140,"MUSHROOMS","#efe3d0","#c0662e");
+  shopFront(1430,140,"LOST & FOUND","#d6d0e8","#7a5c99");shopFront(1830,140,"ARCADE","#2f2a4a","#ff8fe8");drawAlchemyShop(2230);
   for(const [x,c] of[[1870,"#7cc6f2"],[1900,"#f4c84f"],[1930,"#e5577b"]]){g.save();g.globalAlpha=.5+Math.sin(time*5+x)*.3;g.fillStyle=c;g.fillRect(x-8,G-160,16,10);g.restore()}
   // tunnel to the sewers
   cut(()=>{g.beginPath();g.moveTo(2680,G);g.lineTo(2680,G-130);g.arc(2760,G-130,80,Math.PI,0);g.lineTo(2840,G);g.closePath()},"#5b5277",{edge:8});
