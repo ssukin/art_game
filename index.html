@@ -976,7 +976,7 @@ function startLevel2(){
   start([
     ["Narrator","The gate creaks open. Past it, the road winds through the town orchard, and festival music is already drifting over the trees."],
     ["Dab","Ooh, apples! Can we shake the trees?"],
-    ["Sarah","The sign says \"coming soon.\" I don't make the rules."]
+    ["Sarah","They're way too high. Maybe another day."]
   ],()=>sayToast("Walk through the orchard to the festival registration table →"));
 }
 
@@ -1481,7 +1481,7 @@ function drawFestival(){
 }
 function objectiveL2(){
   if(l2.done)return"Level 2 complete! Level 3 is coming soon.";
-  if(scene==="orchard"&&!l2.festReg)return"Walk through the orchard to the Registration table. Entry is 5 coins — or wear your Festival Pin to get in free. (The last apple tree has a few coins in it…)";
+  if(scene==="orchard"&&!l2.festReg)return"Walk through the orchard to the Registration table. Entry is 5 coins — or wear your Festival Pin to get in free.";
   if(l2.mapleDone)return(has("Smudgy Key")?"":"Pick up the Smudgy Key a Smudge dropped. ")+(l2.on2F?"Unlock the door on the second floor.":dogOn?"With the balloon dog tied on, jump up to the bars on the right of the stage, then climb to the second floor and unlock the door.":"Climb the jump bars on the right of the stage to the second floor and unlock the door."+(l2.tramp?" (Use Mrs. Maple’s trampoline!)":""));
   if(l2.fightDone)return"The Smudges are gone! Someone familiar is hurrying over…";
   if(l2.finale)return"Defeat the Smudges before they drain Juniper's painting! With Nib equipped, press Q to jab — or stomp them.";
@@ -1504,7 +1504,7 @@ const FLOOR2={x:3040,y:-52,w:480,h:14};
 const TRAMP_F={x:3446,y:G-18,w:56,h:18},TRAMP_U={x:130,y:G-18,w:70,h:18};
 const DOCK={x:860,w:390};
 const ORCH_TREES=[450,650,850,1050];
-const ORCH_COINS=[[1022,G-118],[1040,G-138],[1060,G-122],[1078,G-140],[1050,G-100]];
+const ORCH_COINS=[];
 const UNDER_W=3000;
 const UNDER_SIGNS=[[1085,"POTTER'S STUDIO — CLOSED FOR FESTIVAL. Gone upstairs to run the Clay Corner. Back soon! (Please do not lick the kiln.)"],
   [1500,"LOST & FOUND — CLOSED FOR FESTIVAL. If you found this sign, please return it. It's the only one we have."],
@@ -1535,9 +1535,8 @@ function goScene(name,x,y){scene=name;s.x=x-s.w/2;s.y=y??G-s.h;s.vy=0;fish.ph=0;
 // ---- orchard ----
 function orchardInteract(){
   if(!onFloor())return null;const T=(l,f)=>[l,f,true];
-  if(near(300,26))return["Read the sign",()=>start([["Sign","THE ORCHARD — Tree shaking coming soon! (Please do not shake the trees yet. They are not ready emotionally.)"]])];
-  for(const x of ORCH_TREES.slice(0,3))if(near(x,30))return["Look at the apples",()=>sayToast("Shiny red apples, juuust out of reach. Tree shaking is coming soon.")];
-  if(near(1050,30))return["Look at the apples",()=>sayToast(l2.orchCoins.every(Boolean)?"Apples, still out of reach. You already got the coins from this one.":"Apples out of reach… but something glints in the lower branches. Coins? Jump for them!")];
+  if(near(300,26))return["Read the sign",()=>start([["Sign","THE ORCHARD"]])];
+  for(const x of ORCH_TREES)if(near(x,30))return["Look at the apples",()=>sayToast("Shiny red apples, juuust out of reach. Maybe someday you'll be able to shake them loose.")];
   if(near(1250,46))return T("Talk to the Registrar",festRegistrar);
   return null;
 }
@@ -1550,7 +1549,7 @@ function festRegistrar(){
     ["Registrar","Happens every year. The Clay Corner — the very first booth past the plaza — lets you whip something up. Bring it back here and I'll enter it."],
     ["Registrar","Totally optional, of course. Judging starts when our judge, Mr. Biscuits, shows up. He's… late. Someone heard yowling near the playground."]];
   const done=(line)=>{l2.festReg=true;l2.registered=true;burst(1250,G-90,18);start((line?[["Registrar",line]]:[]).concat(contest),()=>sayToast("Registered! Head on through to the festival →"))};
-  const pay=()=>{if(coins<5){start([["Registrar","You've got "+coins+" coin"+(coins===1?"":"s")+". It's 5 to get in. Psst — I saw something glinting up in that last apple tree."]],()=>sayToast("Not enough coins (you have "+coins+", need 5)."));return}coins-=5;done("Five coins — received! Here's your wristband. Welcome to the Town Art Festival!")};
+  const pay=()=>{if(coins<5){start([["Registrar","You've got "+coins+" coin"+(coins===1?"":"s")+". It's 5 to get in. (Or wear an official Festival Pin and walk right in!)"]],()=>sayToast("Not enough coins (you have "+coins+", need 5)."));return}coins-=5;done("Five coins — received! Here's your wristband. Welcome to the Town Art Festival!")};
   if(pinWorn){start([["Registrar","Welcome to the festival! Registration is 5 coi— oh! Is that an official Festival Pin you're wearing?"],["Registrar","Pin-wearers get in FREE! Put your coins away. Welcome, welcome!"]],()=>done(null));return}
   if(has("Festival Pin")){start([["Registrar","Welcome! Festival registration is 5 coins."],["Registrar","Ooh — but is that a Festival Pin poking out of your pocket? If you WEAR it, you get in free! (Pockets → Key Items → Festival Pin → Wear.)",["Pay 5 coins","I'll put my pin on"],i=>{if(i===0)pay();else sayToast("Open your Pockets (I), go to Key Items, pick the Festival Pin and choose Wear. Then talk to the Registrar again.")}]]);return}
   start([["Registrar","Welcome to the Town Art Festival! Registration is 5 coins. (Anyone wearing an official Festival Pin gets in free.)",["Pay 5 coins","Not right now"],i=>{if(i===0)pay();else start([["Registrar","No problem! The festival will be here. So will I. Forever, probably."]])}]]);
@@ -1563,7 +1562,7 @@ function updateOrchard(){
 function drawOrchard(){
   drawOutsideBackground(null);g.save();g.translate(-camera,0);drawGround();
   drawGate(-30);
-  cut(()=>rr(296,G-80,8,80,2),"#a8714a");cut(()=>rr(236,G-128,128,56,8),"#fff3d6",{edge:7});g.fillStyle="#5fb35a";g.font="bold 15px "+FONT;g.textAlign="center";g.fillText("THE ORCHARD",300,G-106);g.fillStyle="#e5577b";g.font="bold 11px "+FONT;g.fillText("TREE SHAKING",300,G-90);g.fillText("COMING SOON!",300,G-77);g.textAlign="left";
+  cut(()=>rr(296,G-80,8,80,2),"#a8714a");cut(()=>rr(236,G-128,128,56,8),"#fff3d6",{edge:7});g.fillStyle="#5fb35a";g.font="bold 15px "+FONT;g.textAlign="center";g.font="bold 17px "+FONT;g.fillText("THE ORCHARD",300,G-94);g.textAlign="left";
   ORCH_TREES.forEach((x,i)=>{tree(x,G,1.15,i%2?"#66bf72":"#4fae67");for(const [dx,dy] of[[-26,-112],[18,-98],[0,-128],[-12,-84],[30,-118],[-34,-96]]){cut(()=>{g.beginPath();g.arc(x+dx,G+dy,6,0,7)},"#e5463f",{edge:3,shadow:false});g.fillStyle="#3a7a3a";g.fillRect(x+dx-1,G+dy-9,2,4)}});
   ORCH_COINS.forEach(([x,y],i)=>{if(!l2.orchCoins[i])drawCoin(x,y+Math.sin(time*4+i)*2,8)});
   // registration table + velvet rope
