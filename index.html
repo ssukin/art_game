@@ -1716,7 +1716,9 @@ function updateFishing(dt){
 }
 function updateLake(){
   LAKE_COINS.forEach(([x,y],i)=>{if(!l2.lakeCoins[i]&&Math.abs(center()-x)<22&&s.y<y+10&&s.y+s.h>y-10){l2.lakeCoins[i]=1;coins++;burst(x,y,8,["#f4c84f","#fff"]);if(l2.lakeCoins.every(Boolean))sayToast("Got all 5 coins from the lakeside tree!")}});
-  if(s.y>G+40){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=DOCK.x+DOCK.w-120;s.y=G-s.h;s.vy=0;sayToast("SPLASH! Sarah fishes herself out of the lake. 0/10, would not recommend.")}
+  if(s.y>G+40){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=DOCK.x+DOCK.w-120;s.y=G-s.h;s.vy=0;shake=.3;health--;
+    if(health<=0){health=maxHealth;sayToast("SPLASH! Sarah crumples… soggily… then uncrumples back on the dock. Paper and water: not friends.")}
+    else sayToast("SPLASH! Sarah fishes herself out of the lake. (-1 health) 0/10, would not recommend.")}
 }
 function drawLake(){
   drawOutsideBackground(null);g.save();g.translate(-camera,0);drawGround();
