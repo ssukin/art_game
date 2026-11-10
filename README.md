@@ -50,10 +50,12 @@ Sarah steps through the gate into the Town Art Festival. Townsfolk recognize Dab
 6. **Contest results.** Juniper wins with a painting of the legendary adventurer, who looks a lot like Sarah, plus Dab. The town connects the dots. Sarah isn't so sure.
 7. **The sky cracks again.** Smudges drain color from the painting, and a door falls out of the sky. Jab or stomp the Smudges. One of them drops the **Smudgy Key**. Mrs. Maple arrives to tell Sarah she must save the town. Unlock the sky door to finish Level 2 ("Level 3 coming soon!").
 
+**Balloons:** Inka at the art-supply stand sells balloons for 5 coins. Use one from your Pockets and Sarah's next jump goes twice as high, which is the only way up to the treasure chest on the Library roof (25 coins and a Health Potion).
+
 The town is set up as a future hub. It has Chef Crumb's healing recipes, Gus and his clogged pipe (a hook for later), shops "Closed for Festival" with joke signs, two Save Blocks, and hidden doodles for Dab to find.
 
 ## Admin Cheats Only
 
-Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** drops you at the festival with the Turnip, Festival Pin and Dab. Other buttons jump to after the chase, the contest results, or the Smudge fight. **Restart Level 1** reloads the page.
+Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** drops you at the festival with the Turnip, Festival Pin and Dab. Other buttons jump to after the chase, the contest results, or the Smudge fight, and **+20 coins** tops up your wallet. **Restart Level 1** reloads the page.
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.
