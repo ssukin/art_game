@@ -180,16 +180,16 @@ function getInteract(){
     if(near(465,50)&&onFloor())return[doorOpen?"Go inside":"Open your door",()=>{if(!doorOpen){doorOpen=true;sayToast("Your front door, reporting for duty.")}else{scene="bedroom";s.x=790;s.y=G-s.h;doorOpen=false;sayToast("Back in your room. It still smells like paint.")}}];
     if(near(1515,50)&&onFloor())return[residentDoorOpen?"Go inside":"Knock on the door",()=>{if(!residentDoorOpen){residentDoorOpen=true;sayToast("Knock knock. The door opens itself. Very trusting neighborhood.")}else{scene="resident";s.x=93;s.y=G-s.h;residentDoorOpen=false;camera=0}}];
     if(near(595,24))return["Check the mailbox",mailbox];
-    if(near(720))return["Talk to the flower",guideFlower];
+    if(near(720))return["Talk to the flower",guideFlower,true];
     if(near(850)&&!firstChestOpen)return[has("Road Chest Key")?"Unlock the chest":"Inspect the chest",roadChest];
-    if(near(1201,40))return["Talk to the Save Block",saveBlock];
-    if(near(1280))return["Talk to the flower",bonusFlower];
-    if(near(2800)&&stormDone)return[hasDab&&!flowerRestored?"Restore color with Dab":"Talk to the flower",sadFlower];
+    if(near(1201,40))return["Talk to the Save Block",saveBlock,true];
+    if(near(1280))return["Talk to the flower",bonusFlower,true];
+    if(near(2800)&&stormDone)return[hasDab&&!flowerRestored?"Restore color with Dab":"Talk to the flower",sadFlower,true];
     if(near(2985,55)&&!ladderCollected)return["Take the ladder",()=>{ladderCollected=true;addItem("Wooden Ladder");burst(2985,G-60,10);sayToast("You take the ladder. It folds completely flat into your pocket. Everything does, around here.")}];
   }
   if(scene==="resident"){
     if(near(114,48))return[residentDoorOpen?"Leave the house":"Open the door",()=>{if(!residentDoorOpen){residentDoorOpen=true}else{scene="outside";s.x=1494;s.y=G-s.h;residentDoorOpen=false;sayToast("Back on the road.")}}];
-    if(near(217,62)&&onFloor())return["Talk to Mrs. Maple",mrsMaple];
+    if(near(217,62)&&onFloor())return["Talk to Mrs. Maple",mrsMaple,true];
     if(near(330,30)&&onFloor())return["Pet the cat",cat];
     if(near(719,50)&&ladderGiven&&!grandChestOpen&&s.y+s.h<=290)return[has("Grandma's Chest Key")?"Unlock Grandma's chest":"Inspect Grandma's chest",grandmaChest];
   }
@@ -604,7 +604,7 @@ function drawSarah(){
   sprite(center(),s.y+s.h+3,50,76,drawSarahBody,{sx:sx*(2-s.squash),sy:s.squash,alpha:blinkInv?.45:1});
   if(hasDab)sprite(dab.x,dab.y+28,30,56,drawDabBody,{rot:Math.sin(time*2.6)*.18-.15*s.face,sx:.85*(s.face>0?1:-1),sy:.85});
   // "!" bubble when something can be activated
-  if(!dlg.on&&!invOpen&&getInteract()){const bx=center(),by=s.y-30+Math.sin(time*7)*3;cut(()=>{g.beginPath();g.ellipse(bx,by,14,16,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 20px "+FONT;g.textAlign="center";g.fillText("!",bx,by+7);g.textAlign="left"}
+  if(!dlg.on&&!invOpen&&getInteract()?.[2]){const bx=center(),by=s.y-30+Math.sin(time*7)*3;cut(()=>{g.beginPath();g.ellipse(bx,by,14,16,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 20px "+FONT;g.textAlign="center";g.fillText("!",bx,by+7);g.textAlign="left"}
 }
 function groundUnder(){if(scene==="bedroom"&&s.x+s.w>105&&s.x<385&&s.y+s.h<=350)return 346;if(scene==="resident"&&ladderGiven&&s.x+s.w>400&&s.y+s.h<=284)return 280;if(scene==="outside")for(const p of platforms)if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;return G}
 function drawFlowers(){for(const f of flowers){if(f.x<camera-80||f.x>camera+W+80)continue;const gray=f.kind==="gray"&&stormDone&&!flowerRestored;groundShadow(f.x,G+2,18);

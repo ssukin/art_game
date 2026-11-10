@@ -20,7 +20,7 @@ Level 1 is styled as a paper-craft adventure: characters are flat cut-outs with 
 - **I**: open or close Sarah's Pockets (inventory)
 - **R**: return to the Save Block
 
-A pink **!** appears over Sarah whenever there's something to activate. The on-screen Activate button works like Space (and becomes **Continue** during dialogue). You can also click the screen to advance dialogue.
+A pink **!** appears over Sarah when she's next to someone she can talk to (people, flowers and the Save Block). The on-screen Activate button works like Space (and becomes **Continue** during dialogue). You can also click the screen to advance dialogue.
 
 ## Sarah's Pockets
 
