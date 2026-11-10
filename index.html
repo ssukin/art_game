@@ -213,7 +213,7 @@ function getInteract(){
     if(near(595,24))return["Check the mailbox",mailbox];
     if(near(720))return["Talk to the flower",guideFlower,true];
     if(near(850)&&!firstChestOpen)return[has("Road Chest Key")?"Unlock the chest":"Inspect the chest",roadChest];
-    if(near(1201,40))return["Talk to the Save Block",saveBlock,true];
+    if(near(1201,40))return["Save at the Save Block",saveBlock];
     if(near(1280))return["Talk to the flower",bonusFlower,true];
     if(near(2800)&&stormDone)return[hasDab&&!flowerRestored?"Restore color with Dab":"Talk to the flower",sadFlower,true];
     if(near(2985,55)&&!ladderCollected)return["Take the ladder",()=>{ladderCollected=true;addItem("Wooden Ladder");burst(2985,G-60,10);sayToast("You take the ladder. It folds completely flat into your pocket. Everything does, around here.")}];
@@ -274,13 +274,7 @@ function roadChest(){
 }
 function saveBlock(){
   checkpoint=1180;health=10;burst(1201,G-70,12,["#f4c84f","#fff"]);
-  if(!saveTalked){saveTalked=true;start([
-    ["Save Block","Greetings, traveler. I am a Save Block. I remember things, so you don't have to."],
-    ["Sarah","Do you remember… anything else?"],
-    ["Save Block","I remember everything. I remember you tripping over the curb this morning. We don't need to discuss it."],
-    ["Narrator","Health fully restored! Press R any time to hop back to this Save Block."]
-  ]);return}
-  sayToast("Saved! Health restored. The Save Block pretends not to watch you leave.");
+  sayToast("Saved! Health restored. Press R any time to come back to this Save Block.");
 }
 function sadFlower(){
   grayFlower.wig=1;
@@ -377,6 +371,7 @@ const INFO={
   "Nib":["A sharp little buddy. With Nib equipped, Q jabs enemies. Very pointy, very brave, slightly dramatic.","Equip"],
   "Butter Pat":["A small, guilty curl of festival butter. Slippery. Useful. Do not mention it to Brie.","Ponder"],
   "Ball of Clay":["Your contest entry. It's a ball. Of clay. Some call it minimalism. You call it \"done.\"","Admire"],
+  "Lopsided Teapot":["Your contest entry. A teapot with a strong lean and stronger opinions. Do not put tea in it.","Admire"],
   "Recipe Card":["Turnip-Butter Tonic: 1 Turnip + 1 Butter Pat = Health Potion. Ask Chef Crumb to cook it.","Read"]
 };
 function pocketList(){const isKey=n=>n.includes("Key");if(inv.tab===0)return items.filter(n=>!isKey(n));if(inv.tab===1)return items.filter(isKey);if(inv.tab===2)return[hasDab&&"Dab",hasNib&&"Nib"].filter(Boolean);return[]}
@@ -385,6 +380,7 @@ function useSelected(){
   if(n==="Dab"||n==="Nib"){equipped=n;sayToast(n+" equipped! Q now "+(n==="Dab"?"sniffs out hidden doodles.":"jabs enemies."));return}
   if(n==="Butter Pat"){sayToast("You resist the urge to eat butter straight from your pocket. Growth!");return}
   if(n==="Ball of Clay"){sayToast("You admire your Ball of Clay. It is extremely round.");return}
+  if(n==="Lopsided Teapot"){sayToast("You admire your Lopsided Teapot. It admires the floor. It's leaning toward it.");return}
   if(n==="Recipe Card"){sayToast("Turnip + Butter Pat = Health Potion. Chef Crumb can cook it at his booth.");return}
   if(n==="Health Potion"){if(health>=10){sayToast("You're already at full health. Save it for a rainier day.");return}health=10;useOne(n);inv.sel=0;sayToast("Glug glug. Health fully restored! Strawberry courage achieved.");return}
   if(n==="Turnip"){sayToast("You consider eating the turnip. The turnip considers you back. You put it away.");return}
@@ -410,6 +406,7 @@ function iconArt(n){
   if(n==="Turnip"){g.fillStyle="#5fb35a";for(const a of[-.5,0,.5]){g.save();g.rotate(a);g.beginPath();g.ellipse(0,-20,5,11,0,0,7);g.fill();g.stroke();g.restore()}g.fillStyle="#f7f1ff";g.beginPath();g.moveTo(0,22);g.bezierCurveTo(-20,10,-18,-12,0,-11);g.bezierCurveTo(18,-12,20,10,0,22);g.fill();g.stroke();g.fillStyle="#b77bd1";g.beginPath();g.moveTo(-15,-4);g.bezierCurveTo(-8,-14,8,-14,15,-4);g.bezierCurveTo(8,-8,-8,-8,-15,-4);g.fill();g.fillStyle=INK;circle(-5,3,1.8);g.fill();circle(5,3,1.8);g.fill();return}
   if(n==="Festival Pin"){g.fillStyle="#e5577b";g.beginPath();g.moveTo(-8,6);g.lineTo(-14,24);g.lineTo(-6,20);g.lineTo(-2,26);g.lineTo(0,8);g.fill();g.stroke();g.fillStyle="#17a398";g.beginPath();g.moveTo(8,6);g.lineTo(14,24);g.lineTo(6,20);g.lineTo(2,26);g.lineTo(0,8);g.fill();g.stroke();g.fillStyle="#f4c84f";circle(0,-3,15);g.fill();g.stroke();g.fillStyle="#fff6c2";g.beginPath();for(let i=0;i<10;i++){const r=i%2?4:9,a=i/10*Math.PI*2-Math.PI/2;g.lineTo(Math.cos(a)*r,-3+Math.sin(a)*r)}g.closePath();g.fill();g.stroke();return}
   if(n==="Butter Pat"){g.fillStyle="#ffe48a";g.beginPath();g.moveTo(-18,4);g.lineTo(0,-8);g.lineTo(18,0);g.lineTo(18,10);g.lineTo(0,20);g.lineTo(-18,12);g.closePath();g.fill();g.stroke();g.beginPath();g.moveTo(-18,4);g.lineTo(0,12);g.lineTo(18,0);g.moveTo(0,12);g.lineTo(0,20);g.stroke();g.fillStyle="#fff7d0";g.beginPath();g.ellipse(-2,0,6,2.5,-.3,0,7);g.fill();return}
+  if(n==="Lopsided Teapot"){g.save();g.rotate(.28);g.fillStyle="#b9825a";g.beginPath();g.ellipse(0,4,16,13,0,0,7);g.fill();g.stroke();g.beginPath();g.moveTo(14,2);g.quadraticCurveTo(26,-2,24,-12);g.lineTo(20,-10);g.quadraticCurveTo(20,0,12,-2);g.fill();g.stroke();g.lineWidth=3;g.beginPath();g.arc(-17,4,7,1.7,4.6);g.stroke();g.lineWidth=2.5;g.fillStyle="#d6a27a";g.beginPath();g.ellipse(0,-9,10,4,0,0,7);g.fill();g.stroke();circle(0,-14,3);g.fill();g.stroke();g.restore();return}
   if(n==="Ball of Clay"){g.fillStyle="#b9825a";circle(0,2,17);g.fill();g.stroke();g.fillStyle="#d6a27a";circle(-6,-4,5);g.fill();g.strokeStyle="#8d5a36";g.lineWidth=1.5;g.beginPath();g.arc(3,6,6,.3,2.2);g.stroke();return}
   if(n==="Recipe Card"){g.save();g.rotate(-.12);g.fillStyle="#fffdf6";rr(-18,-22,36,44,4);g.fill();g.stroke();g.fillStyle="#e5577b";g.fillRect(-18,-22,36,9);g.strokeRect(-18,-22,36,9);g.fillStyle="#f7f1ff";circle(-6,4,7);g.fill();g.lineWidth=1.5;g.stroke();g.fillStyle="#5fb35a";g.fillRect(-8,-6,4,5);g.fillStyle="#ffe48a";rr(4,0,10,8,2);g.fill();g.stroke();g.strokeStyle="#bcd8ee";g.beginPath();g.moveTo(-12,15);g.lineTo(12,15);g.stroke();g.restore();return}
   if(n==="Wooden Ladder"){g.save();g.rotate(.35);g.fillStyle="#c58a52";rr(-13,-24,6,48,3);g.fill();g.stroke();rr(7,-24,6,48,3);g.fill();g.stroke();for(let y=-16;y<=16;y+=10){rr(-8,y-2,16,5,2);g.fill();g.stroke()}g.restore();return}
@@ -660,7 +657,7 @@ function drawSarah(){
   groundShadow(center(),groundUnder()+2,20);
   const blinkInv=s.inv>0&&Math.floor(time*12)%2===0;
   let sx=s.flip;if(Math.abs(sx)<.1)sx=.1*Math.sign(sx||1);
-  sprite(center(),s.y+s.h+3,50,76,drawSarahBody,{sx:sx*(2-s.squash),sy:s.squash*(s.duck?.62:1),alpha:blinkInv?.45:1});
+  sprite(center(),s.y+s.h+3,50,76,drawSarahBody,{sx:sx*(2-s.squash),sy:s.squash*(s.duck?.62:1),alpha:blinkInv?.45:(scene==="festival"&&l2.chase===1&&hideSpot()?.5:1)});
   if(hasNib&&equipped==="Nib"){if(jabT>0){const ext=Math.sin((1-jabT/.32)*Math.PI);sprite(center()+s.face*(32+ext*42),s.y+40,24,58,drawNibBody,{rot:-s.face*Math.PI/2,sx:.9,sy:.9});g.save();g.globalAlpha=ext*.8;g.strokeStyle="#fff";g.lineWidth=3;for(const dy of[-8,0,8]){g.beginPath();g.moveTo(center()+s.face*(40+ext*30),s.y+40+dy);g.lineTo(center()+s.face*(20+ext*20),s.y+40+dy);g.stroke()}g.restore()}
     else sprite(dab.x,dab.y+28,24,58,drawNibBody,{rot:Math.sin(time*2.6)*.15,sx:.85,sy:.85})}
   else if(hasDab)sprite(dab.x,dab.y+28,30,56,drawDabBody,{rot:Math.sin(time*2.6)*.18-.15*s.face,sx:.85*(s.face>0?1:-1),sy:.85});
@@ -881,7 +878,7 @@ function drawEndScreen(){
   g.fillStyle="#17a398";g.font="bold 26px "+FONT;
   if(level===1){if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText("Press Space (or click) to continue to Level 2 →",0,40);g.globalAlpha=1}}
   else g.fillText("Level 3 coming soon!",0,40);
-  g.fillStyle="#7a7088";g.font="italic 16px "+FONT;g.fillText("Coins collected: "+coins+(level===1?(roofItemCollected?"  ·  Roof secret: found!":"  ·  Roof secret: still up there…"):(l2.clayEntered?"  ·  \"Ball of Clay\": tried, and rewarded":"")),0,86);
+  g.fillStyle="#7a7088";g.font="italic 16px "+FONT;g.fillText("Coins collected: "+coins+(level===1?(roofItemCollected?"  ·  Roof secret: found!":"  ·  Roof secret: still up there…"):(l2.clayEntered?"  ·  \""+l2.entry+"\": tried, and rewarded":"")),0,86);
   g.restore();g.textAlign="left";
   if(Math.random()<.3)parts.push({scene,x:camera+Math.random()*W,y:-10,vx:(Math.random()-.5)*60,vy:60,life:3,rot:0,vr:(Math.random()-.5)*8,color:["#e5577b","#f4c84f","#17a398","#7cc6f2"][Math.floor(Math.random()*4)]});
   g.save();g.translate(-camera,0);drawParticles();g.restore();
@@ -892,7 +889,7 @@ function drawEndScreen(){
 // ===========================================================================
 const FEST_W=3520,DOOR_X=2915;
 const CRATES=[{x:1770,y:G-36,w:46,h:36},{x:1995,y:G-36,w:46,h:36},{x:2075,y:G-30,w:60,h:30,hay:true},{x:2250,y:G-36,w:46,h:36}];
-const CUTOUTS=[1880,2165];
+const HIDES=[0,1,3].map(i=>CRATES[i]);const hideSpot=()=>HIDES.find(b=>s.duck&&Math.abs(center()-(b.x+b.w/2))<b.w/2+30);
 const TRAIL=[{x:2510,y:385,w:72},{x:2600,y:330,w:72},{x:2690,y:274,w:72},{x:2600,y:218,w:72},{x:2690,y:162,w:110}];
 const SIGNS=[[1130,"HATTER'S — CLOSED FOR FESTIVAL. Our hats are also enjoying the festival. On other people's heads."],
   [1890,"CRUMB & DAUGHTERS BAKERY — CLOSED FOR FESTIVAL. Gone to eat other people's cake. Strictly for research."],
@@ -943,7 +940,7 @@ function festInteract(){
   if(near(npcX("Pippa"),24))return T("Talk to Pippa",pippa);
   if(near(420,40))return T("Talk to the Registrar",registrar);
   if(near(560,40))return T("Talk to Potter Pat",potter);
-  if(near(700,30))return T("Talk to the Save Block",()=>saveFest(700));
+  if(near(700,30))return["Save at the Save Block",()=>saveFest(700)];
   if(near(860,45))return T("Talk to Chef Crumb",chef);
   if(near(1005,30))return T("Talk to Gus",gus);
   for(const [x,t] of SIGNS)if(near(x,24))return["Read the sign",()=>start([["Sign",t]])];
@@ -952,7 +949,7 @@ function festInteract(){
   if(near(1565,50)&&l2.catState==="stuck")return T("Help Mr. Biscuits",catStuck);
   if(near(2365,28))return T("Talk to Lou",lou);
   if(near(2470,40))return T("Talk to Inka",inka);
-  if(near(2990,30))return T("Talk to the Save Block",()=>saveFest(2990));
+  if(near(2990,30))return["Save at the Save Block",()=>saveFest(2990)];
   if(l2.doorY!=null&&l2.doorY>=G&&!l2.doorOpen&&near(DOOR_X,40))return[has("Smudgy Key")?"Unlock the sky door":"Inspect the sky door",skyDoor];
   if(near(3085,28))return T("Talk to the Announcer",announcer);
   if(near(3160,28))return T("Talk to Juniper",juniper);
@@ -961,9 +958,13 @@ function festInteract(){
 }
 function umber(){const l=l2.results?["Told you. Called it. Somebody write down that I called it."]:["In my day, legendary adventurers wore capes. Do you own a cape? You should own a cape.","That butter swan took Brie three weeks, four hundred pounds of butter and one very cold room.","The sky did something funny this morning. Rumbled. Skies shouldn't rumble at a festival."];start([["Mr. Umber",l[tcount("umber")%l.length]]])}
 function pippa(){const l=hasNib?["Is that a PENCIL with a FACE? Best. Festival. EVER."]:["Can Dab paint ME? Make me purple! Make me a DRAGON!","Mom says the butter swan is \"art.\" I say it's breakfast.","My balloon is named Gerald. Gerald is shy."];start([["Pippa",l[tcount("pippa")%l.length]]])}
+const ENTRIES={"Ball of Clay":{short:"ball",enter:"\"Ball of Clay.\" Bold. Round. Unapologetic. Entered!",run:"Your ball is officially in the running! Spherically speaking, it's a frontrunner.",after:"Congratulations on your… participation! Spherically speaking, you were a frontrunner.",award:"for her sculpture \"Ball of Clay\""},
+  "Lopsided Teapot":{short:"teapot",enter:"\"Lopsided Teapot.\" It leans. It dares. It probably leaks. Entered!",run:"Your teapot is officially in the running! It's leaning toward victory. Literally.",after:"Congratulations! Your teapot tried its best. Mostly sideways.",award:"for her ceramic \"Lopsided Teapot\""}};
+const entryHeld=()=>Object.keys(ENTRIES).find(has);
 function registrar(){
-  if(l2.clayEntered){start([["Registrar",l2.results?"Congratulations on your… participation! Spherically speaking, you were a frontrunner.":"Your ball is officially in the running! Spherically speaking, it's a frontrunner."]]);return}
-  if(has("Ball of Clay")){start([["Sarah","I made an entry! It's… a ball."],["Registrar","\"Ball of Clay.\" Bold. Round. Unapologetic. Entered!"]],()=>{removeItem("Ball of Clay");l2.clayEntered=true;sayToast("Your Ball of Clay is entered in the art contest!")});return}
+  if(l2.clayEntered){const e=ENTRIES[l2.entry];start([["Registrar",l2.results?e.after:e.run]]);return}
+  const held=entryHeld();
+  if(held){start([["Sarah","I made an entry! It's… a "+ENTRIES[held].short+"."],["Registrar",ENTRIES[held].enter]],()=>{removeItem(held);l2.entry=held;l2.clayEntered=true;sayToast("Your "+held+" is entered in the art contest!")});return}
   if(l2.results){start([["Registrar","Entries are closed! There's always next year. Practice your spheres."]]);return}
   if(!l2.registered){l2.registered=true;start([
     ["Registrar","Welcome to the Town Art Contest! Name?"],
@@ -975,19 +976,25 @@ function registrar(){
   start([["Registrar","Make something at the Clay Corner and bring it back! Or don't. Art is about choices."]]);
 }
 function potter(){
-  if(l2.clayMade){start([["Potter Pat","Make another? No? Wise. Peak ball has been achieved."]]);return}
-  l2.clayMade=true;start([
-    ["Potter Pat","Welcome to the Clay Corner! Free clay! Make whatever your heart desires!"],
-    ["Sarah","Okay. Okay. I'm an artist. I can do this."],
-    ["Narrator","Sarah rolls. Sarah squishes. Sarah stares deep into the clay. The clay stares back."],
-    ["Sarah","…Done! It's a ball."],
-    ["Potter Pat","That's the ball-iest ball I've ever seen. Take it to the Registrar!"]
-  ],()=>{addItem("Ball of Clay");sayToast("Got a Ball of Clay! Hand it to the Registrar to enter the contest (optional).")});
+  if(l2.clayMade){start([["Potter Pat",l2.clayMade==="Lopsided Teapot"?"One masterpiece per customer. Also, I'm out of the clay that leans.":"Make another? No? Wise. Peak ball has been achieved."]]);return}
+  const intro=l2.talk.potter?[]:[["Potter Pat","Welcome to the Clay Corner! Free clay! Make whatever your heart desires!"],["Sarah","Okay. Okay. I'm an artist. I can do this."]];l2.talk.potter=1;
+  start(intro.concat([["Potter Pat","So! What will you make?",["A ball of clay","A lopsided teapot","Stare at the clay awkwardly (cancel)"],i=>{
+    if(i===2){start([["Narrator","Sarah stares at the clay. The clay stares back. Neither of them blinks."],["Narrator","After a long, uncomfortable silence, Sarah slowly backs away. The clay wins this round."],["Potter Pat","Come back when you're feeling braver. The clay will be here. Waiting."]]);return}
+    const made=i===0?"Ball of Clay":"Lopsided Teapot";l2.clayMade=made;
+    start(i===0?[
+      ["Narrator","Sarah rolls. Sarah squishes. Sarah rolls some more."],
+      ["Sarah","…Done! It's a ball."],
+      ["Potter Pat","That's the ball-iest ball I've ever seen. Take it to the Registrar!"]
+    ]:[
+      ["Narrator","Sarah pinches, coils and sculpts with tremendous focus. She has painted many teapots. She has never MADE one."],
+      ["Sarah","…Done! It's a teapot. It's leaning a little."],
+      ["Potter Pat","A little? It's pouring tea that isn't even in it. I love it. Take it to the Registrar!"]
+    ],()=>{addItem(made);sayToast("Got a "+made+"! Hand it to the Registrar to enter the contest (optional).")});
+  }]]));
 }
 function saveFest(x){
   checkpoint=x-s.w/2;checkpointScene="festival";health=10;burst(x,G-70,12,["#f4c84f","#fff"]);
-  if(!l2.talk.save){l2.talk.save=1;start([["Save Block","Ah. The curb-tripper. I've been transferred to festival duty. Don't expect small talk."],["Narrator","Saved! Health restored. Press R any time to hop back to the last Save Block you touched."]]);return}
-  sayToast("Saved! Health restored. The Save Block sighs, but supportively.");
+  sayToast("Saved! Health restored. Press R any time to come back to this Save Block.");
 }
 function chef(){
   const pre=l2.chefMet?[]:[["Chef Crumb","Bonjour! I am Chef Crumb. I cook healing recipes — but only from proper recipe cards. Fire codes. Also, feelings."]];l2.chefMet=true;
@@ -1032,7 +1039,7 @@ function catStuck(){
     ["Narrator","This is, by far, the nicest thing Mr. Biscuits has ever said to anyone. He trots off toward the judging stage."]
   ],()=>{l2.catFreed=true;l2.catState="judge";burst(1565,G-110,16);
     start([["Brie","WHO. TOUCHED. MY. SWAN?!"],["Brie","YOU! With the buttery fingers! STOP RIGHT THERE!"],["Sarah","Uh-oh."],["Narrator","RUN!"]],
-      ()=>{l2.chase=1;l2.chaseT=0;l2.brieX=1385;sayToast("RUN! Jump over the crates. Hold S behind cardboard cutouts to hide!")});
+      ()=>{l2.chase=1;l2.chaseT=0;l2.brieX=1385;sayToast("RUN! Jump over the crates. Hold S next to a crate to duck behind it!")});
   });
 }
 const SORRY=["Sorry.","It was for a good cause!","What butter?"];
@@ -1080,7 +1087,7 @@ function runResults(){
     ["Dab","I… I DID travel with the legendary adventurer. But I never thought the prophecy might point to… Sarah, it might be about YOU!"],
     ["Sarah","Whoa, whoa, whoa. I'm an artist. I paint teapots. I came here for lemonade, not a prophecy."]
   ];
-  if(l2.clayEntered)p.push(["Announcer","Also! A special \"For Trying\" award — and 20 coins — goes to Sarah, for her sculpture \"Ball of Clay\"!"],["Sarah","I'll take it."]);
+  if(l2.clayEntered)p.push(["Announcer","Also! A special \"For Trying\" award — and 20 coins — goes to Sarah, "+ENTRIES[l2.entry].award+"!"],["Sarah","I'll take it."]);
   start(p,()=>{if(l2.clayEntered){coins+=20;burst(center(),s.y,24,["#f4c84f","#fff"])}startFinale()});
 }
 function startFinale(){
@@ -1130,7 +1137,7 @@ function updateFestival(dt,oldFeet){
   if(l2.trail&&!l2.nibMet&&Math.abs(center()-2770)<40&&s.y+s.h<=170){meetNib();return}
   if(l2.chase===1){
     l2.chaseT+=dt;s.x=Math.min(s.x,2330-s.w);
-    const hideAt=CUTOUTS.find(cx=>Math.abs(center()-cx)<45),hidden=s.duck&&hideAt!=null;
+    const spot=hideSpot(),hideAt=spot&&spot.x,hidden=!!spot;
     if(l2.confused>0)l2.confused-=dt;
     else if(hidden&&!l2.brieHid[hideAt]&&Math.abs(l2.brieX-center())<320){l2.brieHid[hideAt]=true;l2.confused=1.4;sayToast("Brie: \"Where'd she GO?! Come out, Butter Fingers!\"")}
     else{const d=center()-l2.brieX,sp=150+l2.chaseT*45;l2.brieFace=Math.sign(d)||1;l2.brieX+=Math.sign(d)*Math.min(Math.abs(d),sp*dt)}
@@ -1278,11 +1285,6 @@ function drawJungleGym(cx){
 }
 function drawPipe(x){g.fillStyle="#2f2a4a";g.beginPath();g.ellipse(x,G+3,30,7,0,0,7);g.fill();cut(()=>rr(x-18,G-34,36,36,4),"#5fb35a",{edge:6});cut(()=>rr(x-24,G-44,48,12,4),"#4fa65a",{edge:6});g.fillStyle="#1f1b33";g.beginPath();g.ellipse(x,G-38,17,4,0,0,7);g.fill();
   for(const dx of[44,-46])cut(()=>{g.beginPath();g.moveTo(x+dx-10,G);g.lineTo(x+dx,G-30);g.lineTo(x+dx+10,G);g.closePath()},"#f08a3c",{edge:4});g.fillStyle="#fff";g.fillRect(x+38,G-16,12,4);g.fillRect(x-52,G-16,12,4)}
-function drawCutout(x,kind){
-  cut(()=>rr(x-26,G-30,6,30,2),"#a8714a");cut(()=>rr(x+20,G-30,6,30,2),"#a8714a");
-  if(kind===0){cut(()=>rr(x-42,G-140,84,118,10),"#f7c873",{edge:7});g.fillStyle="#e5577b";rr(x-30,G-78,60,52,8);g.fill();g.fillStyle="#3b8fd6";g.beginPath();g.moveTo(x-30,G-110);g.lineTo(x,G-128);g.lineTo(x+30,G-110);g.fill();g.fillStyle="#2f2a4a";circle(x,G-100,13);g.fill();g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("FESTIVAL FRED",x,G-34);g.textAlign="left"}
-  else{for(let i=0;i<10;i++){const a=i/10*Math.PI*2;cut(()=>{g.beginPath();g.ellipse(x+Math.cos(a)*30,G-92+Math.sin(a)*30,12,18,a+Math.PI/2,0,7)},"#f4c84f",{edge:5,shadow:false})}cut(()=>{g.beginPath();g.arc(x,G-92,24,0,7)},"#a8714a",{edge:6});cut(()=>rr(x-4,G-66,8,40,2),"#5fb35a",{edge:4,shadow:false});g.fillStyle="#2f2a4a";circle(x,G-92,12);g.fill()}
-}
 function drawCrate(b){if(b.hay){cut(()=>rr(b.x,b.y,b.w,b.h,8),"#f2d16b",{edge:6});g.strokeStyle="#c9a23a";g.lineWidth=2;for(let i=1;i<4;i++){g.beginPath();g.moveTo(b.x+4,b.y+i*b.h/4);g.lineTo(b.x+b.w-4,b.y+i*b.h/4);g.stroke()}return}
   cut(()=>rr(b.x,b.y,b.w,b.h,3),"#d39f5b",{edge:6});g.strokeStyle="#8d5a36";g.lineWidth=2.5;g.beginPath();g.moveTo(b.x+5,b.y+5);g.lineTo(b.x+b.w-5,b.y+b.h-5);g.moveTo(b.x+b.w-5,b.y+5);g.lineTo(b.x+5,b.y+b.h-5);g.stroke()}
 function drawPainting(x,y,w,h){
@@ -1315,7 +1317,7 @@ function drawStage(){
   else{cut(()=>{g.beginPath();g.moveTo(3176,G-226);g.lineTo(3348,G-226);g.quadraticCurveTo(3340,G-160,3350,G-92);g.lineTo(3174,G-92);g.quadraticCurveTo(3184,G-160,3176,G-226);g.closePath()},"#8a5a8f",{edge:6});g.fillStyle="#fff";g.font="bold 34px "+FONT;g.textAlign="center";g.fillText("?",3262,G-150)}
   g.textAlign="center";if(l2.results){g.font="italic bold 11px "+FONT;g.fillStyle="#fff";g.fillText("\"The Legend Returns\" — Juniper",3262,G-80)}
   cut(()=>rr(x0-10,G-16,x1-x0+20,16,3),"#b5713f",{edge:6});
-  if(l2.clayEntered){cut(()=>rr(3346,G-46,36,46,3),"#fffdf6",{edge:5});cut(()=>{g.beginPath();g.arc(3364,G-58,13,0,7)},"#b9825a",{edge:5,shadow:false});g.fillStyle=INK;g.font="bold 8px "+FONT;g.fillText("BALL OF CLAY",3364,G-26);g.fillText("— SARAH",3364,G-16)}
+  if(l2.clayEntered){cut(()=>rr(3346,G-46,36,46,3),"#fffdf6",{edge:5});drawIcon(l2.entry,3364,G-62,.6);g.fillStyle=INK;g.font="bold 8px "+FONT;g.fillText(l2.entry.toUpperCase(),3364,G-26);g.fillText("— SARAH",3364,G-16)}
   cut(()=>rr(3398,G-58,48,58,4),"#fffdf6",{edge:7});g.fillStyle=INK;g.font="bold 12px "+FONT;g.fillText("JUDGE",3422,G-30);
   if(l2.catState==="judge")drawCatSit(3422,G-58);else{g.font="italic 10px "+FONT;g.fillText("(missing)",3422,G-14)}
   g.textAlign="left";
@@ -1349,7 +1351,7 @@ function drawFestival(){
   booth(860,130,"CHEF CRUMB'S KITCHEN","#e5577b",()=>npc("Chef Crumb",860));
   drawPipe(1050);npc("Gus",1005);
   drawSwan(1300);drawJungleGym(1565);
-  for(const b of CRATES)drawCrate(b);CUTOUTS.forEach((x,i)=>drawCutout(x,i));
+  for(const b of CRATES)drawCrate(b);
   booth(2470,120,"ART SUPPLIES","#b98ad8",()=>npc("Inka",2470));
   drawTrail();drawStage();drawSkyDoor();
   for(const n of["Mr. Umber","Pippa","Lou","Announcer","Juniper"])npc(n,npcX(n));
@@ -1358,7 +1360,7 @@ function drawFestival(){
   else npc("Brie",bx,center()<bx?-1:1);
   for(const m of fsm){if(m.alive){groundShadow(m.x,G+2,18);sprite(m.x,G+2,46,36,drawSmudgeBody,{sx:m.dir>0?-1:1,sy:1+Math.sin(time*10)*.06});if(m.key)drawIcon("Smudgy Key",m.x,G-52+Math.sin(time*5)*3,.5)}else if(m.flat<1){sprite(m.x,G+2,46,36,drawSmudgeBody,{sy:Math.max(.05,.2-m.flat*.2),sx:1.4,alpha:1-m.flat})}}
   drawLoot();drawDoodles();drawParticles();drawSarah();
-  const hid=CUTOUTS.findIndex(x=>s.duck&&Math.abs(center()-x)<45);if(hid>=0)drawCutout(CUTOUTS[hid],hid);
+  const hs=hideSpot();if(hs)drawCrate(hs);
   if(l2.maple!=null){groundShadow(l2.maple,G+2,20);sprite(l2.maple,G+3,50,76,drawMapleBody,{sy:1+Math.abs(Math.sin(time*9))*.03})}
   g.restore();
 }
@@ -1370,7 +1372,7 @@ function objectiveL2(){
   if(hasNib)return"Head to the judging stage at the far right to hear the contest results.";
   if(l2.trail)return"Climb the doodle trail above the art-supply stand and reach the shiny thing.";
   if(l2.chaseDone)return"Lou saw something shiny in the sky above the art-supply stand. With Dab equipped, press Q nearby.";
-  if(l2.chase===1)return"RUN! Jump over the crates. Hold S behind cardboard cutouts to hide.";
+  if(l2.chase===1)return"RUN! Jump over the crates. Hold S next to a crate to duck behind it.";
   if(has("Butter Pat")&&l2.catSeen)return"Smear a little butter on the jungle-gym bars to free Mr. Biscuits.";
   if(l2.catSeen)return"Mr. Biscuits needs something slippery. That butter swan is VERY slippery…";
   return"Enjoy the festival! (Optional: enter the art contest at the Registration booth.) Then find out why the judge is late — listen for yowling near the playground.";
@@ -1412,7 +1414,7 @@ start([
   ["Narrator","(So many things.)"]
 ],()=>sayToast("Walk to the wardrobe and press Space to open it."));
 requestAnimationFrame(frame);
-window.__game={get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0}};
+window.__game={giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0}};
 })();
 </script>
 </body>
