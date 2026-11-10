@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sarah's Tiny Movement Test</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: #fff9ec;
+      color: #25343a;
+      font: 16px/1.45 system-ui, sans-serif;
+    }
+    main { width: min(100%, 980px); }
+    h1 { margin: 0 0 6px; color: #167f7c; font-size: clamp(1.35rem, 3vw, 1.9rem); }
+    p { margin: 0 0 12px; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 3px solid #25343a;
+      border-radius: 10px;
+      background: #bce9f1;
+      touch-action: none;
+    }
+    .help { margin-top: 10px; font-size: .95rem; }
+    kbd {
+      padding: 2px 6px;
+      border: 1px solid #b5a992;
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      background: #fff;
+      font: inherit;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sarah's Tiny Movement Test</h1>
+    <p>A one-screen sketch to try the side-view movement.</p>
+    <canvas id="game" width="960" height="540" tabindex="0" aria-label="A simple side-view movement game"></canvas>
+    <p class="help"><kbd>Left</kbd>/<kbd>A</kbd> and <kbd>Right</kbd>/<kbd>D</kbd> move. <kbd>Space</kbd>/<kbd>Up</kbd>/<kbd>W</kbd> jump. <kbd>E</kbd> activates the door nearby. <kbd>R</kbd> resets Sarah.</p>
+    <p id="message" aria-live="polite">Walk up to the house and press E.</p>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width;
+      const H = canvas.height;
+      const groundY = 438;
+      const gravity = 1500;
+      const speed = 260;
+      const jumpSpeed = 610;
+      const keys = new Set();
+      let doorOpen = false;
+      const platforms = [
+        { x: 0, y: groundY, w: W, h: H - groundY },
+        { x: 445, y: 375, w: 104, h: 22 }
+      ];
+
+      const sarah = {
+        x: 105,
+        y: groundY - 68,
+        w: 42,
+        h: 68,
+        vy: 0,
+        grounded: true,
+        facing: 1,
+        walkTime: 0
+      };
+
+      function resetSarah() {
+        sarah.x = 105;
+        sarah.y = groundY - sarah.h;
+        sarah.vy = 0;
+        sarah.grounded = true;
+        sarah.facing = 1;
+      }
+
+      function keyName(event) {
+        return event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      }
+
+      window.addEventListener("keydown", (event) => {
+        const key = keyName(event);
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", " "].includes(key)) event.preventDefault();
+        if (!keys.has(key) && [" ", "ArrowUp", "w"].includes(key) && sarah.grounded) {
+          sarah.vy = -jumpSpeed;
+          sarah.grounded = false;
+        }
+        if (key === "e" && !event.repeat) activateDoor();
+        if (key === "r") resetSarah();
+        keys.add(key);
+      });
+
+      window.addEventListener("keyup", (event) => keys.delete(keyName(event)));
+      window.addEventListener("blur", () => keys.clear());
+
+      function activateDoor() {
+        const nearDoor = Math.abs((sarah.x + sarah.w / 2) - 770) < 78 && sarah.y + sarah.h >= 430;
+        const message = document.getElementById("message");
+        if (!nearDoor) {
+          message.textContent = "Move closer to the house to use the door.";
+          return;
+        }
+        doorOpen = !doorOpen;
+        message.textContent = doorOpen ? "The door opens. There is a cozy little room inside!" : "The door closes.";
+      }
+
+      function roundedBox(x, y, w, h, radius, fill, stroke = null, lineWidth = 3) {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, radius);
+        ctx.fillStyle = fill;
+        ctx.fill();
+        if (stroke) {
+          ctx.lineWidth = lineWidth;
+          ctx.strokeStyle = stroke;
+          ctx.stroke();
+        }
+      }
+
+      function drawBackground() {
+        ctx.fillStyle = "#bce9f1";
+        ctx.fillRect(0, 0, W, H);
+
+        // A low, connected hill line meets the grass instead of floating above it.
+        ctx.fillStyle = "#9ed7b4";
+        ctx.beginPath();
+        ctx.moveTo(0, groundY);
+        ctx.quadraticCurveTo(145, 340, 300, groundY);
+        ctx.quadraticCurveTo(470, 350, 640, groundY);
+        ctx.quadraticCurveTo(805, 345, W, groundY);
+        ctx.lineTo(W, groundY + 8);
+        ctx.lineTo(0, groundY + 8);
+        ctx.closePath();
+        ctx.fill();
+
+        // Small sun.
+        ctx.fillStyle = "#ffd36a";
+        ctx.beginPath();
+        ctx.arc(830, 95, 34, 0, Math.PI * 2);
+        ctx.fill();
+
+        // House: simple wall, roof, door, and window.
+        roundedBox(650, 280, 218, 158, 7, "#fff0c9", "#25343a", 4);
+        ctx.fillStyle = "#e97862";
+        ctx.strokeStyle = "#25343a";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(625, 292);
+        ctx.lineTo(759, 190);
+        ctx.lineTo(894, 292);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        if (doorOpen) {
+          ctx.fillStyle = "#25343a";
+          ctx.fillRect(744, 351, 52, 87);
+          ctx.fillStyle = "#594033";
+          ctx.beginPath();
+          ctx.moveTo(771, 357);
+          ctx.lineTo(793, 362);
+          ctx.lineTo(793, 433);
+          ctx.lineTo(771, 438);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = "#25343a";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        } else {
+          roundedBox(744, 351, 51, 87, 8, "#4f9fa5", "#25343a", 3);
+          ctx.fillStyle = "#ffd36a";
+          ctx.beginPath();
+          ctx.arc(784, 397, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        roundedBox(681, 310, 45, 44, 5, "#bce9f1", "#25343a", 3);
+        ctx.beginPath();
+        ctx.moveTo(703.5, 310); ctx.lineTo(703.5, 354);
+        ctx.moveTo(681, 332); ctx.lineTo(726, 332);
+        ctx.stroke();
+
+        // A low step gives the jump a simple target.
+        roundedBox(445, 375, 104, 26, 4, "#dba766", "#25343a", 3);
+
+        // Ground.
+        ctx.fillStyle = "#6fbd75";
+        ctx.fillRect(0, groundY, W, 20);
+        ctx.fillStyle = "#9a6b4a";
+        ctx.fillRect(0, groundY + 20, W, H - groundY - 20);
+        ctx.fillStyle = "#5cae67";
+        for (let x = 18; x < W; x += 42) {
+          ctx.beginPath();
+          ctx.arc(x, groundY + 3, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function drawSarah(time) {
+        const moving = keys.has("ArrowLeft") || keys.has("a") || keys.has("ArrowRight") || keys.has("d");
+        const bob = moving && sarah.grounded ? Math.sin(time * 0.018) * 2 : 0;
+        const x = sarah.x;
+        const y = sarah.y + bob;
+        const ink = "#342b2b";
+        const swing = moving && sarah.grounded ? Math.sin(time * 0.025) * 5 : 0;
+
+        ctx.save();
+        if (sarah.facing < 0) {
+          ctx.translate(x * 2 + sarah.w, 0);
+          ctx.scale(-1, 1);
+        }
+
+        // One continuous hair shape, with a low ponytail joined at the back.
+        ctx.fillStyle = "#603a2e";
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x + 11, y + 29);
+        ctx.quadraticCurveTo(x + 0, y + 32, x + 1, y + 44);
+        ctx.quadraticCurveTo(x - 1, y + 54, x + 8, y + 55);
+        ctx.quadraticCurveTo(x + 17, y + 49, x + 16, y + 40);
+        ctx.quadraticCurveTo(x + 7, y + 27, x + 8, y + 19);
+        ctx.quadraticCurveTo(x + 5, y + 2, x + 22, y + 2);
+        ctx.quadraticCurveTo(x + 40, y + 2, x + 39, y + 21);
+        ctx.lineTo(x + 39, y + 44);
+        ctx.quadraticCurveTo(x + 36, y + 51, x + 31, y + 40);
+        ctx.lineTo(x + 12, y + 41);
+        ctx.quadraticCurveTo(x + 7, y + 48, x + 5, y + 41);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Face and simple fringe.
+        ctx.fillStyle = "#ffd9b3";
+        ctx.beginPath();
+        ctx.ellipse(x + 22, y + 22, 13, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#603a2e";
+        ctx.beginPath();
+        ctx.moveTo(x + 9, y + 18);
+        ctx.quadraticCurveTo(x + 10, y + 3, x + 24, y + 7);
+        ctx.quadraticCurveTo(x + 31, y + 7, x + 35, y + 15);
+        ctx.lineTo(x + 22, y + 14);
+        ctx.lineTo(x + 16, y + 19);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = ink;
+        ctx.beginPath();
+        ctx.arc(x + 26, y + 23, 1.7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(x + 28, y + 28, 3, 0.2, 1.8);
+        ctx.stroke();
+
+        // One solid-color outfit with a simple dark outline.
+        ctx.fillStyle = "#168d89";
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(x + 12, y + 38);
+        ctx.lineTo(x + 33, y + 38);
+        ctx.lineTo(x + 39, y + 61);
+        ctx.lineTo(x + 5, y + 61);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Arms, legs, and simple boots.
+        ctx.strokeStyle = "#ffd9b3";
+        ctx.lineWidth = 5;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(x + 12, y + 45); ctx.lineTo(x + 5, y + 52 + swing * 0.2);
+        ctx.moveTo(x + 35, y + 44); ctx.lineTo(x + 40, y + 51 - swing * 0.2);
+        ctx.stroke();
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(x + 16, y + 60); ctx.lineTo(x + 15 + swing, y + 65);
+        ctx.moveTo(x + 30, y + 60); ctx.lineTo(x + 30 - swing, y + 65);
+        ctx.stroke();
+        roundedBox(x + 8 + swing, y + 63, 12, 5, 2, "#8a5639", ink, 1.5);
+        roundedBox(x + 26 - swing, y + 63, 12, 5, 2, "#8a5639", ink, 1.5);
+
+        ctx.restore();
+      }
+
+      function update(dt, time) {
+        const oldBottom = sarah.y + sarah.h;
+        const left = keys.has("ArrowLeft") || keys.has("a");
+        const right = keys.has("ArrowRight") || keys.has("d");
+        const direction = (right ? 1 : 0) - (left ? 1 : 0);
+
+        sarah.x += direction * speed * dt;
+        sarah.x = Math.max(0, Math.min(W - sarah.w, sarah.x));
+        if (direction) sarah.facing = direction;
+        sarah.walkTime = time;
+
+        sarah.vy += gravity * dt;
+        sarah.y += sarah.vy * dt;
+        sarah.grounded = false;
+
+        for (const platform of platforms) {
+          const newBottom = sarah.y + sarah.h;
+          const overlapsX = sarah.x + sarah.w > platform.x && sarah.x < platform.x + platform.w;
+          if (sarah.vy >= 0 && overlapsX && oldBottom <= platform.y && newBottom >= platform.y) {
+            sarah.y = platform.y - sarah.h;
+            sarah.vy = 0;
+            sarah.grounded = true;
+          }
+        }
+      }
+
+      let previousTime = 0;
+      function frame(time) {
+        const dt = Math.min((time - previousTime) / 1000 || 0, 0.033);
+        previousTime = time;
+        update(dt, time);
+        drawBackground();
+        drawSarah(time);
+        requestAnimationFrame(frame);
+      }
+
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>
