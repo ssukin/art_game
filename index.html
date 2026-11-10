@@ -1574,7 +1574,10 @@ function festRegistrar(){
       ].concat(reelLines()),reelGot)}]])};
   const opts=has("Festival Pin")?["Pay 5 coins","I'll put my pin on"]:["Pay 5 coins"];if(!l2.bargained)opts.push("Try bargaining");if(!has("Festival Pin"))opts.push("Not right now");
   const pick=i=>{const o=opts[i];if(o==="Pay 5 coins")pay();else if(o==="Try bargaining")bargain();else if(o==="I'll put my pin on")sayToast("Open your Pockets (I), go to Key Items, pick the Festival Pin and choose Wear. Then talk to the Registrar again.");else start([["Registrar","No problem! The festival will be here. So will I. Forever, probably."]])};
-  if(pinWorn){done([["Registrar","Welcome to the festival! Registration is 5 coi— oh! Is that an official Festival Pin you're wearing?"],["Registrar","Pin-wearers get in FREE! Put your coins away. Welcome, welcome!"]]);return}
+  if(pinWorn){l2.bargained=true;start([["Registrar","Welcome to the festival! Registration is 5 coi— oh! Is that an official Festival Pin you're wearing?"],["Registrar","Pin-wearers get in FREE! Put your coins away. Welcome, welcome!"],
+    ["Registrar","Ooh, while you're here — a little fun quiz, just for pin people. Guess my favorite color!",["Red","Blue","Green","Cyan"],k=>{
+      done(k===3?[["Registrar","CYAN?! Nobody EVER guesses cyan! A pin AND good taste."],["Registrar","Which is wild, because we're all on a screen right now — you'd think I'd be an RGB girl. But I'm a printer at heart. CMYK forever. Cyan, magenta, yellow, key!"]]
+        :[["Registrar",["Red","Blue","Green"][k]+"? Ohh, so close. That's an RGB answer."],["Registrar","I know, I know — we're all on a screen, so RGB makes sense. But I'm a printer at heart. CMYK! Cyan, magenta, yellow, key. Screens just aren't my type."],["Registrar","Don't worry — the pin still gets you in. Rules are rules, and the rule is: pins rule."]])}]]);return}
   if(has("Festival Pin")){start([["Registrar","Welcome! Festival registration is 5 coins."],["Registrar","Ooh — but is that a Festival Pin poking out of your pocket? If you WEAR it, you get in free! (Pockets → Key Items → Festival Pin → Wear.)",opts,pick]]);return}
   start([["Registrar",(l2.bargained?"Back again! ":"Welcome to the Town Art Festival! ")+"Registration is 5 coins. (Anyone wearing an official Festival Pin gets in free.)",opts,pick]]);
 }
