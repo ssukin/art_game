@@ -40,24 +40,30 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 
 ## Level 2 — The Festival Fiasco
 
-Sarah steps through the gate into the Town Art Festival. Townsfolk recognize Dab from the old stories and start wondering whether Sarah is the legendary adventurer. Sarah would just like a lemonade.
+**The orchard.** Level 2 starts in the town orchard: a "Tree shaking coming soon!" sign, four apple trees (apples out of reach for now), and 5 coins hidden in the lower branches of the last tree. At the end is the **Registration table**. Entry costs 5 coins, or it's free if you're *wearing* your Festival Pin (Pockets → Key Items → Festival Pin → Wear). The Registrar notices whether you're wearing it, then tells Sarah about the art contest. The same Registrar takes your contest entry later.
 
-1. **Register (optional).** Sarah left her banner at home, so the Registrar sends her to the Clay Corner. She can make a Ball of Clay or a Lopsided Teapot, or stare at the clay until it gets awkward and make nothing. Enter it and she wins 20 coins "for trying" after the results.
-2. **Recipe Card.** A glowing card sits on the café table near the start. Chef Crumb can cook it into a Health Potion: Turnip + Butter Pat.
-3. **Free Mr. Biscuits.** The judge's head is stuck in the playground jungle gym. Sarah sneaks a curl of butter from Brie's DO NOT TOUCH butter swan (2 Butter Pats, which stack) and greases him free.
-4. **The chase.** Brie notices and chases Sarah. Jump the crates, hold **S** next to a crate to duck behind it, and you'll still get caught. Choose "Sorry." Refuse twice and you get a buttery slap (-1 health).
-5. **Find Nib.** Lou saw something shiny in the sky. With Dab equipped, press **Q** by the art-supply stand to reveal a doodle staircase up to **Nib**, a living pencil. Q with Nib equipped jabs enemies. Swap buddies with **E** or the Buddy pocket.
-6. **Contest results.** Juniper wins with a painting of the legendary adventurer, who looks a lot like Sarah, plus Dab. The town connects the dots. Sarah isn't so sure.
-7. **The sky cracks again.** Smudges drain color from the painting, and a door falls out of the sky. Jab or stomp the Smudges. One of them drops the **Smudgy Key**. Mrs. Maple arrives to tell Sarah she must save the town. Unlock the sky door to finish Level 2 ("Level 3 coming soon!").
+**The main story:**
+1. **Arrive.** Townsfolk recognize Dab from the old stories and wonder whether Sarah is the legendary adventurer. Mr. Umber teaches the hiding trick (hold Down/S by a crate).
+2. **Contest (optional).** Make a Ball of Clay or a Lopsided Teapot at the Clay Corner (or make nothing) and bring it to the Registrar. Entering wins 20 coins "for trying."
+3. **Free Mr. Biscuits.** His head is stuck in the jungle gym. Sneak a curl from Brie's butter swan (2 Butter Pats) and grease him free.
+4. **The chase.** Brie chases you. Jump crates, duck behind them, and choose "Sorry." when caught (refuse twice and you get a buttery slap).
+5. **Find Nib.** Dab's Q by the art-supply stand reveals a doodle staircase up to Nib the pencil (Q jabs).
+6. **Results.** Juniper's painting looks a lot like Sarah and Dab. The prophecy!
+7. **Finale.** The sky cracks. Smudges drain the painting, and a door falls onto the **second floor** balcony above the stage. One Smudge drops the Smudgy Key. Mrs. Maple says Sarah must save the town, then ties the **balloon dog** sculpture to her so she can float up to the jump bars on the right of the stage. Fall off and Mrs. Maple puts down a trampoline. Climb to the second floor and unlock the door: "Level 3 coming soon!"
 
-**Balloons and the sky:** Inka at the art-supply stand sells balloons for 5 coins. Use one from your Pockets and Sarah's next jump goes twice as high, the only way onto the Library roof. The rooftop chest holds a Turnip, a Butter Cheese recipe (2 Butter Pats → Cheese Wedge, +3 health) and 15 coins. From the roof, four clouds with a coin each lead up to a fairy who raises max health by 5 and heals Sarah, once. After she flies off, a Smudge guards the top cloud.
+**Around town (optional):**
+- **The lake** (door near the entrance): chicken coop, a sign ("Eggs: friends of the dog only") and Waffles the dog, who won't let you in but would love dog food. On the dock is **Reel**, a fishing-pole little buddy. At the end of the dock press Space to cast, watch the bobber nibble 1–4 times, and when it's yanked under you have 2 seconds to press Space. Lake Perch stack in one slot.
+- **The hole** near the entrance. Its sign is faded gray until Dab (Q) restores it: "Dig crew entry here." Jump over the hole, or fall in to reach **Undertown**, a full underground floor with a bar (pick up the **Town Map**), the Grimy Grotto club (a bouncer won't let you in), a closed Potter's Studio, Lost & Found, Arcade, Mushroom Grocer, a sewer tunnel, and a dinosaur skeleton stuck in the dirt (dig skills coming someday). A trampoline bounces you back up.
+- **Chef Crumb** cooks from recipe cards: a glowing card near the Clay Corner (Turnip + Butter Pat → Health Potion) and the Cheese recipe (2 Butter Pats → Cheese Wedge, +3 health).
+- **Balloons and the sky:** Inka sells balloons for 5 coins (next jump twice as high). The Library roof chest has a Turnip, the Cheese recipe and 15 coins. From the roof, four coin clouds lead to a one-time fairy (+5 max health and a full heal). After she leaves, a Smudge guards the top cloud.
+- **Gus** is fixing the elevator to the second floor (a future hook). Shops are "Closed for Festival" with joke signs, including a Pet Store (dog food, someday), the Hatter's and a Toy Shop. Next to the butter swan are a balloon dog and a melting ice duck.
 
-Mr. Umber (the first townsperson) teaches the hiding trick: hold Down/S next to a crate or hay bale.
+**Little buddies:** Dab (Q finds hidden doodles), Nib (Q jabs) and Reel (fishing). Swap with E or in the Buddy pocket.
 
-The town is set up as a future hub. It has Chef Crumb's healing recipes, Gus and his clogged pipe (a hook for later), shops "Closed for Festival" with joke signs, two Save Blocks, and hidden doodles for Dab to find.
+**Pockets:** Items (things you use up), **Key Items** (important things you can't get rid of: keys, the Town Map, recipe cards, the Festival Pin), Buddy and Hints.
 
 ## Admin Cheats Only
 
-Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** drops you at the festival with the Turnip, Festival Pin and Dab. Other buttons jump to after the chase, the contest results, or the Smudge fight, and **+20 coins** tops up your wallet. **Restart Level 1** reloads the page.
+Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, and **+20 coins** tops up your wallet. **Restart Level 1** reloads the page.
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.

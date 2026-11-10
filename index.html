@@ -37,8 +37,9 @@
   </div>
   <section class="cheats" aria-label="Admin cheats only">
     <h2>Admin Cheats Only</h2>
-    <p>Testing shortcuts. Level 2 jumps start you with the Turnip, Festival Pin and Dab.</p>
+    <p>Testing shortcuts. Level 2 jumps start you with the Turnip, Festival Pin and Dab. "Start Level 2" begins in the orchard.</p>
     <button class="button" data-cheat="l2">Start Level 2</button>
+    <button class="button" data-cheat="plaza">L2: festival (registered)</button>
     <button class="button" data-cheat="nib">L2: after the chase (Nib trail)</button>
     <button class="button" data-cheat="results">L2: contest results</button>
     <button class="button" data-cheat="fight">L2: Smudge fight</button>
@@ -140,10 +141,12 @@ function advance(){if(!dlg.on)return;const p=dlg.pages[dlg.page];if(dlg.chars<p[
   if(p[2]){const pick=dlg.choice;dlg.on=false;dlg.choice=0;dlg.after=null;p[3](pick);return}
   if(++dlg.page<dlg.pages.length){dlg.chars=0;announce();return}
   dlg.on=false;const fn=dlg.after;dlg.after=null;if(fn)fn()}
-const speakerColor={"Fairy":"#d0648f","Nib":"#d98e1c","Brie":"#c08a3c","Chef Crumb":"#d0648f","Announcer":"#e5577b","Juniper":"#2fb3a7","Townsfolk":"#7a5c99","Sarah":"#17a398","Mrs. Maple":"#d0648f","Flower":"#e1a21b","Dab":"#3b8fd6","Save Block":"#c98a12","Mr. Biscuits":"#8a6a4d","Sign":"#8a6a4d","Letter":"#8a6a4d"};
+const speakerColor={"Registrar":"#17a398","Reel":"#3b8fd6","Waffles":"#c98a5a","Bouncer":"#5b2a6e","Bartender":"#7a2f3a","Fairy":"#d0648f","Nib":"#d98e1c","Brie":"#c08a3c","Chef Crumb":"#d0648f","Announcer":"#e5577b","Juniper":"#2fb3a7","Townsfolk":"#7a5c99","Sarah":"#17a398","Mrs. Maple":"#d0648f","Flower":"#e1a21b","Dab":"#3b8fd6","Save Block":"#c98a12","Mr. Biscuits":"#8a6a4d","Sign":"#8a6a4d","Letter":"#8a6a4d"};
 function speakerPos(who){
   if(who==="Sarah")return[center()-camera,s.y-4];
-  if(who==="Dab"||(who==="Nib"&&hasNib))return[dab.x-camera,dab.y-30];
+  if(who==="Dab"||(who==="Nib"&&hasNib)||(who==="Reel"&&hasReel))return[dab.x-camera,dab.y-30];
+  if(who==="Reel")return[1000-camera,G-70];
+  {const sn=SCENE_NPCS[scene];if(sn&&sn[who]!=null)return[sn[who]-camera,who==="Waffles"?G-50:G-92]}
   if(scene==="festival"){
     if(who==="Nib")return[2770-camera,110];
     if(who==="Fairy")return[l2.fx-camera,l2.fy];
@@ -204,6 +207,9 @@ function objective(){
 }
 function getInteract(){
   if(scene==="festival")return festInteract();
+  if(scene==="orchard")return orchardInteract();
+  if(scene==="lake")return lakeInteract();
+  if(scene==="under")return underInteract();
   if(scene==="bedroom"){
     if(near(645,50)&&!closetOpen)return["Open the wardrobe",()=>{closetOpen=true;burst(645,360,10);sayToast("The wardrobe creaks open. A potion and a tiny key try to look casual.")}];
     if(near(527,26))return["Admire your painting",easel];
@@ -336,6 +342,7 @@ function grandmaChest(){
 }
 function dabPower(){
   if(!hasDab)return;pulse=1;
+  if(scene==="festival"&&!l2.holeSign&&Math.abs(center()-(-578))<300){l2.holeSign=true;burst(-578,G-84,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming! That poor sign was grayer than a rainy Tuesday."],["Sarah","\"Dig crew entry here\"… with an arrow pointing straight down. Into the hole."],["Dab","So we're supposed to jump IN? I love a sign with commitment."]]);return}
   if(scene==="festival"&&!l2.trail&&Math.abs(center()-2560)<380){
     if(!l2.catFreed){sayToast("Dab: \"I smell a doodle trail up there… but I can't concentrate with that cat yowling. Somebody help him!\"");return}
     if(l2.chase===1)return;
@@ -359,12 +366,15 @@ function triggerStorm(){
 // ---------------------------------------------------------------------------
 // Pockets (inventory)
 // ---------------------------------------------------------------------------
-const TABS=["Items","Keys","Buddy","Hints"];
+const TABS=["Items","Key Items","Buddy","Hints"];const KEY_ITEMS=["Town Map","Recipe Card","Cheese Recipe","Festival Pin"];
 const inv={tab:0,sel:0};
 const INFO={
   "Health Potion":["Tastes like strawberries and courage. Restores all your health.","Use"],
   "Turnip":["You don't know why it was locked in a chest. The turnip isn't telling. It has excellent posture.","Ponder"],
-  "Festival Pin":["Proof you climbed onto a roof. Wear it proudly. Do not explain how you got it.","Admire"],
+  "Festival Pin":["Proof you climbed onto a roof. Wearing it gets you into the festival for free. Do not explain how you got it.","Wear"],
+  "Town Map":["A map of the whole town, folded sixteen ways. Found under the town, by the bar. (What it does: coming soon!)","Unfold"],
+  "Lake Perch":["A Lake Perch. Every fish in this lake is this fish. Nobody knows why. Maybe the chef will want these someday.","Admire"],
+  "Reel":["A fishing-pole little buddy and amateur poet. Stand at the end of the dock and press Space to cast; press Space again when the bobber gets yanked under.","Equip"],
   "Wooden Ladder":["Folded completely flat. Everything does, around here. Mrs. Maple will want this.",null],
   "Road Chest Key":["Small, brassy and ambitious. Opens the chest by the road.",null],
   "Grandma's Chest Key":["Coughed up by a fountain that's doing water wrong. Smells of mothballs and destiny.",null],
@@ -380,10 +390,10 @@ const INFO={
   "Cheese Wedge":["A heroic little wedge of butter cheese. Restores 3 health.","Eat"],
   "Recipe Card":["Turnip-Butter Tonic: 1 Turnip + 1 Butter Pat = Health Potion. Ask Chef Crumb to cook it.","Read"]
 };
-function pocketList(){const isKey=n=>n.includes("Key");if(inv.tab===0)return items.filter(n=>!isKey(n));if(inv.tab===1)return items.filter(isKey);if(inv.tab===2)return[hasDab&&"Dab",hasNib&&"Nib"].filter(Boolean);return[]}
+function pocketList(){const isKey=n=>n.includes("Key")||KEY_ITEMS.includes(n);if(inv.tab===0)return items.filter(n=>!isKey(n));if(inv.tab===1)return items.filter(isKey);if(inv.tab===2)return[hasDab&&"Dab",hasNib&&"Nib",hasReel&&"Reel"].filter(Boolean);return[]}
 function useSelected(){
   const list=pocketList(),n=list[inv.sel];if(!n)return;
-  if(n==="Dab"||n==="Nib"){equipped=n;sayToast(n+" equipped! Q now "+(n==="Dab"?"sniffs out hidden doodles.":"jabs enemies."));return}
+  if(n==="Dab"||n==="Nib"||n==="Reel"){equipped=n;sayToast(n+" equipped! "+buddyBlurb(n));return}
   if(n==="Balloon"){if(balloonOn){sayToast("You're already holding a balloon. Any more and you'd just float away.");return}useOne(n);balloonOn=true;invOpen=false;sayToast("You tie the balloon to your wrist. Your next jump will be twice as high!");return}
   if(n==="Butter Pat"){sayToast("You resist the urge to eat butter straight from your pocket. Growth!");return}
   if(n==="Ball of Clay"){sayToast("You admire your Ball of Clay. It is extremely round.");return}
@@ -393,7 +403,9 @@ function useSelected(){
   if(n==="Recipe Card"){sayToast("Turnip + Butter Pat = Health Potion. Chef Crumb can cook it at his booth.");return}
   if(n==="Health Potion"){if(health>=maxHealth){sayToast("You're already at full health. Save it for a rainier day.");return}health=maxHealth;useOne(n);inv.sel=0;sayToast("Glug glug. Health fully restored! Strawberry courage achieved.");return}
   if(n==="Turnip"){sayToast("You consider eating the turnip. The turnip considers you back. You put it away.");return}
-  if(n==="Festival Pin"){sayToast("You adjust the Festival Pin. Looking sharp. Pointy, even.");return}
+  if(n==="Festival Pin"){pinWorn=!pinWorn;sayToast(pinWorn?"You pin the Festival Pin to your dress. Fancy! (Free festival entry!)":"You take off the Festival Pin and pocket it.");return}
+  if(n==="Town Map"){sayToast("You unfold the map. And unfold. And unfold. You'll figure out how to read it later.");return}
+  if(n==="Lake Perch"){sayToast("The Lake Perch stares at you. You stare back. Nobody wins.");return}
 }
 const SLOT={cols:4,x0:180,y0:190,dx:96,dy:96,r:38};
 function slotPos(i){return[SLOT.x0+(i%SLOT.cols)*SLOT.dx,SLOT.y0+Math.floor(i/SLOT.cols)*SLOT.dy]}
@@ -401,6 +413,7 @@ function drawIcon(n,x,y,scale=1){
   const box=56*scale;
   if(n==="Dab"){sprite(x,y+26*scale,30,56,drawDabBody,{sx:scale*.95,sy:scale*.95,rot:-.25,shadow:false});return}
   if(n==="Nib"){sprite(x,y+26*scale,24,58,drawNibBody,{sx:scale*.9,sy:scale*.9,rot:-.35,shadow:false});return}
+  if(n==="Reel"){sprite(x,y+28*scale,30,62,drawReelBody,{sx:scale*.85,sy:scale*.85,rot:-.3,shadow:false});return}
   sprite(x,y+box/2,box,box,()=>{g.translate(box/2,box/2);g.scale(scale,scale);iconArt(n)},{shadow:false});
 }
 function iconArt(n){
@@ -415,6 +428,8 @@ function iconArt(n){
   if(n==="Turnip"){g.fillStyle="#5fb35a";for(const a of[-.5,0,.5]){g.save();g.rotate(a);g.beginPath();g.ellipse(0,-20,5,11,0,0,7);g.fill();g.stroke();g.restore()}g.fillStyle="#f7f1ff";g.beginPath();g.moveTo(0,22);g.bezierCurveTo(-20,10,-18,-12,0,-11);g.bezierCurveTo(18,-12,20,10,0,22);g.fill();g.stroke();g.fillStyle="#b77bd1";g.beginPath();g.moveTo(-15,-4);g.bezierCurveTo(-8,-14,8,-14,15,-4);g.bezierCurveTo(8,-8,-8,-8,-15,-4);g.fill();g.fillStyle=INK;circle(-5,3,1.8);g.fill();circle(5,3,1.8);g.fill();return}
   if(n==="Festival Pin"){g.fillStyle="#e5577b";g.beginPath();g.moveTo(-8,6);g.lineTo(-14,24);g.lineTo(-6,20);g.lineTo(-2,26);g.lineTo(0,8);g.fill();g.stroke();g.fillStyle="#17a398";g.beginPath();g.moveTo(8,6);g.lineTo(14,24);g.lineTo(6,20);g.lineTo(2,26);g.lineTo(0,8);g.fill();g.stroke();g.fillStyle="#f4c84f";circle(0,-3,15);g.fill();g.stroke();g.fillStyle="#fff6c2";g.beginPath();for(let i=0;i<10;i++){const r=i%2?4:9,a=i/10*Math.PI*2-Math.PI/2;g.lineTo(Math.cos(a)*r,-3+Math.sin(a)*r)}g.closePath();g.fill();g.stroke();return}
   if(n==="Butter Pat"){g.fillStyle="#ffe48a";g.beginPath();g.moveTo(-18,4);g.lineTo(0,-8);g.lineTo(18,0);g.lineTo(18,10);g.lineTo(0,20);g.lineTo(-18,12);g.closePath();g.fill();g.stroke();g.beginPath();g.moveTo(-18,4);g.lineTo(0,12);g.lineTo(18,0);g.moveTo(0,12);g.lineTo(0,20);g.stroke();g.fillStyle="#fff7d0";g.beginPath();g.ellipse(-2,0,6,2.5,-.3,0,7);g.fill();return}
+  if(n==="Town Map"){g.save();g.rotate(-.1);g.fillStyle="#fff3d6";g.beginPath();g.moveTo(-20,-16);g.lineTo(-7,-20);g.lineTo(7,-16);g.lineTo(20,-20);g.lineTo(20,16);g.lineTo(7,20);g.lineTo(-7,16);g.lineTo(-20,20);g.closePath();g.fill();g.stroke();g.beginPath();g.moveTo(-7,-20);g.lineTo(-7,16);g.moveTo(7,-16);g.lineTo(7,20);g.stroke();g.strokeStyle="#e5577b";g.setLineDash([3,3]);g.beginPath();g.moveTo(-14,10);g.quadraticCurveTo(0,-10,14,0);g.stroke();g.setLineDash([]);g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("✕",14,4);g.textAlign="left";g.restore();return}
+  if(n==="Lake Perch"){g.fillStyle="#7cc488";g.beginPath();g.moveTo(18,0);g.quadraticCurveTo(4,-14,-14,-2);g.lineTo(-22,-10);g.lineTo(-20,0);g.lineTo(-22,10);g.lineTo(-14,2);g.quadraticCurveTo(4,14,18,0);g.closePath();g.fill();g.stroke();g.strokeStyle="#4f9a5a";g.lineWidth=2;for(const x of[-4,2,8]){g.beginPath();g.moveTo(x,-7);g.lineTo(x,7);g.stroke()}g.fillStyle="#fff";circle(11,-2,3);g.fill();g.fillStyle=INK;circle(11.5,-2,1.5);g.fill();return}
   if(n==="Balloon"){g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(0,8);g.quadraticCurveTo(6,16,0,24);g.stroke();g.lineWidth=2.5;g.fillStyle="#7cc6f2";g.beginPath();g.ellipse(0,-6,14,17,0,0,7);g.fill();g.stroke();g.fillStyle="rgba(255,255,255,.7)";circle(-5,-12,4);g.fill();g.fillStyle="#7cc6f2";g.beginPath();g.moveTo(-3,12);g.lineTo(3,12);g.lineTo(0,9);g.fill();return}
   if(n==="Lopsided Teapot"){g.save();g.rotate(.28);g.fillStyle="#b9825a";g.beginPath();g.ellipse(0,4,16,13,0,0,7);g.fill();g.stroke();g.beginPath();g.moveTo(14,2);g.quadraticCurveTo(26,-2,24,-12);g.lineTo(20,-10);g.quadraticCurveTo(20,0,12,-2);g.fill();g.stroke();g.lineWidth=3;g.beginPath();g.arc(-17,4,7,1.7,4.6);g.stroke();g.lineWidth=2.5;g.fillStyle="#d6a27a";g.beginPath();g.ellipse(0,-9,10,4,0,0,7);g.fill();g.stroke();circle(0,-14,3);g.fill();g.stroke();g.restore();return}
   if(n==="Ball of Clay"){g.fillStyle="#b9825a";circle(0,2,17);g.fill();g.stroke();g.fillStyle="#d6a27a";circle(-6,-4,5);g.fill();g.strokeStyle="#8d5a36";g.lineWidth=1.5;g.beginPath();g.arc(3,6,6,.3,2.2);g.stroke();return}
@@ -451,8 +466,8 @@ function drawInventory(){
   const dx=px+500,dy=py+110,dw=250,dh=290;cut(()=>rr(dx,dy,dw,dh,24),"#fffdf6",{edge:7});
   const n=list[inv.sel];
   if(n){g.fillStyle="#fde9c2";circle(dx+dw/2,dy+64,46);g.fill();drawIcon(n,dx+dw/2,dy+64,1.45);
-    g.fillStyle=INK;g.font="bold 20px "+FONT;g.textAlign="center";g.fillText((n==="Dab"||n==="Nib"?n+" (little buddy)":n==="Recipe Card"?"Recipe: Turnip-Butter Tonic":n==="Cheese Recipe"?"Recipe: Butter Cheese":n)+(count(n)>1?"  ×"+count(n):""),dx+dw/2,dy+136,dw-16);g.textAlign="left";
-    let [desc,verb]=INFO[n]||["",null];if(verb==="Equip"&&n===equipped)verb=null;if(verb==="Equip"&&!hasNib)verb=null;wrap(desc,dw-32,"15px "+FONT).forEach((l,i)=>{g.fillStyle="#4a4360";g.fillText(l,dx+16,dy+160+i*19)});
+    g.fillStyle=INK;g.font="bold 20px "+FONT;g.textAlign="center";g.fillText((n==="Dab"||n==="Nib"||n==="Reel"?n+" (little buddy)":n==="Recipe Card"?"Recipe: Turnip-Butter Tonic":n==="Cheese Recipe"?"Recipe: Butter Cheese":n)+(count(n)>1?"  ×"+count(n):""),dx+dw/2,dy+136,dw-16);g.textAlign="left";
+    let [desc,verb]=INFO[n]||["",null];if(verb==="Equip"&&n===equipped)verb=null;if(n==="Festival Pin"&&pinWorn)verb="Take off";wrap(desc,dw-32,"15px "+FONT).forEach((l,i)=>{g.fillStyle="#4a4360";g.fillText(l,dx+16,dy+160+i*19)});
     if(verb){const hov=Math.sin(time*4)*.5+.5;cut(()=>rr(dx+dw/2-80,dy+dh-48,160,36,18),"#17a398",{edge:5,shadow:true});g.fillStyle="#fff";g.font="bold 15px "+FONT;g.textAlign="center";g.fillText("▶ "+verb+" (click / Space)",dx+dw/2,dy+dh-25,150);g.textAlign="left"}
   }else{g.fillStyle="#8d8578";g.font="bold 17px "+FONT;g.textAlign="center";const empty=[ "Nothing in here yet. Lint, maybe.","No keys yet. Locks everywhere are relieved.","No little buddy yet. Somewhere, a paintbrush is waiting."][inv.tab];wrap(empty,dw-40,"bold 17px "+FONT).forEach((l,i)=>g.fillText(l,dx+dw/2,dy+120+i*24));g.textAlign="left"}
   footer(px,py,pw,ph,"Arrows or click to choose · Space or the Use button to use · Tab / Q / E switch pockets · I or Esc closes");
@@ -464,7 +479,7 @@ function drawHints(px,py,pw,ph){
   g.strokeStyle="#f2a1b5";g.beginPath();g.moveTo(nx+60,ny+6);g.lineTo(nx+60,ny+nh-6);g.stroke();
   g.fillStyle="#e5577b";g.font="bold 19px "+FONT;g.fillText("Right now:",nx+74,ny+40);
   g.fillStyle=INK;wrap(objective(),nw-110,"bold 17px "+FONT).forEach((l,i)=>g.fillText(l,nx+74,ny+68+i*28));
-  const beats=level===2?[["Arrive at the festival",l2.intro],["Enter the art contest (optional)",l2.clayEntered],["Free Mr. Biscuits",l2.catFreed],["Survive the butter sculptor",l2.chaseDone],["Find Nib",hasNib],["Hear the contest results",l2.results],["Defeat the festival Smudges",l2.fightDone],["Open the door from the sky",l2.doorOpen]]:[["Raid the wardrobe",potionCollected&&roadChestKeyCollected],["Investigate the overnight gate",homeIntroSeen],["Unlock the road chest",firstChestOpen],["Ride the upside-down fountain",fountainKeyCollected],["Fetch Mrs. Maple a ladder",ladderGiven],["Open Grandma's chest",grandChestOpen],["Bring color back to the flower",flowerRestored],["Unlock the town gate",gateOpen]];
+  const beats=level===2?[["Register for the festival",l2.festReg],["Arrive at the festival",l2.intro],["Catch a fish (optional)",l2.fishCaught>0],["Enter the art contest (optional)",l2.clayEntered],["Free Mr. Biscuits",l2.catFreed],["Survive the butter sculptor",l2.chaseDone],["Find Nib",hasNib],["Hear the contest results",l2.results],["Defeat the festival Smudges",l2.fightDone],["Open the door from the sky",l2.doorOpen]]:[["Raid the wardrobe",potionCollected&&roadChestKeyCollected],["Investigate the overnight gate",homeIntroSeen],["Unlock the road chest",firstChestOpen],["Ride the upside-down fountain",fountainKeyCollected],["Fetch Mrs. Maple a ladder",ladderGiven],["Open Grandma's chest",grandChestOpen],["Bring color back to the flower",flowerRestored],["Unlock the town gate",gateOpen]];
   const done=beats.filter(b=>b[1]);g.fillStyle="#17a398";g.font="bold 17px "+FONT;g.fillText("Done so far ("+done.length+"/"+beats.length+")"+(level===1&&roofItemCollected?"  ★ Roof secret found!":""),nx+74,ny+156);
   g.font="16px "+FONT;done.slice(-4).forEach((b,i)=>{g.fillStyle="#17a398";g.fillText("✔",nx+78,ny+184+i*28);g.fillStyle=INK;g.fillText(b[0],nx+102,ny+184+i*28)});
   if(!done.length){g.fillStyle="#8d8578";g.fillText("Nothing yet. The day is young.",nx+78,ny+184)}
@@ -479,7 +494,7 @@ function invClick(mx,my){
 // Input
 // ---------------------------------------------------------------------------
 function toggleInv(){if(dlg.on||showEndScreen)return;invOpen=!invOpen;if(invOpen){inv.sel=0}}
-actionBtn.onclick=()=>{actionBtn.blur();if(dlg.on)advance();else{const it=getInteract();if(it&&!invOpen)it[1]()}};
+actionBtn.onclick=()=>{actionBtn.blur();if(scene==="lake"&&fish.ph>0){fishSpace();return}if(dlg.on)advance();else{const it=getInteract();if(it&&!invOpen)it[1]()}};
 invBtn.onclick=()=>{invBtn.blur();toggleInv()};
 c.addEventListener("click",e=>{const r=c.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height;
   if(showEndScreen){if(level===1&&endT>1)startLevel2();return}
@@ -502,16 +517,18 @@ window.addEventListener("keydown",e=>{
     else if(k==="ArrowUp"||k==="w")inv.sel=Math.max(0,inv.sel-SLOT.cols);
     else if(k===" "||k==="Enter")useSelected();
     return}
+  if(k===" "&&!e.repeat&&scene==="lake"&&fish.ph>0){fishSpace();return}
   if(k===" "&&!e.repeat){const it=getInteract();if(it)it[1]();else sayToast("Nothing to activate here. You activate your imagination instead.");return}
   if((k==="ArrowUp"||k==="w")&&s.ground&&!e.repeat&&!onLadder()){
-    if(balloonOn){s.vy=-834;balloonOn=false;balloonsAway.push({scene,x:center()+8,y:s.y-40,t:0});sayToast("WHOOSH! The balloon yanks you sky-high… then drifts off to a better life.")}else s.vy=-590;s.ground=false}
-  if(k==="q"&&!e.repeat){if(!hasDab)sayToast("You don't have a little buddy yet. You wave at nobody. Nobody waves back.");else if(equipped==="Nib"&&hasNib)nibJab();else dabPower()}
-  if(k==="e"&&!e.repeat&&hasNib){equipped=equipped==="Dab"?"Nib":"Dab";sayToast(equipped+" equipped! Q now "+(equipped==="Dab"?"sniffs out hidden doodles.":"jabs enemies."))}
+    if(dogOn){s.vy=-620}else if(balloonOn){s.vy=-834;balloonOn=false;balloonsAway.push({scene,x:center()+8,y:s.y-40,t:0});sayToast("WHOOSH! The balloon yanks you sky-high… then drifts off to a better life.")}else s.vy=-590;s.ground=false}
+  if(k==="q"&&!e.repeat){if(!hasDab)sayToast("You don't have a little buddy yet. You wave at nobody. Nobody waves back.");else if(equipped==="Nib"&&hasNib)nibJab();else if(equipped==="Reel"&&hasReel){if(scene==="lake"&&near(DOCK.x+DOCK.w-40,50)&&fish.ph===0)castLine();else sayToast("Reel: \"No water here. I'm a fishing pole, not a miracle worker.\"")}else dabPower()}
+  if(k==="e"&&!e.repeat&&(hasNib||hasReel)){const b=[hasDab&&"Dab",hasNib&&"Nib",hasReel&&"Reel"].filter(Boolean);equipped=b[(b.indexOf(equipped)+1)%b.length];sayToast(equipped+" equipped! "+buddyBlurb(equipped))}
   if(k==="r"&&!e.repeat&&l2.chase!==1){scene=checkpointScene;s.x=checkpoint;s.y=G-s.h;s.vy=0;health=maxHealth;camera=clamp(s.x-350,0,worldW()-W);sayToast("Whoosh! Back at the Save Block.")}
   keys.add(k);
 });
 window.addEventListener("keyup",e=>keys.delete(key(e.key)));window.addEventListener("blur",()=>keys.clear());
-const worldW=()=>scene==="outside"?WORLD:scene==="festival"?FEST_W:W;
+const buddyBlurb=n=>n==="Dab"?"Q sniffs out hidden doodles.":n==="Nib"?"Q jabs enemies.":"Fish from the end of the lake dock with Space or Q.";
+const worldW=()=>scene==="outside"?WORLD:scene==="festival"?FEST_W:scene==="orchard"?ORCH_W:scene==="lake"?LAKE_W:scene==="under"?UNDER_W:W;
 const onLadder=()=>scene==="resident"&&ladderGiven&&Math.abs(center()-478)<34;
 
 // ---------------------------------------------------------------------------
@@ -532,18 +549,21 @@ function update(dt){
   // Dab follows behind Sarah
   const bx=center()-s.face*34,by=s.y+22+Math.sin(time*3)*4;dab.x+=(bx-dab.x)*Math.min(1,dt*6);dab.y+=(by-dab.y)*Math.min(1,dt*6);
   if(dlg.on||invOpen||complete){updateAction();return}
+  if(scene==="lake"&&fish.ph>0){updateFishing(dt);updateAction();return}
   let dir=(keys.has("ArrowRight")||keys.has("d")?1:0)-(keys.has("ArrowLeft")||keys.has("a")?1:0);
   s.duck=(keys.has("s")||keys.has("ArrowDown"))&&s.ground&&!onLadder();if(s.duck)dir=0;
-  const oldX=s.x;s.x+=dir*245*dt;s.x=clamp(s.x,0,worldW()-s.w);
+  const oldX=s.x;s.x+=dir*245*dt;s.x=clamp(s.x,worldMin(),worldW()-s.w);
   if(scene==="festival")for(const b of CRATES){if(s.x+s.w>b.x&&s.x<b.x+b.w&&s.y+s.h>b.y+6&&s.y<b.y+b.h){if(oldX+s.w<=b.x+1)s.x=b.x-s.w;else if(oldX>=b.x+b.w-1)s.x=b.x+b.w}}if(dir)s.face=dir;s.walk=dir&&s.ground?s.walk+dt*14:0;
   s.inv=Math.max(0,s.inv-dt);
-  const oldFeet=s.y+s.h;s.vy+=1450*dt;s.y+=s.vy*dt;s.wasGround=s.ground;s.ground=false;
-  const ps=[{x:-50,y:G,w:99999,h:100}];
+  const oldFeet=s.y+s.h;s.vy+=1450*(dogOn?.42:1)*dt;s.y+=s.vy*dt;s.wasGround=s.ground;s.ground=false;
+  const ps=scene==="festival"?[{x:FEST_MIN-100,y:G,w:HOLE.x-FEST_MIN+100,h:100},{x:HOLE.x+HOLE.w,y:G,w:99999,h:100}]:scene==="lake"?[{x:-50,y:G,w:930,h:100},{x:DOCK.x,y:G,w:DOCK.w,h:100}]:[{x:-50,y:G,w:99999,h:100}];
   if(scene==="bedroom")ps.push({x:105,y:346,w:280,h:18,bed:true});
   if(scene==="resident"&&ladderGiven)ps.push({x:400,y:280,w:540,h:22});
   if(scene==="outside")ps.push(...platforms);
-  if(scene==="festival"){ps.push(...CRATES,LIB_ROOF,...CLOUDS);if(l2.trail)ps.push(...TRAIL)}
+  if(scene==="under")ps.push({...TRAMP_U,tramp:-1150});
+  if(scene==="festival"){ps.push(...CRATES,LIB_ROOF,...CLOUDS,...BARS,FLOOR2);if(l2.tramp)ps.push({...TRAMP_F,tramp:-900});if(l2.trail)ps.push(...TRAIL)}
   for(const p of ps){if(s.vy>=0&&s.x+s.w>p.x&&s.x<p.x+p.w&&oldFeet<=p.y+1&&s.y+s.h>=p.y){
+    if(p.tramp){s.y=p.y-s.h;s.vy=p.tramp;s.squash=.7;burst(center(),p.y,6,["#3bb6c4","#fff"]);continue}
     if(p.bed&&s.vy>420){s.y=p.y-s.h;s.vy=-Math.min(760,s.vy*1.08);s.squash=.7;if(!bedBounced){bedBounced=true;sayToast("BOING! Your bed is 40% mattress, 60% trampoline.")}continue}
     s.y=p.y-s.h;if(s.vy>300)s.squash=.82;s.vy=0;s.ground=true}}
   if(scene==="bedroom"&&closetOpen){
@@ -566,12 +586,17 @@ function update(dt){
           if(health<=0){health=maxHealth;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}
     }
   }
-  if(scene==="festival"){updateFestival(dt,oldFeet);if(dlg.on){updateAction();return}}
+  if(scene==="festival"){if(festIntroCheck()){updateAction();return}
+    if(s.x<=FEST_MIN+1&&(keys.has("a")||keys.has("ArrowLeft"))&&l2.chase!==1){goScene("orchard",ORCH_W-90);updateAction();return}
+    updateFestival(dt,oldFeet);if(dlg.on){updateAction();return}updateFinaleClimb();if(dlg.on){updateAction();return}}
+  if(scene==="orchard"){updateOrchard();if(dlg.on){updateAction();return}}
+  if(scene==="lake"){updateLake();if(dlg.on){updateAction();return}}
+  if(scene==="under"){updateUnder();if(dlg.on){updateAction();return}}
   for(const l of loot){if(l.got||l.scene!==scene)continue;l.wait=Math.max(0,(l.wait||0)-dt);l.vy+=1450*dt;l.x+=l.vx*dt;l.y+=l.vy*dt;if(l.y>G-14){l.y=G-14;l.vy=-l.vy*.35;if(Math.abs(l.vy)<60)l.vy=0;l.vx*=.85}
     if(l.wait<=0&&Math.abs(center()-l.x)<28&&l.y>s.y-10&&l.y<s.y+s.h+10){l.got=true;burst(l.x,l.y,6,["#f4c84f","#fff"]);if(l.type==="coin")coins++;else{addItem(l.name);sayToast(l.name==="Turnip"?"Got a Turnip! Why was it locked up? You're afraid to ask.":"Got "+l.name+"!")}}}
   if(!s.wasGround&&s.ground&&s.squash>.95)s.squash=.9;
-  if(s.y>H+40){s.x=checkpoint;s.y=G-s.h;s.vy=0}
-  camera=scene==="outside"||scene==="festival"?clamp(s.x-350,0,worldW()-W):0;
+  if(s.y>H+40){if(scene==="festival"&&center()>HOLE.x-30&&center()<HOLE.x+HOLE.w+30){goScene("under",300,-90);sayToast("Wheeee— down the hole!")}else{s.x=checkpoint;s.y=G-s.h;s.vy=0}}
+  camera=worldW()>W?clamp(s.x-350,worldMin(),worldW()-W):0;
   const ty=scene==="festival"?clamp(s.y-150,-320,0):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
   updateAction();
 }
@@ -673,15 +698,18 @@ function drawSarah(){
   const blinkInv=s.inv>0&&Math.floor(time*12)%2===0;
   let sx=s.flip;if(Math.abs(sx)<.1)sx=.1*Math.sign(sx||1);
   sprite(center(),s.y+s.h+3,50,76,drawSarahBody,{sx:sx*(2-s.squash),sy:s.squash*(s.duck?.62:1),alpha:blinkInv?.45:(scene==="festival"&&l2.chase===1&&hideSpot()?.5:1)});
+  if(pinWorn){const px=center()+(s.flip>0?4:-4),py=s.y+s.h-30*(s.duck?.62:1);g.fillStyle="#f4c84f";g.strokeStyle=INK;g.lineWidth=1.2;star(px,py,4.5,2);g.fill();g.stroke()}
+  if(dogOn){const bx=center()+6,by=s.y-70+Math.sin(time*3)*4;g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(center(),s.y+30);g.quadraticCurveTo(bx+10,s.y-10,bx,by);g.stroke();drawBalloonDog(bx-6,by,.75)}
   if(balloonOn){const bx=center()+14,by=s.y-46+Math.sin(time*3)*3;g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(center()+8,s.y+40);g.quadraticCurveTo(bx+8,s.y,bx,by+20);g.stroke();cut(()=>{g.beginPath();g.ellipse(bx,by,15,19,0,0,7)},"#7cc6f2",{edge:5});g.fillStyle="rgba(255,255,255,.6)";circle(bx-5,by-7,4);g.fill()}
-  for(const b of balloonsAway){if(b.scene!==scene)continue;cut(()=>{g.beginPath();g.ellipse(b.x+Math.sin(b.t*3)*10,b.y,15,19,0,0,7)},"#7cc6f2",{edge:5,shadow:false})}
+  for(const b of balloonsAway){if(b.scene!==scene)continue;if(b.dog){drawBalloonDog(b.x+Math.sin(b.t*3)*10,b.y,.75);continue}cut(()=>{g.beginPath();g.ellipse(b.x+Math.sin(b.t*3)*10,b.y,15,19,0,0,7)},"#7cc6f2",{edge:5,shadow:false})}
   if(hasNib&&equipped==="Nib"){if(jabT>0){const ext=Math.sin((1-jabT/.32)*Math.PI);sprite(center()+s.face*(32+ext*42),s.y+40,24,58,drawNibBody,{rot:-s.face*Math.PI/2,sx:.9,sy:.9});g.save();g.globalAlpha=ext*.8;g.strokeStyle="#fff";g.lineWidth=3;for(const dy of[-8,0,8]){g.beginPath();g.moveTo(center()+s.face*(40+ext*30),s.y+40+dy);g.lineTo(center()+s.face*(20+ext*20),s.y+40+dy);g.stroke()}g.restore()}
     else sprite(dab.x,dab.y+28,24,58,drawNibBody,{rot:Math.sin(time*2.6)*.15,sx:.85,sy:.85})}
+  else if(hasReel&&equipped==="Reel"){if(scene==="lake"&&fish.ph>0)sprite(center()+18,s.y+52,30,62,drawReelBody,{rot:.75,sx:.9,sy:.9});else sprite(dab.x,dab.y+30,30,62,drawReelBody,{rot:Math.sin(time*2.6)*.15,sx:.8,sy:.8})}
   else if(hasDab)sprite(dab.x,dab.y+28,30,56,drawDabBody,{rot:Math.sin(time*2.6)*.18-.15*s.face,sx:.85*(s.face>0?1:-1),sy:.85});
   // "!" bubble when something can be activated
   if(!dlg.on&&!invOpen&&getInteract()?.[2]){const bx=center(),by=s.y-30+Math.sin(time*7)*3;cut(()=>{g.beginPath();g.ellipse(bx,by,14,16,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 20px "+FONT;g.textAlign="center";g.fillText("!",bx,by+7);g.textAlign="left"}
 }
-function groundUnder(){if(scene==="bedroom"&&s.x+s.w>105&&s.x<385&&s.y+s.h<=350)return 346;if(scene==="resident"&&ladderGiven&&s.x+s.w>400&&s.y+s.h<=284)return 280;if(scene==="outside")for(const p of platforms)if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;if(scene==="festival"){for(const p of CRATES.concat(l2.trail?TRAIL:[],[LIB_ROOF],CLOUDS))if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y}return G}
+function groundUnder(){if(scene==="bedroom"&&s.x+s.w>105&&s.x<385&&s.y+s.h<=350)return 346;if(scene==="resident"&&ladderGiven&&s.x+s.w>400&&s.y+s.h<=284)return 280;if(scene==="outside")for(const p of platforms)if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;if(scene==="festival"){for(const p of CRATES.concat(l2.trail?TRAIL:[],[LIB_ROOF],CLOUDS,BARS,[FLOOR2]))if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y}return G}
 function drawFlowers(){for(const f of flowers){if(f.x<camera-80||f.x>camera+W+80)continue;const gray=f.kind==="gray"&&stormDone&&!flowerRestored;groundShadow(f.x,G+2,18);
   sprite(f.x,G+4,56,86,()=>drawFlowerBody(gray,gray,f.kind==="gray"&&flowerRestored),{rot:Math.sin(time*2+f.x)*.04+Math.sin(time*18)*f.wig*.12,sy:1-f.wig*.06})}}
 
@@ -875,13 +903,13 @@ function label(t){g.font="bold 15px "+FONT;const w=g.measureText(t).width+28;cut
 // HUD
 // ---------------------------------------------------------------------------
 function drawHud(){
-  const top=scene==="outside"||scene==="festival"?18:58;
+  const top=scene==="bedroom"||scene==="resident"?58:18;
   cut(()=>rr(18,top,168,44,22),"#fffdf6",{edge:7});
   // heart
   g.save();g.translate(44,top+22);g.scale(1+Math.sin(time*5)*.04*(health<4?3:1),1);cut(()=>{g.beginPath();g.moveTo(0,10);g.bezierCurveTo(-18,-2,-10,-16,0,-7);g.bezierCurveTo(10,-16,18,-2,0,10)},"#e5577b",{edge:4,shadow:false});g.restore();
   g.fillStyle=INK;g.font="bold 22px "+FONT;g.fillText(health,66,top+30);g.font="bold 14px "+FONT;g.fillStyle="#7a7088";g.fillText("/ "+maxHealth+" HP",health>9?94:82,top+29);
   cut(()=>rr(196,top,104,44,22),"#fffdf6",{edge:7});drawCoin(220,top+22,11);g.fillStyle=INK;g.font="bold 22px "+FONT;g.fillText(coins,240,top+30);
-  if(hasDab){const wb=hasNib?190:124;cut(()=>rr(310,top,wb,44,22),"#fffdf6",{edge:7});if(equipped==="Nib"&&hasNib)sprite(332,top+40,24,58,drawNibBody,{sx:.6,sy:.6,rot:-.3,shadow:false});else sprite(332,top+40,30,56,drawDabBody,{sx:.6,sy:.6,rot:-.3,shadow:false});g.fillStyle=INK;g.font="bold 14px "+FONT;g.fillText("Q: Buddy",350,top+28);if(hasNib){g.fillStyle="#7a7088";g.fillText("E: swap",424,top+28)}}
+  if(hasDab){const wb=hasNib||hasReel?190:124;cut(()=>rr(310,top,wb,44,22),"#fffdf6",{edge:7});if(equipped==="Nib"&&hasNib)sprite(332,top+40,24,58,drawNibBody,{sx:.6,sy:.6,rot:-.3,shadow:false});else if(equipped==="Reel"&&hasReel)sprite(332,top+42,30,62,drawReelBody,{sx:.55,sy:.55,rot:-.3,shadow:false});else sprite(332,top+40,30,56,drawDabBody,{sx:.6,sy:.6,rot:-.3,shadow:false});g.fillStyle=INK;g.font="bold 14px "+FONT;g.fillText("Q: Buddy",350,top+28);if(hasNib||hasReel){g.fillStyle="#7a7088";g.fillText("E: swap",424,top+28)}}
   cut(()=>rr(W-142,18,124,36,18),"#fffdf6",{edge:6});g.fillStyle=INK;g.font="bold 14px "+FONT;g.fillText("I: Pockets",W-122,41);
   if(toastTimer>0){const a=Math.min(1,toastTimer*3,(3.4-toastTimer)*6),y=H-24-a*40;g.save();g.globalAlpha=Math.min(1,a*1.2);const lines=wrap(toastText,W-220,"bold 17px "+FONT),h=20+lines.length*22;
     cut(()=>rr(90,y-h+30,W-180,h,16),"#2f2a4a",{edge:7});g.fillStyle="#fff4d6";g.textAlign="center";lines.forEach((l,i)=>g.fillText(l,W/2,y-h+56+i*22));g.textAlign="left";g.restore()}
@@ -904,14 +932,16 @@ function drawEndScreen(){
 // ===========================================================================
 // LEVEL 2 — The Festival Fiasco
 // ===========================================================================
-const FEST_W=3520,DOOR_X=2915,LIB_ROOF={x:2072,y:246,w:156,h:20};
+const FEST_W=3520,DOOR_X=3150,LIB_ROOF={x:2072,y:246,w:156,h:20};
 let balloonOn=false,balloonsAway=[];
 const CLOUDS=[{x:2228,y:192,w:84,h:16},{x:2128,y:132,w:84,h:16},{x:2232,y:72,w:84,h:16},{x:2110,y:12,w:140,h:18}];
 const SKYTOP=CLOUDS[3];
 const CRATES=[{x:1770,y:G-36,w:46,h:36},{x:1995,y:G-36,w:46,h:36},{x:2075,y:G-30,w:60,h:30,hay:true},{x:2250,y:G-36,w:46,h:36}];
 const HIDES=[0,1,3].map(i=>CRATES[i]);const hideSpot=()=>HIDES.find(b=>s.duck&&Math.abs(center()-(b.x+b.w/2))<b.w/2+30);
 const TRAIL=[{x:2510,y:385,w:72},{x:2600,y:330,w:72},{x:2690,y:274,w:72},{x:2600,y:218,w:72},{x:2690,y:162,w:110}];
-const SIGNS=[[1130,"HATTER'S — CLOSED FOR FESTIVAL. Our hats are also enjoying the festival. On other people's heads."],
+const SIGNS=[[-230,"HATTER'S — CLOSED FOR FESTIVAL. Our hats are also enjoying the festival. On other people's heads."],
+  [-650,"PAWS & CLAWS PET STORE — CLOSED FOR FESTIVAL. Even the goldfish took the day off. Dog food back in stock soon! (Sorry, Waffles.)"],
+  [-85,"TOY SHOP — CLOSED FOR FESTIVAL. The toys are finally playing with each other. Please don't interrupt."],
   [1890,"CRUMB & DAUGHTERS BAKERY — CLOSED FOR FESTIVAL. Gone to eat other people's cake. Strictly for research."],
   [2150,"TOWN LIBRARY — CLOSED FOR FESTIVAL. Please return all overdue silence by Monday."],
   [2890,"WEATHER STATION — CLOSED. Forecast: sunny, with a chance of the sky ripping open. Again. We're looking into it."]];
@@ -926,9 +956,11 @@ const LOOKS={
   "Lou":{skin:"#b07a55",hair:"#8a8f98",style:"short",top:"#5fb35a",bottom:"#4a4060",acc:"binoculars"},
   "Inka":{skin:"#f1c7a0",hair:"#2fb3a7",style:"long",top:"#b98ad8",bottom:"#2b2540",acc:"apron",apron:"#e5577b"},
   "Announcer":{skin:"#e2a77f",hair:"#2b2540",style:"short",top:"#e5577b",bottom:"#2b2540",hat:"top",hatCol:"#2b2540",acc:"mic"},
+  "Bouncer":{skin:"#8d5a3b",hair:"#2b2540",style:"bald",top:"#2b2540",bottom:"#1b1730",acc:"shades"},
+  "Bartender":{skin:"#f1c7a0",hair:"#5b3a28",style:"short",top:"#7a2f3a",bottom:"#2b2540",acc:"mustache"},
   "Juniper":{skin:"#ffd9b8",hair:"#d0642f",style:"long",top:"#7cc6f2",bottom:"#3b5a8f",hat:"beret",hatCol:"#2fb3a7",acc:"brush"}
 };
-const NPC_X={"Mr. Umber":250,"Pippa":305,"Registrar":420,"Potter Pat":560,"Chef Crumb":860,"Gus":1005,"Lou":2365,"Inka":2470,"Announcer":3085,"Juniper":3160};
+const NPC_X={"Mr. Umber":250,"Pippa":305,"Potter Pat":560,"Chef Crumb":860,"Gus":1005,"Lou":2365,"Inka":2470,"Announcer":3085,"Juniper":3160};
 let level=1,checkpointScene="outside",hasNib=false,equipped="Dab",jabT=0,l2={},fsm=[];
 function resetL2(){l2={intro:false,registered:false,clayMade:false,clayEntered:false,cardTaken:false,chefMet:false,catSeen:false,butterTaken:false,catFreed:false,
   chase:0,chaseT:0,chaseDone:false,brieX:1385,brieFace:-1,brieHid:{},confused:0,refusals:0,slapped:false,trail:false,nibMet:false,results:false,finale:false,
@@ -938,33 +970,33 @@ function npcX(n){if(n==="Brie")return l2.brieX;if(l2.results&&n==="Mr. Umber")re
 function tcount(n){l2.talk[n]=(l2.talk[n]||0)+1;return l2.talk[n]-1}
 
 function startLevel2(){
-  level=2;resetL2();scene="festival";s.x=80;s.y=G-s.h;s.vy=0;s.face=1;s.flip=1;dab.x=50;dab.y=G-50;
-  showEndScreen=false;complete=false;invOpen=false;gateOpen=true;gateAnim=1;checkpoint=700;checkpointScene="festival";camera=0;parts=[];hasDab=true;health=maxHealth;
+  level=2;resetL2();resetL2Extra();dogOn=false;scene="orchard";s.x=40;s.y=G-s.h;s.vy=0;s.face=1;s.flip=1;dab.x=20;dab.y=G-50;
+  showEndScreen=false;complete=false;invOpen=false;gateOpen=true;gateAnim=1;checkpoint=40;checkpointScene="orchard";camera=0;parts=[];hasDab=true;health=maxHealth;
   if(!hasNib)equipped="Dab";
   start([
-    ["Narrator","The gate creaks open, and the Town Art Festival spills out to meet Sarah: music, bunting, and the smell of kettle corn."],
-    ["Mr. Umber","Great galloping gouache… is that a living paintbrush?"],
-    ["Pippa","It's DAB! From the old stories! Dab went everywhere with the legendary adventurer!"],
-    ["Dab","Hi! Yes! That's me! I'm famous! Somebody write that down!"],
-    ["Mr. Umber","And if Dab is back… then you, young lady, might be—"],
-    ["Sarah","—here for the festival! I'm just here for the festival. One lemonade and zero prophecies, please."],
-    ["Narrator","The townsfolk exchange meaningful looks. Several of them are very bad at it."]
-  ],()=>{l2.intro=true;sayToast("Explore the festival! The Registration booth is just ahead.")});
+    ["Narrator","The gate creaks open. Past it, the road winds through the town orchard, and festival music is already drifting over the trees."],
+    ["Dab","Ooh, apples! Can we shake the trees?"],
+    ["Sarah","The sign says \"coming soon.\" I don't make the rules."]
+  ],()=>sayToast("Walk through the orchard to the festival registration table →"));
 }
 
 // ---- who can Sarah talk to / activate? ----
 function festInteract(){
   if(l2.chase===1||(l2.finale&&!l2.fightDone)||l2.done)return null;
   if(!l2.roofChest&&near(2150,40)&&s.y+s.h<=LIB_ROOF.y+2)return["Open the rooftop chest",roofChest];
+  if(l2.doorY!=null&&l2.doorY>=FLOOR2.y&&!l2.doorOpen&&near(DOOR_X,44)&&s.y+s.h<=FLOOR2.y+2)return[has("Smudgy Key")?"Unlock the sky door":"Inspect the sky door",skyDoor];
   if(!onFloor())return null;
   const T=(label,fn)=>[label,fn,true];
   if(near(npcX("Mr. Umber"),26))return T("Talk to Mr. Umber",umber);
   if(near(npcX("Pippa"),24))return T("Talk to Pippa",pippa);
-  if(near(420,40))return T("Talk to the Registrar",registrar);
+  if(near(LAKE_DOOR,36))return["Go to the lake",()=>goScene("lake",170)];
+  if(near(1112,22))return["Inspect the balloon dog",()=>sayToast(l2.dogGone?"The empty pedestal says \"Good Boy\" (on loan). On loan to you, technically.":"A giant balloon dog sculpture titled \"Good Boy.\" It squeaks when the wind blows. Very good boy.")];
+  if(near(1166,16))return["Inspect the ice duck",()=>sayToast("\"Ice Duck (Melting).\" The artist calls it a meditation on impermanence. It is mostly a puddle now.")];
   if(near(560,40))return T("Talk to Potter Pat",potter);
   if(near(700,30))return["Save at the Save Block",()=>saveFest(700)];
   if(near(860,45))return T("Talk to Chef Crumb",chef);
   if(near(1005,30))return T("Talk to Gus",gus);
+  if(near(-578,24))return["Read the sign",()=>{if(!l2.holeSign){sayToast("The sign is so faded and gray you can't read a word. Maybe Dab could bring its color back? (Q)");return}start([["Sign","DIG CREW ENTRY HERE. Hard hats recommended. Bravery required. Jump in if you dare! ♥"]])}];
   for(const [x,t] of SIGNS)if(near(x,24))return["Read the sign",()=>start([["Sign",t]])];
   if(near(l2.brieX,30))return T("Talk to Brie",brie);
   if(near(1300,40))return["Inspect the butter swan",swan];
@@ -972,7 +1004,6 @@ function festInteract(){
   if(near(2365,28))return T("Talk to Lou",lou);
   if(near(2470,40))return T("Talk to Inka",inka);
   if(near(2990,30))return["Save at the Save Block",()=>saveFest(2990)];
-  if(l2.doorY!=null&&l2.doorY>=G&&!l2.doorOpen&&near(DOOR_X,40))return[has("Smudgy Key")?"Unlock the sky door":"Inspect the sky door",skyDoor];
   if(near(3085,28))return T("Talk to the Announcer",announcer);
   if(near(3160,28))return T("Talk to Juniper",juniper);
   if(near(3420,36)&&l2.catState==="judge")return T("Greet Mr. Biscuits",()=>sayToast("Mr. Biscuits gives you one slow blink. In cat, that's a standing ovation."));
@@ -1127,11 +1158,11 @@ function runResults(){
   start(p,()=>{if(l2.clayEntered){coins+=20;burst(center(),s.y,24,["#f4c84f","#fff"])}startFinale()});
 }
 function startFinale(){
-  l2.finale=true;l2.tearT=.01;l2.doorY=-260;flash=.9;shake=1.2;
+  l2.finale=true;l2.tearT=.01;l2.doorY=-760;flash=.9;shake=1.2;
   start([
     ["Narrator","KRAKA-THOOM! Lightning splits the sky again — right above the stage!"],
     ["Narrator","Smudges tumble out of the tear and swarm Juniper's painting. The color starts draining right out of it!"],
-    ["Narrator","Then — THUD. A door falls out of the sky and lands upright in the street. Just a door. No house. Very rude."],
+    ["Narrator","Then — THUD. A door falls out of the sky and lands upright on the second-floor balcony above the stage. Just a door. No house. Very rude."],
     ["Dab","One of those Smudges is carrying something shiny… a key!"],
     ["Nib","FINALLY. Something to poke! Press Q to jab. Stomping works too!"]
   ],()=>{equipped="Nib";checkpoint=2990-s.w/2;checkpointScene="festival";sayToast("Progress saved! Stop the Smudges before they drain the painting!");
@@ -1156,7 +1187,7 @@ function fairyVisit(){
 function skyDoor(){
   if(!has("Smudgy Key")){sayToast(l2.fightDone?"Locked. The keyhole is inky and smudge-shaped. One of those Smudges dropped a key, didn't it?":"Locked tight. One of the Smudges is carrying the key!");return}
   if(!l2.mapleDone){sayToast("Wait — someone's hurrying over to talk to you first.");return}
-  removeItem("Smudgy Key");l2.doorOpen=true;burst(DOOR_X,G-80,30,["#b98ad8","#f4c84f","#fff"]);
+  removeItem("Smudgy Key");l2.doorOpen=true;burst(DOOR_X,FLOOR2.y-80,30,["#b98ad8","#f4c84f","#fff"]);
   start([
     ["Narrator","The Smudgy Key turns with a wet little click. The door swings open."],
     ["Narrator","Behind it there's no room and no street. Just a deep, inky dark… and the faint smell of fresh paint."],
@@ -1172,8 +1203,11 @@ function mapleFinale(){
     ["Mrs. Maple","Sarah. You must save the town."],
     ["Sarah","…Can I at least finish my lemonade first?"],
     ["Mrs. Maple","Of course, dear. Finish your lemonade. Then save the town. I'll pack you a sandwich."],
-    ["Mrs. Maple","Oh, and dear? That door that fell out of the sky? I suspect it's meant for you."]
-  ],()=>{l2.mapleDone=true;sayToast(has("Smudgy Key")?"Unlock the door that fell from the sky!":"Grab the Smudgy Key, then unlock the door that fell from the sky!")});
+    ["Mrs. Maple","Oh, and dear? That door that fell out of the sky? I suspect it's meant for you. It's way up on the second floor, though, and Gus still hasn't fixed that elevator."],
+    ["Mrs. Maple","Hold still. I have an idea."],
+    ["Narrator","Mrs. Maple marches to the sculpture garden, unties the giant balloon dog, marches back and ties it firmly to Sarah's backpack."],
+    ["Mrs. Maple","There! Float up to those jump bars by the stage, dear. Mind the dog — he's a good boy, but he's mostly air."]
+  ],()=>{l2.mapleDone=true;l2.dogGone=true;dogOn=true;sayToast((has("Smudgy Key")?"":"Grab the Smudgy Key first! ")+"Floaty! Jump up to the bars on the right side of the stage, then climb to the second floor.")});
 }
 function dropDoorKey(m){spill(m.x,G-60,"item","Smudgy Key",-s.face*60);burst(m.x,G-50,18,["#b98ad8","#fff","#f4c84f"]);sayToast("The Smudge drops a key! Grab it!")}
 function nibJab(){
@@ -1192,7 +1226,7 @@ function updateFestival(dt,oldFeet){
     const top=m.base-32;if(s.x+s.w>m.x-20&&s.x<m.x+20&&s.y+s.h>top&&s.y<m.base){
       if(s.vy>0&&oldFeet<=top+14){m.alive=false;s.vy=-430;burst(m.x,top,14,[INK,"#5b5277","#fff"]);coins+=3;sayToast("Stomped the sky Smudge! +3 coins.")}
       else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;if(health<=0){health=maxHealth;scene=checkpointScene;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples… then uncrumples at the Save Block.")}else sayToast("Ouch! Smudged! (-1 health)")}}}}
-  if(l2.doorY!=null&&l2.doorY<G){l2.doorY=Math.min(G,l2.doorY+dt*900);if(l2.doorY>=G){shake=.6;burst(DOOR_X,G-10,20,["#5b5277","#fff","#b98ad8"])}}
+  if(l2.doorY!=null&&l2.doorY<FLOOR2.y){l2.doorY=Math.min(FLOOR2.y,l2.doorY+dt*900);if(l2.doorY>=FLOOR2.y){shake=.6;burst(DOOR_X,FLOOR2.y-10,20,["#5b5277","#fff","#b98ad8"])}}
   if(!l2.cardTaken&&Math.abs(center()-640)<26){l2.cardTaken=true;addItem("Recipe Card");burst(640,G-64,16,["#f4c84f","#fff","#e5577b"]);sayToast("Found a Recipe Card: Turnip-Butter Tonic! (Turnip + Butter Pat → Health Potion.) Chef Crumb can cook it.")}
   if(l2.trail&&!l2.nibMet&&Math.abs(center()-2770)<40&&s.y+s.h<=170){meetNib();return}
   if(l2.chase===1){
@@ -1251,6 +1285,7 @@ function drawPersonBody(L){
   if(L.acc==="mustache"){g.fillStyle=L.style==="bald"?"#cfcac0":L.hair;g.beginPath();g.ellipse(22,32.5,4,2,.2,0,7);g.ellipse(29,32.5,4,2,-.2,0,7);g.fill();g.stroke()}
   else{g.lineWidth=1.5;g.beginPath();g.arc(25.5,31,3,.2,2.9);g.stroke()}
   if(L.acc==="glasses"){g.lineWidth=1.4;circle(21,26,4.2);g.stroke();circle(30,26,4.2);g.stroke()}
+  if(L.acc==="shades"){g.fillStyle="#111";rr(15,22,9,6,2);g.fill();rr(26,22,9,6,2);g.fill();g.fillRect(23,24,4,2)}
   if(L.acc==="binoculars"){g.fillStyle="#3a3352";rr(16,22,8,8,2);g.fill();g.stroke();rr(27,22,8,8,2);g.fill();g.stroke()}
   g.lineWidth=2;
   if(L.hat==="chef"){g.fillStyle="#fff";rr(14,8,22,8,2);g.fill();g.stroke();circle(18,6,5.5);g.fill();g.stroke();circle(25,3,6.5);g.fill();g.stroke();circle(32,6,5.5);g.fill();g.stroke()}
@@ -1327,7 +1362,7 @@ function drawSwan(x){
   g.strokeStyle="#e0b64a";g.lineWidth=2.5;g.beginPath();g.moveTo(x-30,G-74);g.quadraticCurveTo(x-6,G-88,x+18,G-72);g.moveTo(x-26,G-64);g.quadraticCurveTo(x-4,G-76,x+16,G-62);g.stroke();
   g.fillStyle="rgba(255,255,255,.7)";g.beginPath();g.ellipse(x-14,G-88,10,3,-.2,0,7);g.fill();
   if(l2.butterTaken){g.fillStyle="#fff7d6";g.beginPath();g.arc(x-44,G-80,7,0,7);g.fill();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.arc(x-44,G-80,7,-.4,2.2);g.stroke()}
-  cut(()=>rr(x-93,G-70,5,70,1),"#a8714a");cut(()=>rr(x-124,G-104,66,40,6),"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("DO NOT",x-91,G-87);g.fillText("TOUCH",x-91,G-72);g.textAlign="left";
+  cut(()=>rr(x-46,G-30,92,22,4),"#e5577b",{edge:4,shadow:false});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("DO NOT TOUCH",x,G-14);g.textAlign="left";
 }
 function drawJungleGym(cx){
   const x0=cx-90,x1=cx+90,top=G-170;
@@ -1422,19 +1457,18 @@ function drawFestival(){
   drawOutsideBackground(l2.tearT>0?{x:2050,t:l2.tearT}:null);
   g.save();g.translate(-camera,0);
   drawSkyClouds();
-  drawGround();drawBunting();drawGate(20);
-  shopFront(1060,140,"HATTER'S","#f7d6e0","#d0648f");shopFront(1820,140,"BAKERY","#ffe9c7","#f08a3c");shopFront(2080,140,"LIBRARY","#e3f2ff","#3b8fd6");drawChest(2121,LIB_ROOF.y-38,l2.roofChest,"#f4c84f");if(!l2.roofChest){g.fillStyle="#fff6a8";star(2172,LIB_ROOF.y-52,6+Math.sin(time*6)*2,2.4);g.fill()}shopFront(2830,120,"WEATHER","#e9f4e0","#5fb35a");
-  booth(420,120,"REGISTRATION","#17a398",()=>npc("Registrar",420));
+  drawGround();drawBunting();drawFestEntrance();
+  shopFront(1820,140,"BAKERY","#ffe9c7","#f08a3c");shopFront(2080,140,"LIBRARY","#e3f2ff","#3b8fd6");drawChest(2121,LIB_ROOF.y-38,l2.roofChest,"#f4c84f");if(!l2.roofChest){g.fillStyle="#fff6a8";star(2172,LIB_ROOF.y-52,6+Math.sin(time*6)*2,2.4);g.fill()}shopFront(2830,120,"WEATHER","#e9f4e0","#5fb35a");
   booth(560,120,"CLAY CORNER","#c98a5a",()=>npc("Potter Pat",560));
   cut(()=>rr(636,G-40,8,40,2),"#a8714a");cut(()=>{g.beginPath();g.ellipse(640,G-40,26,7,0,0,7)},"#fff3d6",{edge:5});
   if(!l2.cardTaken){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#fff6a8";circle(640,G-66,24);g.fill();g.restore();drawIcon("Recipe Card",640,G-66+Math.sin(time*3)*3,.7);g.fillStyle="#fff6a8";star(660,G-88,6+Math.sin(time*7)*2,2);g.fill()}
   for(const x of[700,2990]){sprite(x,G-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,G+2,20)}
   booth(860,130,"CHEF CRUMB'S KITCHEN","#e5577b",()=>npc("Chef Crumb",860));
-  drawPipe(1050);npc("Gus",1005);
-  drawSwan(1300);drawJungleGym(1565);
+  drawElevator(1050);npc("Gus",1005);
+  drawSwan(1300);drawSculptures();drawJungleGym(1565);
   for(const b of CRATES)drawCrate(b);
   booth(2470,120,"ART SUPPLIES","#b98ad8",()=>npc("Inka",2470));
-  drawTrail();drawStage();drawSkyDoor();
+  drawTrail();drawStage();drawBars();drawSkyDoor();
   for(const n of["Mr. Umber","Pippa","Lou","Announcer","Juniper"])npc(n,npcX(n));
   const bx=l2.brieX;if(l2.chase===1){const hop=Math.abs(Math.sin(time*12))*6;groundShadow(bx,G+2,18);sprite(bx,G+3-hop,50,78,()=>drawPersonBody(LOOKS.Brie),{sx:l2.brieFace});
     g.font="bold 22px "+FONT;g.fillStyle=l2.confused>0?"#3b8fd6":"#e5577b";g.textAlign="center";g.fillText(l2.confused>0?"?":"!!",bx,G-92);g.textAlign="left"}
@@ -1447,7 +1481,8 @@ function drawFestival(){
 }
 function objectiveL2(){
   if(l2.done)return"Level 2 complete! Level 3 is coming soon.";
-  if(l2.mapleDone)return has("Smudgy Key")?"Unlock the door that fell out of the sky (next to the Weather Station).":"Pick up the Smudgy Key a Smudge dropped, then unlock the door that fell out of the sky.";
+  if(scene==="orchard"&&!l2.festReg)return"Walk through the orchard to the Registration table. Entry is 5 coins — or wear your Festival Pin to get in free. (The last apple tree has a few coins in it…)";
+  if(l2.mapleDone)return(has("Smudgy Key")?"":"Pick up the Smudgy Key a Smudge dropped. ")+(l2.on2F?"Unlock the door on the second floor.":dogOn?"With the balloon dog tied on, jump up to the bars on the right of the stage, then climb to the second floor and unlock the door.":"Climb the jump bars on the right of the stage to the second floor and unlock the door."+(l2.tramp?" (Use Mrs. Maple’s trampoline!)":""));
   if(l2.fightDone)return"The Smudges are gone! Someone familiar is hurrying over…";
   if(l2.finale)return"Defeat the Smudges before they drain Juniper's painting! With Nib equipped, press Q to jab — or stomp them.";
   if(hasNib)return"Head to the judging stage at the far right to hear the contest results.";
@@ -1456,16 +1491,331 @@ function objectiveL2(){
   if(l2.chase===1)return"RUN! Jump over the crates. Hold S next to a crate to duck behind it.";
   if(has("Butter Pat")&&l2.catSeen)return"Smear a little butter on the jungle-gym bars to free Mr. Biscuits.";
   if(l2.catSeen)return"Mr. Biscuits needs something slippery. That butter swan is VERY slippery…";
-  return"Enjoy the festival! (Optional: enter the art contest at the Registration booth.) Then find out why the judge is late — listen for yowling near the playground.";
+  return"Enjoy the festival! (Optional: make something at the Clay Corner and enter it at the Registration table back in the orchard.) Then find out why the judge is late — listen for yowling near the playground.";
 }
 
+// ===========================================================================
+// LEVEL 2 additions: orchard, lake + fishing, underground, second floor
+// ===========================================================================
+const FEST_MIN=-900,ORCH_W=1500,LAKE_W=1500;
+const HOLE={x:-540,w:60},LAKE_DOOR=-390;
+const BARS=[{x:3440,y:180,w:60,h:10},{x:3370,y:122,w:60,h:10},{x:3440,y:64,w:60,h:10},{x:3370,y:6,w:60,h:10}];
+const FLOOR2={x:3040,y:-52,w:480,h:14};
+const TRAMP_F={x:3446,y:G-18,w:56,h:18},TRAMP_U={x:130,y:G-18,w:70,h:18};
+const DOCK={x:860,w:390};
+const ORCH_TREES=[450,650,850,1050];
+const ORCH_COINS=[[1022,G-118],[1040,G-138],[1060,G-122],[1078,G-140],[1050,G-100]];
+const UNDER_W=3000;
+const UNDER_SIGNS=[[1085,"POTTER'S STUDIO — CLOSED FOR FESTIVAL. Gone upstairs to run the Clay Corner. Back soon! (Please do not lick the kiln.)"],
+  [1500,"LOST & FOUND — CLOSED FOR FESTIVAL. If you found this sign, please return it. It's the only one we have."],
+  [1900,"UNDERGROUND ARCADE — CLOSED FOR FESTIVAL. High score: \"KEVIN.\" Every game. Every machine. We're worried about Kevin."],
+  [2300,"MUSHROOM GROCER — CLOSED FOR FESTIVAL. Fresh fungus, fun guys. Opening soon (they grow fast)."],
+  [2760,"TUNNEL TO THE SEWERS — KEEP OUT. Construction coming soon. (Gus says hi.)"]];
+function drawFossil(){
+  cut(()=>{g.beginPath();g.moveTo(2860,G);g.quadraticCurveTo(2870,G-170,2930,G-230);g.lineTo(3010,G-260);g.lineTo(3010,G);g.closePath()},"#7a5a3a",{edge:6});
+  g.fillStyle="#6a4a2e";for(const [x,y,r] of[[2900,G-40,6],[2960,G-120,8],[2985,G-60,5],[2920,G-150,4],[2950,G-30,7]]){circle(x,y,r);g.fill()}
+  const B="#f3ead2";g.strokeStyle=INK;g.lineWidth=2;
+  // skull
+  g.fillStyle=B;g.beginPath();g.moveTo(2895,G-118);g.quadraticCurveTo(2905,G-150,2950,G-146);g.quadraticCurveTo(2972,G-140,2970,G-122);g.lineTo(2945,G-112);g.lineTo(2900,G-108);g.closePath();g.fill();g.stroke();
+  g.fillStyle="#3a2a1e";circle(2935,G-134,6);g.fill();g.fillStyle=B;for(let x=2904;x<2944;x+=8){g.beginPath();g.moveTo(x,G-110);g.lineTo(x+3,G-102);g.lineTo(x+6,G-110);g.fill();g.stroke()}
+  // spine + ribs
+  g.strokeStyle=B;g.lineWidth=5;g.beginPath();g.moveTo(2968,G-126);g.quadraticCurveTo(2990,G-90,2985,G-40);g.stroke();
+  g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(2968,G-126);g.quadraticCurveTo(2990,G-90,2985,G-40);g.stroke();
+  for(let i=0;i<5;i++){const y=G-108+i*14;g.strokeStyle=B;g.lineWidth=4;g.beginPath();g.moveTo(2982,y);g.quadraticCurveTo(2962,y+6,2958,y+16);g.stroke();g.strokeStyle=INK;g.lineWidth=1.2;g.stroke()}
+  g.fillStyle=B;g.strokeStyle=INK;g.lineWidth=1.5;rr(2930,G-30,30,7,3);g.fill();g.stroke();circle(2930,G-27,5);g.fill();g.stroke();
+  g.save();g.globalAlpha=.4+Math.sin(time*2)*.2;g.fillStyle="#fff6c2";star(2915,G-160,5,2);g.fill();g.restore();
+}
+const SCENE_NPCS={orchard:{"Registrar":1250},lake:{"Waffles":530},under:{"Bouncer":770,"Bartender":570}};
+let pinWorn=false,hasReel=false,dogOn=false;
+const fish={ph:0,t:0,bx:1360,need:0,n:0,next:0,dip:0,wait:0};
+function resetL2Extra(){Object.assign(l2,{holeSign:false,festReg:false,orchCoins:[0,0,0,0,0],orchMsg:false,mapTaken:false,underIntro:false,dogUsed:false,tramp:false,on2F:false,dogGone:false,wafflesTalk:0,bouncerTalk:0,barTalk:0,reelMet:false,fishCaught:0});fish.ph=0}
+const worldMin=()=>scene==="festival"?FEST_MIN:0;
+function goScene(name,x,y){scene=name;s.x=x-s.w/2;s.y=y??G-s.h;s.vy=0;fish.ph=0;camY=0;camera=clamp(s.x-350,worldMin(),Math.max(worldMin(),worldW()-W));dab.x=center()-30;dab.y=s.y+20}
+
+// ---- orchard ----
+function orchardInteract(){
+  if(!onFloor())return null;const T=(l,f)=>[l,f,true];
+  if(near(300,26))return["Read the sign",()=>start([["Sign","THE ORCHARD — Tree shaking coming soon! (Please do not shake the trees yet. They are not ready emotionally.)"]])];
+  for(const x of ORCH_TREES.slice(0,3))if(near(x,30))return["Look at the apples",()=>sayToast("Shiny red apples, juuust out of reach. Tree shaking is coming soon.")];
+  if(near(1050,30))return["Look at the apples",()=>sayToast(l2.orchCoins.every(Boolean)?"Apples, still out of reach. You already got the coins from this one.":"Apples out of reach… but something glints in the lower branches. Coins? Jump for them!")];
+  if(near(1250,46))return T("Talk to the Registrar",festRegistrar);
+  return null;
+}
+function festRegistrar(){
+  if(l2.festReg){registrar();return}
+  const contest=[
+    ["Registrar","Now — are you entering the Art Contest too? Name?"],
+    ["Sarah","Sarah! My entry is a banner I painted mys— oh no."],
+    ["Sarah","I left it at home. On my bed. Drying. Next to my dignity."],
+    ["Registrar","Happens every year. The Clay Corner — the very first booth past the plaza — lets you whip something up. Bring it back here and I'll enter it."],
+    ["Registrar","Totally optional, of course. Judging starts when our judge, Mr. Biscuits, shows up. He's… late. Someone heard yowling near the playground."]];
+  const done=(line)=>{l2.festReg=true;l2.registered=true;burst(1250,G-90,18);start((line?[["Registrar",line]]:[]).concat(contest),()=>sayToast("Registered! Head on through to the festival →"))};
+  const pay=()=>{if(coins<5){start([["Registrar","You've got "+coins+" coin"+(coins===1?"":"s")+". It's 5 to get in. Psst — I saw something glinting up in that last apple tree."]],()=>sayToast("Not enough coins (you have "+coins+", need 5)."));return}coins-=5;done("Five coins — received! Here's your wristband. Welcome to the Town Art Festival!")};
+  if(pinWorn){start([["Registrar","Welcome to the festival! Registration is 5 coi— oh! Is that an official Festival Pin you're wearing?"],["Registrar","Pin-wearers get in FREE! Put your coins away. Welcome, welcome!"]],()=>done(null));return}
+  if(has("Festival Pin")){start([["Registrar","Welcome! Festival registration is 5 coins."],["Registrar","Ooh — but is that a Festival Pin poking out of your pocket? If you WEAR it, you get in free! (Pockets → Key Items → Festival Pin → Wear.)",["Pay 5 coins","I'll put my pin on"],i=>{if(i===0)pay();else sayToast("Open your Pockets (I), go to Key Items, pick the Festival Pin and choose Wear. Then talk to the Registrar again.")}]]);return}
+  start([["Registrar","Welcome to the Town Art Festival! Registration is 5 coins. (Anyone wearing an official Festival Pin gets in free.)",["Pay 5 coins","Not right now"],i=>{if(i===0)pay();else start([["Registrar","No problem! The festival will be here. So will I. Forever, probably."]])}]]);
+}
+function updateOrchard(){
+  ORCH_COINS.forEach(([x,y],i)=>{if(!l2.orchCoins[i]&&Math.abs(center()-x)<22&&s.y<y+10&&s.y+s.h>y-10){l2.orchCoins[i]=1;coins++;burst(x,y,8,["#f4c84f","#fff"]);if(l2.orchCoins.every(Boolean))sayToast("Got all 5 coins from the last tree!")}});
+  if(!l2.festReg&&s.x+s.w>1330){s.x=1330-s.w;if(!l2.orchMsg){l2.orchMsg=true;sayToast("A velvet rope blocks the way. Register at the table first!")}}
+  if(l2.festReg&&center()>ORCH_W-24)goScene("festival",FEST_MIN+60);
+}
+function drawOrchard(){
+  drawOutsideBackground(null);g.save();g.translate(-camera,0);drawGround();
+  drawGate(-30);
+  cut(()=>rr(296,G-80,8,80,2),"#a8714a");cut(()=>rr(236,G-128,128,56,8),"#fff3d6",{edge:7});g.fillStyle="#5fb35a";g.font="bold 15px "+FONT;g.textAlign="center";g.fillText("THE ORCHARD",300,G-106);g.fillStyle="#e5577b";g.font="bold 11px "+FONT;g.fillText("TREE SHAKING",300,G-90);g.fillText("COMING SOON!",300,G-77);g.textAlign="left";
+  ORCH_TREES.forEach((x,i)=>{tree(x,G,1.15,i%2?"#66bf72":"#4fae67");for(const [dx,dy] of[[-26,-112],[18,-98],[0,-128],[-12,-84],[30,-118],[-34,-96]]){cut(()=>{g.beginPath();g.arc(x+dx,G+dy,6,0,7)},"#e5463f",{edge:3,shadow:false});g.fillStyle="#3a7a3a";g.fillRect(x+dx-1,G+dy-9,2,4)}});
+  ORCH_COINS.forEach(([x,y],i)=>{if(!l2.orchCoins[i])drawCoin(x,y+Math.sin(time*4+i)*2,8)});
+  // registration table + velvet rope
+  cut(()=>rr(1190,G-46,130,46,5),"#fff3d6",{edge:7});g.fillStyle="#17a398";g.fillRect(1196,G-40,118,8);
+  cut(()=>rr(1205,G-150,100,28,8),"#17a398",{edge:6});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("REGISTRATION",1255,G-131);g.font="bold 10px "+FONT;g.fillStyle=INK;g.fillText("5 COINS · PINS FREE",1255,G-52);g.textAlign="left";
+  cut(()=>rr(1209,G-122,4,76,2),"#a8714a",{edge:3,shadow:false});cut(()=>rr(1297,G-122,4,76,2),"#a8714a",{edge:3,shadow:false});
+  npc("Registrar",1250);cut(()=>rr(1190,G-46,130,46,5),"#fff3d6",{edge:7,shadow:false});g.fillStyle="#17a398";g.fillRect(1196,G-40,118,8);
+  for(const x of[1336,1420])cut(()=>rr(x-4,G-60,8,60,3),"#d4bf7d",{edge:4});
+  if(!l2.festReg){g.strokeStyle="#c0392b";g.lineWidth=6;g.beginPath();g.moveTo(1336,G-52);g.quadraticCurveTo(1378,G-30,1420,G-52);g.stroke()}
+  cut(()=>rr(1440,G-170,40,26,6),"#e5577b",{edge:5});g.fillStyle="#fff";g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("FEST →",1460,G-152);g.textAlign="left";
+  drawLoot();drawParticles();drawSarah();g.restore();
+}
+
+// ---- festival additions ----
+function festIntroCheck(){if(!l2.intro&&center()>130){start([
+    ["Mr. Umber","Great galloping gouache… is that a living paintbrush?"],
+    ["Pippa","It's DAB! From the old stories! Dab went everywhere with the legendary adventurer!"],
+    ["Dab","Hi! Yes! That's me! I'm famous! Somebody write that down!"],
+    ["Mr. Umber","And if Dab is back… then you, young lady, might be—"],
+    ["Sarah","—here for the festival! I'm just here for the festival. One lemonade and zero prophecies, please."],
+    ["Narrator","The townsfolk exchange meaningful looks. Several of them are very bad at it."]
+  ],()=>{l2.intro=true;sayToast("Explore the festival! The Clay Corner is the first booth.")});return true}return false}
+function drawFestEntrance(){
+  cut(()=>{g.beginPath();g.moveTo(-890,G);g.lineTo(-890,G-200);g.quadraticCurveTo(-820,G-250,-750,G-200);g.lineTo(-750,G);g.lineTo(-770,G);g.lineTo(-770,G-190);g.quadraticCurveTo(-820,G-226,-870,G-190);g.lineTo(-870,G);g.closePath()},"#e5577b",{edge:8});
+  cut(()=>rr(-905,G-262,170,30,10),"#f4c84f",{edge:6});g.fillStyle=INK;g.font="bold 14px "+FONT;g.textAlign="center";g.fillText("ART FESTIVAL",-820,G-241);g.textAlign="left";
+  shopFront(-720,140,"PET STORE","#e9f7ff","#3bb6c4");shopFront(-300,140,"HATTER'S","#f7d6e0","#d0648f");shopFront(-150,130,"TOY SHOP","#fff1d6","#f08a3c");
+  // the hole
+  g.fillStyle="#1b1730";g.fillRect(HOLE.x,G-8,HOLE.w,H);g.fillStyle="#3a3352";g.fillRect(HOLE.x,G-8,HOLE.w,10);g.strokeStyle=INK;g.lineWidth=2.5;g.strokeRect(HOLE.x,G-8,HOLE.w,H);
+  cut(()=>rr(HOLE.x-34,G-70,6,70,2),"#a8714a");g.save();g.translate(HOLE.x-38,G-84);g.rotate(Math.sin(time*1.4)*.04);
+  if(l2.holeSign){cut(()=>rr(-38,-16,76,34,6),"#f4c84f",{edge:5});g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("DIG CREW",0,-2);g.fillText("ENTRY HERE ↓",0,11)}
+  else{cut(()=>rr(-38,-16,76,34,6),"#b7b5ae",{edge:5,ink:"#77746c"});g.strokeStyle="#9a9890";g.lineWidth=2;for(const y of[-4,6]){g.beginPath();g.moveTo(-26,y);g.lineTo(26,y);g.stroke()}}
+  g.restore();g.textAlign="left";
+  // door to the lake
+  const x=LAKE_DOOR;cut(()=>{g.beginPath();g.moveTo(x-40,G);g.lineTo(x-40,G-110);g.arc(x,G-110,40,Math.PI,0);g.lineTo(x+40,G);g.closePath()},"#7cc488",{edge:8});
+  cut(()=>{g.beginPath();g.moveTo(x-28,G);g.lineTo(x-28,G-104);g.arc(x,G-104,28,Math.PI,0);g.lineTo(x+28,G);g.closePath()},"#4f8fb8",{edge:0,line:2,shadow:false});
+  g.fillStyle="#bfe6fb";g.beginPath();g.ellipse(x,G-60,20,6,0,0,7);g.fill();g.fillStyle="#7cc6f2";g.beginPath();g.ellipse(x,G-40,22,6,0,0,7);g.fill();
+  cut(()=>rr(x-36,G-182,72,24,8),"#3bb6c4",{edge:5});g.fillStyle="#fff";g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("THE LAKE",x,G-165);g.textAlign="left";
+  cut(()=>rr(-886,G-70,4,70,1),"#a8714a");cut(()=>rr(-900,G-96,74,24,5),"#fff3d6",{edge:4,shadow:false});g.fillStyle=INK;g.font="bold 10px "+FONT;g.fillText("← ORCHARD",-896,G-80);
+}
+function drawElevator(x){
+  cut(()=>rr(x-26,G-230,52,230,6),"#c9d6d4",{edge:8});g.fillStyle="#9fb0ae";for(let y=G-220;y<G-100;y+=24)g.fillRect(x-20,y,40,10);
+  cut(()=>rr(x-20,G-96,40,96,4),"#8fa3a0",{edge:0,line:2,shadow:false});g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(x,G-96);g.lineTo(x,G);g.stroke();
+  cut(()=>rr(x-22,G-250,44,24,8),"#f4c84f",{edge:5});g.fillStyle=INK;g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("↑ 2F",x,G-233);
+  g.save();g.translate(x,G-120);g.rotate(-.08);cut(()=>rr(-34,-10,68,20,4),"#e5577b",{edge:4,shadow:false});g.fillStyle="#fff";g.font="bold 9px "+FONT;g.fillText("OUT OF ORDER",0,4);g.restore();g.textAlign="left";
+}
+function drawBalloonDog(x,y,sc,c="#ff8fc8"){g.save();g.translate(x,y);g.scale(sc,sc);
+  const bal=(cx,cy,rx,ry,a)=>cut(()=>{g.beginPath();g.ellipse(cx,cy,rx,ry,a,0,7)},c,{edge:4,shadow:false});
+  bal(-22,-14,7,16,.1);bal(18,-14,7,16,-.1);bal(-14,-12,7,16,-.1);bal(26,-12,7,16,.1);bal(2,-34,26,11,0);bal(-30,-46,6,14,-.6);bal(26,-50,8,15,.3);bal(30,-74,15,10,.2);bal(20,-84,6,12,-.4);bal(40,-84,6,12,.4);
+  g.fillStyle="rgba(255,255,255,.6)";g.beginPath();g.ellipse(-4,-38,10,3,0,0,7);g.fill();g.fillStyle=INK;circle(34,-76,1.8);g.fill();g.restore()}
+function drawSculptures(){
+  // balloon dog
+  cut(()=>rr(1080,G-34,64,34,4),"#e9e4f2",{edge:6});
+  if(!l2.dogGone)drawBalloonDog(1112,G-34,1);else{g.fillStyle=INK;g.font="italic bold 9px "+FONT;g.textAlign="center";g.fillText("(on loan)",1112,G-44);g.textAlign="left"}
+  g.fillStyle=INK;g.font="bold 8px "+FONT;g.textAlign="center";g.fillText("\"GOOD BOY\"",1112,G-14);
+  // ice duck (melting)
+  cut(()=>rr(1146,G-30,40,30,4),"#e9e4f2",{edge:6});
+  g.save();g.globalAlpha=.85;cut(()=>{g.beginPath();g.ellipse(1166,G-44,17,12,0,0,7)},"#cdeffa",{edge:5,shadow:false});cut(()=>{g.beginPath();g.arc(1176,G-62,8,0,7)},"#cdeffa",{edge:4,shadow:false});g.restore();
+  g.fillStyle="#f4c84f";g.beginPath();g.moveTo(1183,G-63);g.lineTo(1192,G-60);g.lineTo(1183,G-58);g.fill();g.fillStyle=INK;circle(1178,G-64,1.4);g.fill();
+  g.fillStyle="#9fdcf4";const d=(time*12)%14;g.beginPath();g.ellipse(1158,G-30+d,1.8,3,0,0,7);g.fill();g.fillStyle="rgba(124,198,242,.5)";g.beginPath();g.ellipse(1166,G-1,16,3,0,0,7);g.fill();
+  g.fillStyle=INK;g.font="bold 7px "+FONT;g.textAlign="center";g.fillText("ICE DUCK",1166,G-16);g.fillText("(MELTING)",1166,G-8);g.textAlign="left";
+}
+function drawBars(){
+  for(const b of BARS){g.strokeStyle="#8a6a4d";g.lineWidth=2;g.beginPath();g.moveTo(b.x+6,b.y);g.lineTo(b.x+6,FLOOR2.y+14);g.moveTo(b.x+b.w-6,b.y);g.lineTo(b.x+b.w-6,FLOOR2.y+14);g.stroke();
+    cut(()=>rr(b.x,b.y,b.w,b.h,5),"#b9c7c5",{edge:5});g.fillStyle="#fff";g.fillRect(b.x+6,b.y+2,b.w-12,2)}
+  // second-floor balcony
+  for(const x of[3060,3290,3500])cut(()=>rr(x-6,FLOOR2.y+14,12,G-292-FLOOR2.y-14,3),"#8a6a4d",{edge:5});
+  cut(()=>rr(FLOOR2.x,FLOOR2.y,FLOOR2.w,FLOOR2.h,4),"#c58a52",{edge:7});
+  g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(FLOOR2.x,FLOOR2.y-30);g.lineTo(FLOOR2.x+FLOOR2.w,FLOOR2.y-30);for(let x=FLOOR2.x+10;x<FLOOR2.x+FLOOR2.w;x+=30){g.moveTo(x,FLOOR2.y-30);g.lineTo(x,FLOOR2.y)}g.stroke();
+  cut(()=>rr(FLOOR2.x+8,FLOOR2.y-62,40,24,8),"#f4c84f",{edge:5});g.fillStyle=INK;g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("2F",FLOOR2.x+28,FLOOR2.y-45);g.textAlign="left";
+  if(l2.tramp)drawTramp(TRAMP_F);
+}
+function drawTramp(t){cut(()=>rr(t.x+4,t.y+6,6,12,2),"#5b5277",{edge:3});cut(()=>rr(t.x+t.w-10,t.y+6,6,12,2),"#5b5277",{edge:3});cut(()=>{g.beginPath();g.ellipse(t.x+t.w/2,t.y+4,t.w/2,6,0,0,7)},"#3bb6c4",{edge:5});g.strokeStyle="#fff";g.lineWidth=1.5;g.setLineDash([4,4]);g.beginPath();g.ellipse(t.x+t.w/2,t.y+4,t.w/2-6,3,0,0,7);g.stroke();g.setLineDash([])}
+
+// ---- lake ----
+function lakeInteract(){
+  if(fish.ph>0)return null;const T=(l,f)=>[l,f,true];
+  if(near(70,44))return["Back to the festival",()=>goScene("festival",LAKE_DOOR)];
+  if(near(250,24))return["Read the sign",()=>start([["Sign","EGGS: ONLY FOR FRIENDS OF THE DOG. (The dog decides who his friends are. The dog is very picky.)"]])];
+  if(near(395,50))return["Peek into the coop",()=>sayToast("Bawk. Three chickens eye you suspiciously. A very serious dog stands between you and the eggs.")];
+  if(near(530,30))return T("Talk to the dog",waffles);
+  if(near(DOCK.x+DOCK.w-40,50))return[hasReel?"Cast your line":"Fish (you need a fishing pole)",()=>{if(!hasReel){sayToast("You'd need a fishing pole. Didn't you see one lying on the dock?");return}castLine()}];
+  return null;
+}
+function waffles(){
+  const n=l2.wafflesTalk++;
+  if(n===0){start([
+    ["Waffles","WOOF! Halt! Nobody gets into the coop. Strict orders from the chickens."],
+    ["Sarah","You take orders from chickens?"],
+    ["Waffles","They're very persuasive. …Unless. You wouldn't happen to have any DOG FOOD, would you? I'd be best friends with anyone who had dog food."],
+    ["Sarah","The pet store's closed for the festival."],
+    ["Waffles","I KNOW. It's a tragedy. Everyone keeps saying \"enjoy the festival!\" I can't enjoy ANYTHING."]
+  ]);return}
+  const l=["Dog food? No? *sigh* I'll just keep guarding. Sadly.","The chickens say hi. Actually they said \"bawk.\" I'm translating generously.","When the pet store opens, you'll remember me, right? Waffles. Two F's. One dream."];start([["Waffles",l[(n-1)%3]]]);
+}
+function meetReel(){
+  l2.reelMet=true;start([
+    ["Reel","Oh! Hello! Are you here to fish? Please say you're here to fish."],
+    ["Sarah","Is… is the fishing pole talking?"],
+    ["Reel","Name's Reel! Little buddy, professional fishing pole, amateur poet. Everyone ran off when the lightning hit and left me here on the dock."],
+    ["Dab","Another little buddy! The more the merrier!"],
+    ["Reel","Stand at the end of the dock and press Space to cast. Watch the bobber. When it gets yanked under — press Space again, fast! You've got two seconds. No pressure. Lots of pressure."]
+  ],()=>{hasReel=true;equipped="Reel";burst(1000,G-30,16,["#7cc6f2","#fff","#f4c84f"]);sayToast("Reel joined you! Stand at the end of the dock and press Space to fish.")});
+}
+function castLine(){equipped="Reel";s.face=1;fish.ph=1;fish.t=0;fish.bx=1330+Math.random()*80}
+function rodTip(){return[center()+36,s.y+4]}
+function fishSpace(){
+  if(fish.ph===4){fish.ph=5;fish.t=0;addItem("Lake Perch");l2.fishCaught++;burst(fish.bx,G+14,18,["#7cc6f2","#fff","#f4c84f"]);
+    sayToast(l2.fishCaught===1?"You caught a Lake Perch! Reel: \"Our first fish! I'm going to cry. Do fishing poles cry?\"":"You caught a Lake Perch! (That's "+count("Lake Perch")+" now.)");return}
+  if(fish.ph===1)return;
+  fish.ph=0;sayToast("Too soon! You yanked the line before the fish bit, and it swam off. Wait for the bobber to get pulled under.");
+}
+function updateFishing(dt){
+  fish.t+=dt;fish.dip=Math.max(0,fish.dip-dt);
+  if(fish.ph===1&&fish.t>.6){fish.ph=2;fish.t=0;fish.wait=1+Math.random()*2}
+  else if(fish.ph===2&&fish.t>fish.wait){fish.ph=3;fish.t=0;fish.need=1+Math.floor(Math.random()*4);fish.n=0;fish.next=.2}
+  else if(fish.ph===3&&fish.t>fish.next){if(fish.n<fish.need){fish.n++;fish.dip=.3;fish.next=fish.t+.7+Math.random()*.7}else{fish.ph=4;fish.t=0}}
+  else if(fish.ph===4&&fish.t>2){fish.ph=0;sayToast("It got away! When the bobber gets pulled under, press Space within two seconds.")}
+  else if(fish.ph===5&&fish.t>1.1)fish.ph=0;
+}
+function updateLake(){
+  if(!l2.reelMet&&Math.abs(center()-1000)<30){meetReel();return}
+  if(s.y>G+40){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=DOCK.x+DOCK.w-120;s.y=G-s.h;s.vy=0;sayToast("SPLASH! Sarah fishes herself out of the lake. 0/10, would not recommend.")}
+}
+function drawLake(){
+  drawOutsideBackground(null);g.save();g.translate(-camera,0);drawGround();
+  // water
+  const wy=G+6;const gr=g.createLinearGradient(0,wy,0,H);gr.addColorStop(0,"#7cc6f2");gr.addColorStop(1,"#3b8fd6");g.fillStyle=gr;g.fillRect(880,G-8,LAKE_W-880+40,H);
+  g.strokeStyle="#fff";g.lineWidth=2;for(let i=0;i<10;i++){const x=900+i*70+Math.sin(time+i)*10;g.beginPath();g.moveTo(x,G+20+i%3*20);g.lineTo(x+24,G+20+i%3*20);g.stroke()}
+  for(const [x,y] of[[1000,G+40],[1380,G+60],[1180,G+80]]){cut(()=>{g.beginPath();g.ellipse(x,y,16,6,0,.3,Math.PI*2-.3);g.lineTo(x,y);g.closePath()},"#5fb35a",{edge:3,shadow:false})}
+  // dock
+  for(let x=DOCK.x+20;x<DOCK.x+DOCK.w;x+=70)cut(()=>rr(x-5,G,10,70,2),"#8d5a36",{edge:4,shadow:false});
+  cut(()=>rr(DOCK.x,G-6,DOCK.w,14,3),"#c58a52",{edge:6});g.strokeStyle="#8d5a36";g.lineWidth=1.5;for(let x=DOCK.x+20;x<DOCK.x+DOCK.w;x+=20){g.beginPath();g.moveTo(x,G-5);g.lineTo(x,G+7);g.stroke()}
+  cut(()=>rr(DOCK.x+DOCK.w-60,G-130,6,124,2),"#a8714a");cut(()=>rr(DOCK.x+DOCK.w-100,G-156,86,28,7),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("FISHING SPOT",DOCK.x+DOCK.w-57,G-138);g.textAlign="left";
+  // exit door
+  cut(()=>rr(30,G-140,80,140,10),"#7cc488",{edge:8});cut(()=>rr(42,G-128,56,128,6),"#c58a52",{edge:0,line:2,shadow:false});g.fillStyle="#f4c84f";circle(88,G-64,4);g.fill();g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("← FESTIVAL",70,G-148);g.textAlign="left";
+  // coop + sign
+  cut(()=>rr(246,G-70,6,70,2),"#a8714a");cut(()=>rr(206,G-118,90,52,6),"#fff3d6",{edge:6});g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("EGGS:",251,G-102);g.fillText("FRIENDS OF",251,G-89);g.fillText("THE DOG ONLY",251,G-76);
+  cut(()=>{g.beginPath();g.moveTo(320,G);g.lineTo(320,G-80);g.lineTo(395,G-130);g.lineTo(470,G-80);g.lineTo(470,G);g.closePath()},"#e5463f",{edge:8});
+  cut(()=>rr(372,G-56,46,56,6),"#8d5a36",{edge:0,line:2,shadow:false});g.fillStyle="#fff";g.font="bold 11px "+FONT;g.fillText("COOP",395,G-90);g.textAlign="left";
+  g.strokeStyle="#c9a23a";g.lineWidth=2;for(let x=290;x<=500;x+=14){g.beginPath();g.moveTo(x,G);g.lineTo(x,G-30);g.stroke()}g.beginPath();g.moveTo(290,G-24);g.lineTo(500,G-24);g.stroke();
+  for(const [x,i] of[[340,0],[440,1],[460,2]]){const peck=Math.max(0,Math.sin(time*3+i*2))*5;cut(()=>{g.beginPath();g.ellipse(x,G-14,11,9,0,0,7)},"#fffdf6",{edge:4,shadow:false});cut(()=>{g.beginPath();g.arc(x+8,G-24+peck,5,0,7)},"#fffdf6",{edge:3,shadow:false});g.fillStyle="#e5463f";g.fillRect(x+6,G-31+peck,4,3);g.fillStyle="#f4c84f";g.beginPath();g.moveTo(x+13,G-24+peck);g.lineTo(x+17,G-22+peck);g.lineTo(x+13,G-20+peck);g.fill()}
+  // Waffles
+  groundShadow(530,G+2,22);sprite(530,G+2,58,48,drawDogBody,{sx:center()<530?-1:1});
+  // Reel waiting on the dock
+  if(!l2.reelMet)sprite(1000,G-4,30,62,drawReelBody,{rot:.25+Math.sin(time*2)*.05});
+  drawLoot();drawParticles();drawSarah();
+  // fishing line + bobber
+  if(fish.ph>0&&fish.ph<5){const [tx,ty]=rodTip();let bx=fish.bx,by=wy+Math.sin(time*3)*2+fish.dip*10;
+    if(fish.ph===1){const k=Math.min(1,fish.t/.6);bx=tx+(fish.bx-tx)*k;by=ty+(wy-ty)*k-Math.sin(k*Math.PI)*90}
+    if(fish.ph===4)by=wy+12;
+    g.strokeStyle="rgba(255,255,255,.9)";g.lineWidth=1.5;g.beginPath();g.moveTo(tx,ty);g.quadraticCurveTo((tx+bx)/2,Math.min(ty,by)-20,bx,by);g.stroke();
+    if(fish.ph>=3&&fish.dip>0){g.strokeStyle="#fff";g.lineWidth=2;g.beginPath();g.ellipse(bx,wy+4,14+(.3-fish.dip)*40,4,0,0,7);g.stroke()}
+    if(fish.ph===4){g.strokeStyle="#fff";g.lineWidth=3;for(let r=10;r<40;r+=12){g.beginPath();g.ellipse(bx,wy+4,r+Math.sin(time*20)*3,r*.3,0,0,7);g.stroke()}}
+    else{cut(()=>{g.beginPath();g.arc(bx,by,7,0,7)},"#e5463f",{edge:3,shadow:false});g.fillStyle="#fff";g.fillRect(bx-7,by,14,4)}
+    if(fish.ph===4){cut(()=>{g.beginPath();g.ellipse(center(),s.y-34,16,18,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 24px "+FONT;g.textAlign="center";g.fillText("!",center(),s.y-25);g.textAlign="left"}}
+  if(fish.ph===5){const k=fish.t/1.1;drawIcon("Lake Perch",center()+10,s.y-40-k*20,1)}
+  g.restore();
+}
+function drawDogBody(){
+  g.strokeStyle=INK;g.lineWidth=2;const wag=Math.sin(time*12)*.5;
+  g.save();g.translate(8,22);g.rotate(-.6+wag);g.fillStyle="#c98a5a";rr(-3,-16,6,18,3);g.fill();g.stroke();g.restore();
+  g.fillStyle="#c98a5a";g.beginPath();g.ellipse(26,28,20,12,0,0,7);g.fill();g.stroke();
+  for(const x of[12,20,32,40]){rr(x-3,34,7,12,3);g.fill();g.stroke()}
+  g.fillStyle="#e5577b";rr(36,16,10,5,2);g.fill();g.stroke();
+  g.fillStyle="#c98a5a";g.beginPath();g.arc(46,14,11,0,7);g.fill();g.stroke();
+  g.fillStyle="#8d5a36";g.beginPath();g.ellipse(39,12,4,9,.4,0,7);g.fill();g.stroke();
+  g.fillStyle="#e9c49c";g.beginPath();g.ellipse(53,18,6,4.5,0,0,7);g.fill();g.stroke();g.fillStyle=INK;circle(57,16,2);g.fill();circle(47,11,1.8);g.fill();
+  g.fillStyle="#e5577b";g.beginPath();g.ellipse(53,24,2.5,3,0,0,7);g.fill();
+}
+function drawReelBody(){
+  g.strokeStyle=INK;g.lineWidth=2;
+  g.strokeStyle="#8d5a36";g.lineWidth=3;g.beginPath();g.moveTo(15,40);g.lineTo(15,2);g.stroke();g.strokeStyle=INK;g.lineWidth=1.5;circle(15,2,2);g.stroke();
+  g.fillStyle="#d9b382";rr(10,40,10,20,4);g.fill();g.lineWidth=2;g.stroke();
+  g.fillStyle="#3bb6c4";circle(15,32,9);g.fill();g.stroke();g.fillStyle="#c9d6d4";circle(15,32,4);g.fill();g.stroke();
+  g.fillStyle="#fff";g.beginPath();g.ellipse(11,26,2.4,3,0,0,7);g.ellipse(19,26,2.4,3,0,0,7);g.fill();g.stroke();g.fillStyle=INK;circle(11.5,26.5,1.2);g.fill();circle(19.5,26.5,1.2);g.fill();
+  g.lineWidth=1.4;g.beginPath();g.arc(15,36,3,.2,2.9);g.stroke();
+}
+
+// ---- underground ----
+function underInteract(){
+  if(!onFloor())return null;const T=(l,f)=>[l,f,true];
+  if(!l2.mapTaken&&near(500,22))return["Pick up the town map",()=>{l2.mapTaken=true;addItem("Town Map");burst(500,G-72,14);sayToast("Got the Town Map! It's folded sixteen ways. You'll figure it out later.")}];
+  if(near(570,40))return T("Talk to the Bartender",()=>{const l=["We're closed. We're always closed. It's a whole vibe.","Take the map if you want. Nobody down here needs directions. Everyone down here is already lost.","Trampoline's by the drain. Bounce your way out. Tip your bartender. (You can't. We're closed.)"];start([["Bartender",l[l2.barTalk++%3]]])});
+  if(near(770,34)||near(870,30))return T("Talk to the Bouncer",bouncer);
+  for(const [x,txt] of UNDER_SIGNS)if(near(x,34))return["Read the sign",()=>start([["Sign",txt]])];
+  if(near(2920,50))return["Inspect the fossil",()=>start([["Narrator","A dinosaur skeleton, stuck fast in the packed dirt. It grins at you. Dinosaurs always grin. It's the teeth."],["Dab","We'd need some serious digging skills to get that out. Someday!"]])];
+  return null;
+}
+function bouncer(){
+  const n=l2.bouncerTalk++;
+  if(n===0){start([["Bouncer","Whoa, whoa, whoa. Members only."],["Sarah","How do I become a member?"],["Bouncer","You don't. Ever. …Unless you do. Which you won't."],["Dab","Rude!"],["Bouncer","Rude is my middle name. My first name is Kevin."]]);return}
+  const l=["Still not a member.","Nice paintbrush. Still no.","The password changes every day. Today's password is \"no.\""];start([["Bouncer",l[(n-1)%3]]]);
+}
+function updateUnder(){
+  if(!l2.underIntro&&s.ground){l2.underIntro=true;start([["Sarah","…Ow. Where am I?"],["Narrator","Somewhere under the town. It smells like old pennies and bad decisions."],["Dab","There's a trampoline over there! I think that's our way back up."]])}
+  if(s.y<-70&&s.vy<0){goScene("festival",HOLE.x+HOLE.w+40,G-220);s.vy=-150;sayToast("BOING! Sarah sails out of the hole and lands back in town.")}
+}
+function drawUnder(){
+  g.fillStyle="#2b2540";g.fillRect(0,0,W,H);g.save();g.translate(-camera,0);
+  g.fillStyle="#3a3352";for(let y=0;y<G;y+=30)for(let x=(y/30%2)*30-60;x<UNDER_W+60;x+=60)g.fillRect(x+2,y+2,56,26);
+  g.save();g.globalAlpha=.18;g.fillStyle="#fff6c2";g.beginPath();g.moveTo(270,0);g.lineTo(330,0);g.lineTo(380,G);g.lineTo(220,G);g.closePath();g.fill();g.restore();
+  g.fillStyle="#1b1730";g.fillRect(270,0,60,14);
+  cut(()=>rr(-20,60,UNDER_W+40,14,7),"#5b6b6a",{edge:4,shadow:false});cut(()=>rr(640,60,14,180,7),"#5b6b6a",{edge:4,shadow:false});
+  g.fillStyle="#1f1b33";g.fillRect(-20,G,UNDER_W+40,H-G);g.fillStyle="#463e63";for(let x=0;x<UNDER_W;x+=60){g.fillRect(x+2,G+2,56,20)}
+  g.fillStyle="rgba(124,198,242,.35)";g.beginPath();g.ellipse(250,G+6,40,5,0,0,7);g.fill();g.beginPath();g.ellipse(700,G+8,30,4,0,0,7);g.fill();
+  drawTramp(TRAMP_U);g.fillStyle="#f4c84f";g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("↑ BOUNCE ↑",165,G-40);g.textAlign="left";
+  cut(()=>rr(440,G-200,240,24,6),"#7a2f3a",{edge:6});g.fillStyle="#f4c84f";g.font="bold 15px "+FONT;g.fillText("THE BAR",560,G-182);
+  for(let i=0;i<6;i++){g.fillStyle=["#7cc488","#e5577b","#7cc6f2","#f4c84f"][i%4];rr(460+i*36,G-160,12,30,3);g.fill()}
+  npc("Bartender",570);cut(()=>rr(440,G-62,240,62,5),"#5b3a28",{edge:7});g.fillStyle="#8d5a36";g.fillRect(446,G-56,228,8);
+  for(const x of[470,650])cut(()=>rr(x-10,G-30,20,30,4),"#7a2f3a",{edge:4,shadow:false});
+  if(!l2.mapTaken){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#fff6a8";circle(500,G-76,20);g.fill();g.restore();drawIcon("Town Map",500,G-78,.6)}
+  cut(()=>rr(820,G-170,110,170,6),"#1b1730",{edge:8});cut(()=>rr(840,G-120,70,120,4),"#5b2a6e",{edge:0,line:2,shadow:false});
+  g.save();g.shadowColor="#ff4fd8";g.shadowBlur=14;g.fillStyle="#ff8fe8";g.font="bold 16px "+FONT;g.textAlign="center";g.fillText("THE GRIMY",875,G-150);g.fillText("GROTTO",875,G-132);g.restore();
+  g.fillStyle="#7cc6f2";g.font="bold 9px "+FONT;g.textAlign="center";g.fillText("MEMBERS ONLY",875,G-124);g.textAlign="left";
+  g.strokeStyle="#f4c84f";g.lineWidth=4;g.beginPath();g.moveTo(800,G-50);g.quadraticCurveTo(812,G-30,824,G-50);g.stroke();
+  // potter's studio (closed)
+  cut(()=>rr(1010,G-180,150,180,8),"#b9825a",{edge:8});cut(()=>rr(1000,G-200,170,26,6),"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("POTTER'S STUDIO",1085,G-182);
+  cut(()=>rr(1030,G-160,50,44,6),"#a6def5",{edge:5,shadow:false});g.fillStyle="#8d5a36";for(const [x,h] of[[1040,14],[1056,20],[1070,12]]){rr(x-5,G-116-h,10,h,4);g.fill()}
+  cut(()=>rr(1095,G-96,46,96,5),"#8d5a36",{edge:5,shadow:false});
+  g.save();g.translate(1118,G-74);g.rotate(Math.sin(time*1.5)*.05);cut(()=>rr(-34,0,68,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
+  shopFront(1430,140,"LOST & FOUND","#d6d0e8","#7a5c99");shopFront(1830,140,"ARCADE","#2f2a4a","#ff8fe8");shopFront(2230,140,"MUSHROOMS","#efe3d0","#c0662e");
+  for(const [x,c] of[[1870,"#7cc6f2"],[1900,"#f4c84f"],[1930,"#e5577b"]]){g.save();g.globalAlpha=.5+Math.sin(time*5+x)*.3;g.fillStyle=c;g.fillRect(x-8,G-160,16,10);g.restore()}
+  // tunnel to the sewers
+  cut(()=>{g.beginPath();g.moveTo(2680,G);g.lineTo(2680,G-130);g.arc(2760,G-130,80,Math.PI,0);g.lineTo(2840,G);g.closePath()},"#5b5277",{edge:8});
+  g.fillStyle="#0f0c1d";g.beginPath();g.moveTo(2700,G);g.lineTo(2700,G-120);g.arc(2760,G-120,60,Math.PI,0);g.lineTo(2820,G);g.closePath();g.fill();
+  g.strokeStyle="#f4c84f";g.lineWidth=6;for(let i=0;i<3;i++){g.beginPath();g.moveTo(2700,G-40-i*30);g.lineTo(2820,G-60-i*30);g.stroke()}
+  for(let x=300;x<UNDER_W;x+=380){cut(()=>rr(x-3,G-150,6,150,2),"#5b6b6a",{edge:4,shadow:false});g.save();g.globalAlpha=.25;g.fillStyle="#fff6c2";g.beginPath();g.moveTo(x-6,G-140);g.lineTo(x+6,G-140);g.lineTo(x+40,G);g.lineTo(x-40,G);g.closePath();g.fill();g.restore();cut(()=>{g.beginPath();g.arc(x,G-150,9,0,7)},"#fff6c2",{edge:4,shadow:false})}
+  cut(()=>rr(10,G-200,150,28,8),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("UNDERTOWN",85,G-181);g.textAlign="left";
+  drawFossil();
+  npc("Bouncer",770);
+  drawLoot();drawParticles();drawSarah();g.restore();
+}
+
+// ---- finale on the second floor ----
+function placeTrampoline(){l2.tramp=true;burst(TRAMP_F.x+28,G-20,20);start([["Mrs. Maple","Oh dear, oh dear! Hold on — I always carry a spare trampoline."],["Narrator","Mrs. Maple produces a trampoline from her handbag. Nobody asks how."],["Mrs. Maple","There! Bounce right up to the bars, dear."]])}
+function updateFinaleClimb(){
+  if(!l2.mapleDone)return;
+  const under=groundUnder();
+  if(dogOn&&s.ground&&BARS.some(b=>under===b.y&&s.x+s.w>b.x&&s.x<b.x+b.w)){dogOn=false;l2.dogUsed=true;balloonsAway.push({scene,x:center(),y:s.y-60,t:0,dog:true});sayToast("The balloon dog slips loose and floats off, wagging. Keep climbing!")}
+  if(s.ground&&s.y+s.h<=FLOOR2.y+2)l2.on2F=true;
+  if(l2.dogUsed&&!l2.tramp&&!l2.on2F&&s.ground&&onFloor()&&!dlg.on){placeTrampoline();return}
+}
+
+resetL2Extra();
 // ---- Admin cheats ----
-function cheatBase(){items=[];for(const k in counts)delete counts[k];addItem("Turnip");addItem("Festival Pin");hasDab=true;hasNib=false;
+function cheatBase(){items=[];for(const k in counts)delete counts[k];addItem("Turnip");addItem("Festival Pin");hasDab=true;hasNib=false;hasReel=false;pinWorn=false;dogOn=false;balloonOn=false;
   potionCollected=roadChestKeyCollected=homeIntroSeen=firstChestOpen=fountainKeyCollected=ladderGiven=grandChestOpen=flowerRestored=gateOpen=true;
   dlg.on=false;loot=[];startLevel2()}
-function cheatTele(x){dlg.on=false;s.x=x-s.w/2;s.y=G-s.h;s.vy=0;camera=clamp(s.x-350,0,FEST_W-W)}
+function cheatTele(x){dlg.on=false;scene="festival";l2.festReg=true;l2.registered=true;l2.intro=true;s.x=x-s.w/2;s.y=G-s.h;s.vy=0;camera=clamp(s.x-350,FEST_MIN,FEST_W-W)}
 const CHEATS={
   l2:()=>cheatBase(),
+  plaza:()=>{cheatBase();cheatTele(FEST_MIN+200)},
   nib:()=>{cheatBase();l2.intro=true;l2.catSeen=l2.butterTaken=l2.catFreed=l2.chaseDone=true;l2.chase=2;l2.catState="judge";addItem("Butter Pat",2);cheatTele(2400)},
   results:()=>{CHEATS.nib();hasNib=true;l2.nibMet=true;l2.trail=true;equipped="Nib";cheatTele(2960)},
   fight:()=>{CHEATS.results();l2.results=true;cheatTele(3010);startFinale()},
@@ -1480,7 +1830,7 @@ document.querySelectorAll("[data-cheat]").forEach(b=>b.addEventListener("click",
 let last=0;
 function frame(t){const dt=Math.min((t-(last||t))/1000,.033);last=t;update(dt);
   g.save();if(shake>0)g.translate((Math.random()-.5)*14*shake,(Math.random()-.5)*10*shake);
-  if(scene==="bedroom")drawBedroom();else if(scene==="resident")drawResident();else if(scene==="festival")drawFestival();else drawOutside();
+  if(scene==="bedroom")drawBedroom();else if(scene==="resident")drawResident();else if(scene==="festival")drawFestival();else if(scene==="orchard")drawOrchard();else if(scene==="lake")drawLake();else if(scene==="under")drawUnder();else drawOutside();
   g.restore();
   g.save();g.fillStyle=grain;g.fillRect(0,0,W,H);g.restore();
   if(flash>0){g.fillStyle=`rgba(255,255,255,${Math.min(.95,flash)})`;g.fillRect(0,0,W,H)}
@@ -1496,7 +1846,7 @@ start([
   ["Narrator","(So many things.)"]
 ],()=>sayToast("Walk to the wardrobe and press Space to open it."));
 requestAnimationFrame(frame);
-window.__game={giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0}};
+window.__game={get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0}};
 })();
 </script>
 </body>
