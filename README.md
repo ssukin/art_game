@@ -1,4 +1,4 @@
-# Sarah and the Fading World — Level 1
+# Sarah and the Fading World
 
 A small, self-contained 2D browser game prototype. It uses one HTML file, simple canvas drawings, and no external libraries or downloaded art assets.
 
@@ -18,7 +18,9 @@ Level 1 is styled as a paper-craft adventure: characters are flat cut-outs with 
 - **Space**: activate nearby doors, chests, signs and people; advance dialogue
 - **Q**: Buddy power — with Dab, sniff out hidden doodles (they burst into coins)
 - **I**: open or close Sarah's Pockets (inventory)
-- **R**: return to the Save Block
+- **E**: swap equipped buddy (once you have more than one)
+- **R**: return to the last Save Block
+- **Arrows / W / S + Space**: pick an answer when a conversation gives you choices
 
 A pink **!** appears over Sarah when she's next to someone she can talk to (people, flowers and the Save Block). The on-screen Activate button works like Space (and becomes **Continue** during dialogue). You can also click the screen to advance dialogue.
 
@@ -34,6 +36,24 @@ Along the road: a mailbox with a letter from the Festival Committee and a flower
 
 Past Mrs. Maple's house, lightning rips the sky. One flower at the far end of the road turns gray and starts crying, and ink **Smudges** appear — stomp them for a coin, or lose 1 health if they touch you. Grab the ladder leaning against the tree and bring it to Mrs. Maple, who sets it against her shelf. Climb up and use Grandma's Chest Key to free **Dab**, Sarah's paintbrush little buddy.
 
-Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gate Key**. Return to the gate at the far left and unlock it to see: "Thanks for playing Level 1! Level 2 will be created soon!"
+Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gate Key**. Return to the gate at the far left and unlock it to finish Level 1, then press Space to continue to Level 2.
+
+## Level 2 — The Festival Fiasco
+
+Sarah steps through the gate into the Town Art Festival. Townsfolk recognize Dab from the old stories and start wondering whether Sarah is the legendary adventurer. Sarah would just like a lemonade.
+
+1. **Register (optional).** Sarah left her banner at home, so the Registrar sends her to the Clay Corner. She makes a Ball of Clay. Enter it and she wins 20 coins "for trying" after the results.
+2. **Recipe Card.** A glowing card sits on the café table near the start. Chef Crumb can cook it into a Health Potion: Turnip + Butter Pat.
+3. **Free Mr. Biscuits.** The judge's head is stuck in the playground jungle gym. Sarah sneaks a curl of butter from Brie's DO NOT TOUCH butter swan (2 Butter Pats, which stack) and greases him free.
+4. **The chase.** Brie notices and chases Sarah. Jump the crates, hold **S** behind cardboard cutouts to hide, and you'll still get caught. Choose "Sorry." Refuse twice and you get a buttery slap (-1 health).
+5. **Find Nib.** Lou saw something shiny in the sky. With Dab equipped, press **Q** by the art-supply stand to reveal a doodle staircase up to **Nib**, a living pencil. Q with Nib equipped jabs enemies. Swap buddies with **E** or the Buddy pocket.
+6. **Contest results.** Juniper wins with a painting of the legendary adventurer, who looks a lot like Sarah, plus Dab. The town connects the dots. Sarah isn't so sure.
+7. **The sky cracks again.** Smudges drain color from the painting, and a door falls out of the sky. Jab or stomp the Smudges. One of them drops the **Smudgy Key**. Mrs. Maple arrives to tell Sarah she must save the town. Unlock the sky door to finish Level 2 ("Level 3 coming soon!").
+
+The town is set up as a future hub. It has Chef Crumb's healing recipes, Gus and his clogged pipe (a hook for later), shops "Closed for Festival" with joke signs, two Save Blocks, and hidden doodles for Dab to find.
+
+## Admin Cheats Only
+
+Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** drops you at the festival with the Turnip, Festival Pin and Dab. Other buttons jump to after the chase, the contest results, or the Smudge fight. **Restart Level 1** reloads the page.
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.
