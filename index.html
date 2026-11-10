@@ -1543,6 +1543,13 @@ function orchardInteract(){
   if(near(ORCH_LAKE_DOOR,34))return["Go to the lake",()=>{l2.lakeFrom="orchard";goScene("lake",170)}];
   return null;
 }
+function reelLines(){return hasReel?[]:[
+  ["Registrar","Oh! And before you go — take this fishing pole. He's been chattering at me all morning and I can't get a single thing registered."],
+  ["Reel","Hi hi hi! Name's Reel! Little buddy, professional fishing pole, amateur poet. Take me to the lake? Please? PLEASE?"],
+  ["Sarah","Is… is the fishing pole talking?"],
+  ["Dab","Another little buddy! The more the merrier!"],
+  ["Reel","At the end of the lake dock, press Space to cast. When the bobber gets yanked under, press Space again — fast! You've got two seconds. No pressure. Lots of pressure."]]}
+function reelGot(){if(hasReel)return;hasReel=true;l2.reelMet=true;burst(center(),s.y+10,14,["#7cc6f2","#fff","#f4c84f"]);sayToast("Reel joined you! Fish at the end of the lake dock. (E swaps buddies.)")}
 function festRegistrar(){
   if(l2.festReg){registrar();return}
   const contest=[
@@ -1551,11 +1558,25 @@ function festRegistrar(){
     ["Sarah","I left it at home. On my bed. Drying. Next to my dignity."],
     ["Registrar","Happens every year. The Clay Corner — the very first booth past the plaza — lets you whip something up. Bring it back here and I'll enter it."],
     ["Registrar","Totally optional, of course. Judging starts when our judge, Mr. Biscuits, shows up. He's… late. Someone heard yowling near the playground."]];
-  const done=(line)=>{l2.festReg=true;l2.registered=true;burst(1250,G-90,18);start((line?[["Registrar",line]]:[]).concat(contest),()=>sayToast("Registered! Head on through to the festival →"))};
-  const pay=()=>{if(coins<5){start([["Registrar","You've got "+coins+" coin"+(coins===1?"":"s")+". It's 5 to get in — or wear an official Festival Pin and walk right in! Psst: folks say there's a tree by the lake with coins in it. The lake path is just back that way."]],()=>sayToast("Not enough coins (you have "+coins+", need 5)."));return}coins-=5;done("Five coins — received! Here's your wristband. Welcome to the Town Art Festival!")};
-  if(pinWorn){start([["Registrar","Welcome to the festival! Registration is 5 coi— oh! Is that an official Festival Pin you're wearing?"],["Registrar","Pin-wearers get in FREE! Put your coins away. Welcome, welcome!"]],()=>done(null));return}
-  if(has("Festival Pin")){start([["Registrar","Welcome! Festival registration is 5 coins."],["Registrar","Ooh — but is that a Festival Pin poking out of your pocket? If you WEAR it, you get in free! (Pockets → Key Items → Festival Pin → Wear.)",["Pay 5 coins","I'll put my pin on"],i=>{if(i===0)pay();else sayToast("Open your Pockets (I), go to Key Items, pick the Festival Pin and choose Wear. Then talk to the Registrar again.")}]]);return}
-  start([["Registrar","Welcome to the Town Art Festival! Registration is 5 coins. (Anyone wearing an official Festival Pin gets in free.)",["Pay 5 coins","Not right now"],i=>{if(i===0)pay();else start([["Registrar","No problem! The festival will be here. So will I. Forever, probably."]])}]]);
+  const done=lines=>{l2.festReg=true;l2.registered=true;burst(1250,G-90,18);start(lines.concat(contest,reelLines()),()=>{reelGot();sayToast("Registered! Head on through to the festival →")})};
+  const pay=()=>{if(coins<5){start([["Registrar","You've got "+coins+" coin"+(coins===1?"":"s")+". It's 5 to get in — or wear an official Festival Pin and walk right in! Psst: folks say there's a tree by the lake with coins in it. The lake path is just back that way."]],()=>sayToast("Not enough coins (you have "+coins+", need 5)."));return}coins-=5;done([["Registrar","Five coins — received! Here's your wristband. Welcome to the Town Art Festival!"]])};
+  const bargain=()=>{l2.bargained=true;start([
+    ["Sarah","Is there… any wiggle room on that price?"],
+    ["Registrar","Ooh, a haggler! Fine. Guess my favorite color and you get in free. One guess.",["Red","Blue","Green","Cyan"],k=>{
+      if(k===3){done([
+        ["Registrar","CYAN?! Nobody EVER guesses cyan! Everyone goes red, green or blue."],
+        ["Registrar","Which is wild, because we're all on a screen right now — you'd think I'd be an RGB girl. But no. I'm a printer at heart. CMYK forever. Cyan, magenta, yellow, key!"],
+        ["Registrar","Free entry for my fellow ink enthusiast. Welcome to the festival!"]]);return}
+      start([
+        ["Registrar",["Red","Blue","Green"][k]+"? Ohh, so close. That's an RGB answer."],
+        ["Registrar","I know, I know — we're all on a screen, so RGB makes sense. But I'm a printer at heart. CMYK! Cyan, magenta, yellow, key. Screens just aren't my type."],
+        ["Registrar","So… still 5 coins. Or a Festival Pin. Rules are rules, even for funny people."]
+      ].concat(reelLines()),reelGot)}]])};
+  const opts=has("Festival Pin")?["Pay 5 coins","I'll put my pin on"]:["Pay 5 coins"];if(!l2.bargained)opts.push("Try bargaining");if(!has("Festival Pin"))opts.push("Not right now");
+  const pick=i=>{const o=opts[i];if(o==="Pay 5 coins")pay();else if(o==="Try bargaining")bargain();else if(o==="I'll put my pin on")sayToast("Open your Pockets (I), go to Key Items, pick the Festival Pin and choose Wear. Then talk to the Registrar again.");else start([["Registrar","No problem! The festival will be here. So will I. Forever, probably."]])};
+  if(pinWorn){done([["Registrar","Welcome to the festival! Registration is 5 coi— oh! Is that an official Festival Pin you're wearing?"],["Registrar","Pin-wearers get in FREE! Put your coins away. Welcome, welcome!"]]);return}
+  if(has("Festival Pin")){start([["Registrar","Welcome! Festival registration is 5 coins."],["Registrar","Ooh — but is that a Festival Pin poking out of your pocket? If you WEAR it, you get in free! (Pockets → Key Items → Festival Pin → Wear.)",opts,pick]]);return}
+  start([["Registrar",(l2.bargained?"Back again! ":"Welcome to the Town Art Festival! ")+"Registration is 5 coins. (Anyone wearing an official Festival Pin gets in free.)",opts,pick]]);
 }
 function updateOrchard(){
   if(s.x<=0&&(keys.has("a")||keys.has("ArrowLeft"))){goScene("outside",330);sayToast("Back on the road home. (Walk through the gate to return to the orchard.)");return}
@@ -1651,7 +1672,7 @@ function lakeInteract(){
   if(near(250,24))return["Read the sign",()=>start([["Sign","EGGS: ONLY FOR FRIENDS OF THE DOG. (The dog decides who his friends are. The dog is very picky.)"]])];
   if(near(395,50))return["Peek into the coop",()=>sayToast("Bawk. Three chickens eye you suspiciously. A very serious dog stands between you and the eggs.")];
   if(near(530,30))return T("Talk to the dog",waffles);
-  if(near(DOCK.x+DOCK.w-40,50))return[hasReel?"Cast your line":"Fish (you need a fishing pole)",()=>{if(!hasReel){sayToast("You'd need a fishing pole. Didn't you see one lying on the dock?");return}castLine()}];
+  if(near(DOCK.x+DOCK.w-40,50))return[hasReel?"Cast your line":"Fish (you need a fishing pole)",()=>{if(!hasReel){sayToast("You'd need a fishing pole. The Registrar at the orchard table had a very chatty one…");return}castLine()}];
   return null;
 }
 function waffles(){
@@ -1692,7 +1713,6 @@ function updateFishing(dt){
 }
 function updateLake(){
   LAKE_COINS.forEach(([x,y],i)=>{if(!l2.lakeCoins[i]&&Math.abs(center()-x)<22&&s.y<y+10&&s.y+s.h>y-10){l2.lakeCoins[i]=1;coins++;burst(x,y,8,["#f4c84f","#fff"]);if(l2.lakeCoins.every(Boolean))sayToast("Got all 5 coins from the lakeside tree!")}});
-  if(!l2.reelMet&&Math.abs(center()-1000)<30){meetReel();return}
   if(s.y>G+40){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=DOCK.x+DOCK.w-120;s.y=G-s.h;s.vy=0;sayToast("SPLASH! Sarah fishes herself out of the lake. 0/10, would not recommend.")}
 }
 function drawLake(){
@@ -1718,7 +1738,6 @@ function drawLake(){
   // Waffles
   groundShadow(530,G+2,22);sprite(530,G+2,58,48,drawDogBody,{sx:center()<530?-1:1});
   // Reel waiting on the dock
-  if(!l2.reelMet)sprite(1000,G-4,30,62,drawReelBody,{rot:.25+Math.sin(time*2)*.05});
   drawLoot();drawParticles();drawSarah();
   // fishing line + bobber
   if(fish.ph>0&&fish.ph<5){const [tx,ty]=rodTip();let bx=fish.bx,by=wy+Math.sin(time*3)*2+fish.dip*10;
