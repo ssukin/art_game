@@ -59,7 +59,8 @@ const actionBtn=document.querySelector("#activate"),invBtn=document.querySelecto
 const INK="#2b2540",FONT='"Trebuchet MS","Segoe UI",system-ui,sans-serif';
 const keys=new Set();
 const s={x:120,y:G-68,w:42,h:68,vy:0,ground:true,face:1,flip:1,squash:1,walk:0,inv:0,wasGround:true};
-let scene="bedroom",camera=0,health=10,coins=0,time=0;
+let maxHealth=10,camY=0;
+let scene="bedroom",camera=0,health=maxHealth,coins=0,time=0;
 let toastText="",toastTimer=0,invOpen=false,shake=0,flash=0,showEndScreen=false,endT=0;
 let doorOpen=false,closetOpen=false,potionCollected=false,roadChestKeyCollected=false,homeIntroSeen=false,residentDoorOpen=false,residentTalked=false,ladderCollected=false,ladderGiven=false,firstChestOpen=false,grandChestOpen=false,hasDab=false,checkpoint=1180,roofItemCollected=false,bedBounced=false;
 let stormStarted=false,stormDone=false,flowerTalked=false,firstFlowerTalked=false,bonusFlowerTalked=false,flowerRestored=false,fountainKeyCollected=false,gateKey=false,gateOpen=false,complete=false,saveTalked=false,mailRead=false;
@@ -139,12 +140,13 @@ function advance(){if(!dlg.on)return;const p=dlg.pages[dlg.page];if(dlg.chars<p[
   if(p[2]){const pick=dlg.choice;dlg.on=false;dlg.choice=0;dlg.after=null;p[3](pick);return}
   if(++dlg.page<dlg.pages.length){dlg.chars=0;announce();return}
   dlg.on=false;const fn=dlg.after;dlg.after=null;if(fn)fn()}
-const speakerColor={"Nib":"#d98e1c","Brie":"#c08a3c","Chef Crumb":"#d0648f","Announcer":"#e5577b","Juniper":"#2fb3a7","Townsfolk":"#7a5c99","Sarah":"#17a398","Mrs. Maple":"#d0648f","Flower":"#e1a21b","Dab":"#3b8fd6","Save Block":"#c98a12","Mr. Biscuits":"#8a6a4d","Sign":"#8a6a4d","Letter":"#8a6a4d"};
+const speakerColor={"Fairy":"#d0648f","Nib":"#d98e1c","Brie":"#c08a3c","Chef Crumb":"#d0648f","Announcer":"#e5577b","Juniper":"#2fb3a7","Townsfolk":"#7a5c99","Sarah":"#17a398","Mrs. Maple":"#d0648f","Flower":"#e1a21b","Dab":"#3b8fd6","Save Block":"#c98a12","Mr. Biscuits":"#8a6a4d","Sign":"#8a6a4d","Letter":"#8a6a4d"};
 function speakerPos(who){
   if(who==="Sarah")return[center()-camera,s.y-4];
   if(who==="Dab"||(who==="Nib"&&hasNib))return[dab.x-camera,dab.y-30];
   if(scene==="festival"){
     if(who==="Nib")return[2770-camera,110];
+    if(who==="Fairy")return[l2.fx-camera,l2.fy];
     if(who==="Mr. Biscuits")return l2.catState==="stuck"?[1565-camera,G-140]:[3422-camera,G-110];
     if(who==="Mrs. Maple")return[(l2.maple??0)-camera,G-80];
     if(who==="Save Block"){const x=Math.abs(center()-700)<Math.abs(center()-2990)?700:2990;return[x-camera,G-90]}
@@ -161,7 +163,7 @@ function drawDialogue(){
   if(!dlg.on)return;const [who,text]=dlg.pages[dlg.page];const shown=text.slice(0,Math.floor(dlg.chars));
   const narr=who==="Narrator"||who==="Letter";const bw=720,bx=(W-bw)/2,by=22;
   const lines=wrap(text,bw-64,"bold 21px "+FONT),bh=40+lines.length*29;
-  const pos=narr?null:speakerPos(who);
+  const pos=narr?null:speakerPos(who);if(pos&&scene==="festival")pos[1]-=camY;
   g.save();
   if(narr){
     cut(()=>rr(bx,by,bw,bh,10),who==="Letter"?"#fffaf0":"#2f2a4a",{edge:8});
@@ -274,7 +276,7 @@ function roadChest(){
   sayToast("Click! A Turnip bounces out and lands with tremendous dignity.");
 }
 function saveBlock(){
-  checkpoint=1180;health=10;burst(1201,G-70,12,["#f4c84f","#fff"]);
+  checkpoint=1180;health=maxHealth;burst(1201,G-70,12,["#f4c84f","#fff"]);
   sayToast("Saved! Health restored. Press R any time to come back to this Save Block.");
 }
 function sadFlower(){
@@ -369,11 +371,13 @@ const INFO={
   "Town Gate Key":["Shaped like a flower. Fits a flower-shaped keyhole. Coincidence? No.",null],
   "Dab":["Paintbrush and color expert. With Dab equipped, Q sniffs out hidden doodles. She once traveled with the legendary adventurer.","Equip"],
   "Smudgy Key":["Dropped by a Smudge. Cold, inky, and shaped suspiciously like the keyhole on the door that fell out of the sky.",null],
-  "Balloon":["A festival balloon from Inka's stand. Use it, then jump: you'll go twice as high! (One big jump per balloon.)","Use"],
+  "Balloon":["Makes your NEXT JUMP TWICE AS HIGH! Use it here, then jump. One balloon = one super jump. Great for reaching rooftops.","Use"],
   "Nib":["A sharp little buddy. With Nib equipped, Q jabs enemies. Very pointy, very brave, slightly dramatic.","Equip"],
   "Butter Pat":["A small, guilty curl of festival butter. Slippery. Useful. Do not mention it to Brie.","Ponder"],
   "Ball of Clay":["Your contest entry. It's a ball. Of clay. Some call it minimalism. You call it \"done.\"","Admire"],
   "Lopsided Teapot":["Your contest entry. A teapot with a strong lean and stronger opinions. Do not put tea in it.","Admire"],
+  "Cheese Recipe":["Butter Cheese: 2 Butter Pats = 1 Cheese Wedge. Chef Crumb can make it. Do not ask how butter becomes cheese.","Read"],
+  "Cheese Wedge":["A heroic little wedge of butter cheese. Restores 3 health.","Eat"],
   "Recipe Card":["Turnip-Butter Tonic: 1 Turnip + 1 Butter Pat = Health Potion. Ask Chef Crumb to cook it.","Read"]
 };
 function pocketList(){const isKey=n=>n.includes("Key");if(inv.tab===0)return items.filter(n=>!isKey(n));if(inv.tab===1)return items.filter(isKey);if(inv.tab===2)return[hasDab&&"Dab",hasNib&&"Nib"].filter(Boolean);return[]}
@@ -384,8 +388,10 @@ function useSelected(){
   if(n==="Butter Pat"){sayToast("You resist the urge to eat butter straight from your pocket. Growth!");return}
   if(n==="Ball of Clay"){sayToast("You admire your Ball of Clay. It is extremely round.");return}
   if(n==="Lopsided Teapot"){sayToast("You admire your Lopsided Teapot. It admires the floor. It's leaning toward it.");return}
+  if(n==="Cheese Recipe"){sayToast("2 Butter Pats = Cheese Wedge. Chef Crumb can make it at his booth.");return}
+  if(n==="Cheese Wedge"){if(health>=maxHealth){sayToast("You're already at full health. The cheese can wait. Cheese is patient.");return}health=Math.min(maxHealth,health+3);useOne(n);inv.sel=0;sayToast("Nom. +3 health. It tastes like butter that went to college.");return}
   if(n==="Recipe Card"){sayToast("Turnip + Butter Pat = Health Potion. Chef Crumb can cook it at his booth.");return}
-  if(n==="Health Potion"){if(health>=10){sayToast("You're already at full health. Save it for a rainier day.");return}health=10;useOne(n);inv.sel=0;sayToast("Glug glug. Health fully restored! Strawberry courage achieved.");return}
+  if(n==="Health Potion"){if(health>=maxHealth){sayToast("You're already at full health. Save it for a rainier day.");return}health=maxHealth;useOne(n);inv.sel=0;sayToast("Glug glug. Health fully restored! Strawberry courage achieved.");return}
   if(n==="Turnip"){sayToast("You consider eating the turnip. The turnip considers you back. You put it away.");return}
   if(n==="Festival Pin"){sayToast("You adjust the Festival Pin. Looking sharp. Pointy, even.");return}
 }
@@ -412,6 +418,8 @@ function iconArt(n){
   if(n==="Balloon"){g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(0,8);g.quadraticCurveTo(6,16,0,24);g.stroke();g.lineWidth=2.5;g.fillStyle="#7cc6f2";g.beginPath();g.ellipse(0,-6,14,17,0,0,7);g.fill();g.stroke();g.fillStyle="rgba(255,255,255,.7)";circle(-5,-12,4);g.fill();g.fillStyle="#7cc6f2";g.beginPath();g.moveTo(-3,12);g.lineTo(3,12);g.lineTo(0,9);g.fill();return}
   if(n==="Lopsided Teapot"){g.save();g.rotate(.28);g.fillStyle="#b9825a";g.beginPath();g.ellipse(0,4,16,13,0,0,7);g.fill();g.stroke();g.beginPath();g.moveTo(14,2);g.quadraticCurveTo(26,-2,24,-12);g.lineTo(20,-10);g.quadraticCurveTo(20,0,12,-2);g.fill();g.stroke();g.lineWidth=3;g.beginPath();g.arc(-17,4,7,1.7,4.6);g.stroke();g.lineWidth=2.5;g.fillStyle="#d6a27a";g.beginPath();g.ellipse(0,-9,10,4,0,0,7);g.fill();g.stroke();circle(0,-14,3);g.fill();g.stroke();g.restore();return}
   if(n==="Ball of Clay"){g.fillStyle="#b9825a";circle(0,2,17);g.fill();g.stroke();g.fillStyle="#d6a27a";circle(-6,-4,5);g.fill();g.strokeStyle="#8d5a36";g.lineWidth=1.5;g.beginPath();g.arc(3,6,6,.3,2.2);g.stroke();return}
+  if(n==="Cheese Wedge"){g.fillStyle="#f7d257";g.beginPath();g.moveTo(-18,12);g.lineTo(18,12);g.lineTo(18,-2);g.lineTo(-18,-10);g.closePath();g.fill();g.stroke();g.beginPath();g.moveTo(-18,-10);g.lineTo(18,-2);g.stroke();g.fillStyle="#e0b23a";circle(-6,4,3.5);g.fill();circle(8,6,2.5);g.fill();circle(2,-1,2);g.fill();return}
+  if(n==="Cheese Recipe"){g.save();g.rotate(.1);g.fillStyle="#fffdf6";rr(-18,-22,36,44,4);g.fill();g.stroke();g.fillStyle="#f4c84f";g.fillRect(-18,-22,36,9);g.strokeRect(-18,-22,36,9);g.fillStyle="#f7d257";g.beginPath();g.moveTo(-12,8);g.lineTo(12,8);g.lineTo(12,0);g.lineTo(-12,-6);g.closePath();g.fill();g.lineWidth=1.5;g.stroke();g.strokeStyle="#bcd8ee";g.beginPath();g.moveTo(-12,15);g.lineTo(12,15);g.stroke();g.restore();return}
   if(n==="Recipe Card"){g.save();g.rotate(-.12);g.fillStyle="#fffdf6";rr(-18,-22,36,44,4);g.fill();g.stroke();g.fillStyle="#e5577b";g.fillRect(-18,-22,36,9);g.strokeRect(-18,-22,36,9);g.fillStyle="#f7f1ff";circle(-6,4,7);g.fill();g.lineWidth=1.5;g.stroke();g.fillStyle="#5fb35a";g.fillRect(-8,-6,4,5);g.fillStyle="#ffe48a";rr(4,0,10,8,2);g.fill();g.stroke();g.strokeStyle="#bcd8ee";g.beginPath();g.moveTo(-12,15);g.lineTo(12,15);g.stroke();g.restore();return}
   if(n==="Wooden Ladder"){g.save();g.rotate(.35);g.fillStyle="#c58a52";rr(-13,-24,6,48,3);g.fill();g.stroke();rr(7,-24,6,48,3);g.fill();g.stroke();for(let y=-16;y<=16;y+=10){rr(-8,y-2,16,5,2);g.fill();g.stroke()}g.restore();return}
 }
@@ -443,11 +451,11 @@ function drawInventory(){
   const dx=px+500,dy=py+110,dw=250,dh=290;cut(()=>rr(dx,dy,dw,dh,24),"#fffdf6",{edge:7});
   const n=list[inv.sel];
   if(n){g.fillStyle="#fde9c2";circle(dx+dw/2,dy+64,46);g.fill();drawIcon(n,dx+dw/2,dy+64,1.45);
-    g.fillStyle=INK;g.font="bold 20px "+FONT;g.textAlign="center";g.fillText((n==="Dab"||n==="Nib"?n+" (little buddy)":n==="Recipe Card"?"Recipe: Turnip-Butter Tonic":n)+(count(n)>1?"  ×"+count(n):""),dx+dw/2,dy+136,dw-16);g.textAlign="left";
+    g.fillStyle=INK;g.font="bold 20px "+FONT;g.textAlign="center";g.fillText((n==="Dab"||n==="Nib"?n+" (little buddy)":n==="Recipe Card"?"Recipe: Turnip-Butter Tonic":n==="Cheese Recipe"?"Recipe: Butter Cheese":n)+(count(n)>1?"  ×"+count(n):""),dx+dw/2,dy+136,dw-16);g.textAlign="left";
     let [desc,verb]=INFO[n]||["",null];if(verb==="Equip"&&n===equipped)verb=null;if(verb==="Equip"&&!hasNib)verb=null;wrap(desc,dw-32,"15px "+FONT).forEach((l,i)=>{g.fillStyle="#4a4360";g.fillText(l,dx+16,dy+160+i*19)});
-    if(verb){cut(()=>rr(dx+dw/2-70,dy+dh-46,140,32,16),"#17a398",{edge:5,shadow:false});g.fillStyle="#fff";g.font="bold 15px "+FONT;g.textAlign="center";g.fillText("Space: "+verb,dx+dw/2,dy+dh-25);g.textAlign="left"}
+    if(verb){const hov=Math.sin(time*4)*.5+.5;cut(()=>rr(dx+dw/2-80,dy+dh-48,160,36,18),"#17a398",{edge:5,shadow:true});g.fillStyle="#fff";g.font="bold 15px "+FONT;g.textAlign="center";g.fillText("▶ "+verb+" (click / Space)",dx+dw/2,dy+dh-25,150);g.textAlign="left"}
   }else{g.fillStyle="#8d8578";g.font="bold 17px "+FONT;g.textAlign="center";const empty=[ "Nothing in here yet. Lint, maybe.","No keys yet. Locks everywhere are relieved.","No little buddy yet. Somewhere, a paintbrush is waiting."][inv.tab];wrap(empty,dw-40,"bold 17px "+FONT).forEach((l,i)=>g.fillText(l,dx+dw/2,dy+120+i*24));g.textAlign="left"}
-  footer(px,py,pw,ph,"Arrows choose · Space uses · Tab / Q / E switch pockets · I or Esc closes");
+  footer(px,py,pw,ph,"Arrows or click to choose · Space or the Use button to use · Tab / Q / E switch pockets · I or Esc closes");
 }
 function footer(px,py,pw,ph,t){g.fillStyle="#7a7088";g.font="bold 14px "+FONT;g.textAlign="center";g.fillText(t,px+pw/2,py+ph-16);g.textAlign="left"}
 function drawHints(px,py,pw,ph){
@@ -463,6 +471,7 @@ function drawHints(px,py,pw,ph){
 }
 function invClick(mx,my){
   const px=90,py=46;for(let i=0;i<4;i++){const tx=px+60+i*120,ty=py+48;if(mx>tx&&mx<tx+108&&my>ty&&my<ty+40){inv.tab=i;inv.sel=0;return}}
+  if(inv.tab<3&&mx>590+125-80&&mx<590+125+80&&my>156+290-48&&my<156+290-12){useSelected();return}
   if(inv.tab<3){const list=pocketList();for(let i=0;i<list.length;i++){const [x,y]=slotPos(i);if(Math.hypot(mx-x,my-y)<SLOT.r){if(inv.sel===i)useSelected();inv.sel=i;return}}}
 }
 
@@ -498,7 +507,7 @@ window.addEventListener("keydown",e=>{
     if(balloonOn){s.vy=-834;balloonOn=false;balloonsAway.push({scene,x:center()+8,y:s.y-40,t:0});sayToast("WHOOSH! The balloon yanks you sky-high… then drifts off to a better life.")}else s.vy=-590;s.ground=false}
   if(k==="q"&&!e.repeat){if(!hasDab)sayToast("You don't have a little buddy yet. You wave at nobody. Nobody waves back.");else if(equipped==="Nib"&&hasNib)nibJab();else dabPower()}
   if(k==="e"&&!e.repeat&&hasNib){equipped=equipped==="Dab"?"Nib":"Dab";sayToast(equipped+" equipped! Q now "+(equipped==="Dab"?"sniffs out hidden doodles.":"jabs enemies."))}
-  if(k==="r"&&!e.repeat&&l2.chase!==1){scene=checkpointScene;s.x=checkpoint;s.y=G-s.h;s.vy=0;health=10;camera=clamp(s.x-350,0,worldW()-W);sayToast("Whoosh! Back at the Save Block.")}
+  if(k==="r"&&!e.repeat&&l2.chase!==1){scene=checkpointScene;s.x=checkpoint;s.y=G-s.h;s.vy=0;health=maxHealth;camera=clamp(s.x-350,0,worldW()-W);sayToast("Whoosh! Back at the Save Block.")}
   keys.add(k);
 });
 window.addEventListener("keyup",e=>keys.delete(key(e.key)));window.addEventListener("blur",()=>keys.clear());
@@ -533,7 +542,7 @@ function update(dt){
   if(scene==="bedroom")ps.push({x:105,y:346,w:280,h:18,bed:true});
   if(scene==="resident"&&ladderGiven)ps.push({x:400,y:280,w:540,h:22});
   if(scene==="outside")ps.push(...platforms);
-  if(scene==="festival"){ps.push(...CRATES,LIB_ROOF);if(l2.trail)ps.push(...TRAIL)}
+  if(scene==="festival"){ps.push(...CRATES,LIB_ROOF,...CLOUDS);if(l2.trail)ps.push(...TRAIL)}
   for(const p of ps){if(s.vy>=0&&s.x+s.w>p.x&&s.x<p.x+p.w&&oldFeet<=p.y+1&&s.y+s.h>=p.y){
     if(p.bed&&s.vy>420){s.y=p.y-s.h;s.vy=-Math.min(760,s.vy*1.08);s.squash=.7;if(!bedBounced){bedBounced=true;sayToast("BOING! Your bed is 40% mattress, 60% trampoline.")}continue}
     s.y=p.y-s.h;if(s.vy>300)s.squash=.82;s.vy=0;s.ground=true}}
@@ -554,7 +563,7 @@ function update(dt){
       const top=G-32;if(s.x+s.w>m.x-20&&s.x<m.x+20&&s.y+s.h>top&&s.y<G){
         if(s.vy>0&&oldFeet<=top+14){m.alive=false;s.vy=-430;burst(m.x,top,14,[INK,"#5b5277","#fff"]);spill(m.x,top-6,"coin",null,m.dir*70);if(!firstStomp){firstStomp=true;sayToast("Stomped a Smudge! It's flat now — and a coin pops out!")}}
         else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;
-          if(health<=0){health=10;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}
+          if(health<=0){health=maxHealth;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}
     }
   }
   if(scene==="festival"){updateFestival(dt,oldFeet);if(dlg.on){updateAction();return}}
@@ -563,6 +572,7 @@ function update(dt){
   if(!s.wasGround&&s.ground&&s.squash>.95)s.squash=.9;
   if(s.y>H+40){s.x=checkpoint;s.y=G-s.h;s.vy=0}
   camera=scene==="outside"||scene==="festival"?clamp(s.x-350,0,worldW()-W):0;
+  const ty=scene==="festival"?clamp(s.y-150,-320,0):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
   updateAction();
 }
 function updateParticles(dt){for(const p of parts){p.vy+=600*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.98;p.rot+=p.vr*dt;p.life-=dt}parts=parts.filter(p=>p.life>0)}
@@ -671,7 +681,7 @@ function drawSarah(){
   // "!" bubble when something can be activated
   if(!dlg.on&&!invOpen&&getInteract()?.[2]){const bx=center(),by=s.y-30+Math.sin(time*7)*3;cut(()=>{g.beginPath();g.ellipse(bx,by,14,16,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 20px "+FONT;g.textAlign="center";g.fillText("!",bx,by+7);g.textAlign="left"}
 }
-function groundUnder(){if(scene==="bedroom"&&s.x+s.w>105&&s.x<385&&s.y+s.h<=350)return 346;if(scene==="resident"&&ladderGiven&&s.x+s.w>400&&s.y+s.h<=284)return 280;if(scene==="outside")for(const p of platforms)if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;if(scene==="festival"){for(const p of CRATES.concat(l2.trail?TRAIL:[],[LIB_ROOF]))if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y}return G}
+function groundUnder(){if(scene==="bedroom"&&s.x+s.w>105&&s.x<385&&s.y+s.h<=350)return 346;if(scene==="resident"&&ladderGiven&&s.x+s.w>400&&s.y+s.h<=284)return 280;if(scene==="outside")for(const p of platforms)if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;if(scene==="festival"){for(const p of CRATES.concat(l2.trail?TRAIL:[],[LIB_ROOF],CLOUDS))if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y}return G}
 function drawFlowers(){for(const f of flowers){if(f.x<camera-80||f.x>camera+W+80)continue;const gray=f.kind==="gray"&&stormDone&&!flowerRestored;groundShadow(f.x,G+2,18);
   sprite(f.x,G+4,56,86,()=>drawFlowerBody(gray,gray,f.kind==="gray"&&flowerRestored),{rot:Math.sin(time*2+f.x)*.04+Math.sin(time*18)*f.wig*.12,sy:1-f.wig*.06})}}
 
@@ -685,7 +695,7 @@ function drawDoodles(){for(const d of doodles){if(d.scene!==scene||d.found)conti
   if(hasDab&&dist<120){g.save();g.globalAlpha=.25+Math.sin(time*5)*.15;g.fillStyle="#3bb6c4";circle(d.x+Math.sin(time*3)*6,d.y,3);g.fill();g.restore()}}
   if(pulse>0){g.save();g.globalAlpha=pulse*.6;g.strokeStyle="#3bb6c4";g.lineWidth=5;g.setLineDash([12,10]);circle(dab.x,dab.y,(1-pulse)*340);g.stroke();g.restore()}}
 function star(x,y,r1,r2){g.beginPath();for(let i=0;i<10;i++){const r=i%2?r2:r1,a=i/10*Math.PI*2-Math.PI/2;g.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r)}g.closePath()}
-function cloud(x,y,sc){cut(()=>{g.beginPath();g.moveTo(x-50*sc,y+14*sc);g.arc(x-30*sc,y+2*sc,20*sc,Math.PI*.9,Math.PI*1.6);g.arc(x,y-10*sc,26*sc,Math.PI*1.1,Math.PI*1.9);g.arc(x+32*sc,y+2*sc,20*sc,Math.PI*1.4,Math.PI*2.1);g.lineTo(x+50*sc,y+14*sc);g.closePath()},"#fffdf8",{edge:0,line:2})}
+function cloud(x,y,sc){g.save();if(scene==="festival")g.globalAlpha=.45;cut(()=>{g.beginPath();g.moveTo(x-50*sc,y+14*sc);g.arc(x-30*sc,y+2*sc,20*sc,Math.PI*.9,Math.PI*1.6);g.arc(x,y-10*sc,26*sc,Math.PI*1.1,Math.PI*1.9);g.arc(x+32*sc,y+2*sc,20*sc,Math.PI*1.4,Math.PI*2.1);g.lineTo(x+50*sc,y+14*sc);g.closePath()},"#fffdf8",{edge:0,line:2});g.restore()}
 function tree(x,y,sc,col="#58b56a"){cut(()=>rr(x-7*sc,y-60*sc,14*sc,60*sc,4),"#a8714a");cut(()=>{g.beginPath();g.arc(x,y-78*sc,34*sc,0,7)},col);cut(()=>{g.beginPath();g.arc(x-20*sc,y-60*sc,22*sc,0,7)},col,{shadow:false});cut(()=>{g.beginPath();g.arc(x+22*sc,y-62*sc,22*sc,0,7)},col,{shadow:false});g.fillStyle="rgba(255,255,255,.35)";circle(x-10*sc,y-92*sc,8*sc);g.fill()}
 function sky(top="#8fd3f0",bot="#e9f8f1"){const gr=g.createLinearGradient(0,0,0,G);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,W,H)}
 
@@ -869,7 +879,7 @@ function drawHud(){
   cut(()=>rr(18,top,168,44,22),"#fffdf6",{edge:7});
   // heart
   g.save();g.translate(44,top+22);g.scale(1+Math.sin(time*5)*.04*(health<4?3:1),1);cut(()=>{g.beginPath();g.moveTo(0,10);g.bezierCurveTo(-18,-2,-10,-16,0,-7);g.bezierCurveTo(10,-16,18,-2,0,10)},"#e5577b",{edge:4,shadow:false});g.restore();
-  g.fillStyle=INK;g.font="bold 22px "+FONT;g.fillText(health,66,top+30);g.font="bold 14px "+FONT;g.fillStyle="#7a7088";g.fillText("/ 10 HP",health>9?94:82,top+29);
+  g.fillStyle=INK;g.font="bold 22px "+FONT;g.fillText(health,66,top+30);g.font="bold 14px "+FONT;g.fillStyle="#7a7088";g.fillText("/ "+maxHealth+" HP",health>9?94:82,top+29);
   cut(()=>rr(196,top,104,44,22),"#fffdf6",{edge:7});drawCoin(220,top+22,11);g.fillStyle=INK;g.font="bold 22px "+FONT;g.fillText(coins,240,top+30);
   if(hasDab){const wb=hasNib?190:124;cut(()=>rr(310,top,wb,44,22),"#fffdf6",{edge:7});if(equipped==="Nib"&&hasNib)sprite(332,top+40,24,58,drawNibBody,{sx:.6,sy:.6,rot:-.3,shadow:false});else sprite(332,top+40,30,56,drawDabBody,{sx:.6,sy:.6,rot:-.3,shadow:false});g.fillStyle=INK;g.font="bold 14px "+FONT;g.fillText("Q: Buddy",350,top+28);if(hasNib){g.fillStyle="#7a7088";g.fillText("E: swap",424,top+28)}}
   cut(()=>rr(W-142,18,124,36,18),"#fffdf6",{edge:6});g.fillStyle=INK;g.font="bold 14px "+FONT;g.fillText("I: Pockets",W-122,41);
@@ -896,6 +906,8 @@ function drawEndScreen(){
 // ===========================================================================
 const FEST_W=3520,DOOR_X=2915,LIB_ROOF={x:2072,y:246,w:156,h:20};
 let balloonOn=false,balloonsAway=[];
+const CLOUDS=[{x:2228,y:192,w:84,h:16},{x:2128,y:132,w:84,h:16},{x:2232,y:72,w:84,h:16},{x:2110,y:12,w:140,h:18}];
+const SKYTOP=CLOUDS[3];
 const CRATES=[{x:1770,y:G-36,w:46,h:36},{x:1995,y:G-36,w:46,h:36},{x:2075,y:G-30,w:60,h:30,hay:true},{x:2250,y:G-36,w:46,h:36}];
 const HIDES=[0,1,3].map(i=>CRATES[i]);const hideSpot=()=>HIDES.find(b=>s.duck&&Math.abs(center()-(b.x+b.w/2))<b.w/2+30);
 const TRAIL=[{x:2510,y:385,w:72},{x:2600,y:330,w:72},{x:2690,y:274,w:72},{x:2600,y:218,w:72},{x:2690,y:162,w:110}];
@@ -920,14 +932,14 @@ const NPC_X={"Mr. Umber":250,"Pippa":305,"Registrar":420,"Potter Pat":560,"Chef 
 let level=1,checkpointScene="outside",hasNib=false,equipped="Dab",jabT=0,l2={},fsm=[];
 function resetL2(){l2={intro:false,registered:false,clayMade:false,clayEntered:false,cardTaken:false,chefMet:false,catSeen:false,butterTaken:false,catFreed:false,
   chase:0,chaseT:0,chaseDone:false,brieX:1385,brieFace:-1,brieHid:{},confused:0,refusals:0,slapped:false,trail:false,nibMet:false,results:false,finale:false,
-  fightDone:false,drain:0,tearT:0,roofChest:false,doorY:null,doorOpen:false,mapleDone:false,maple:null,mapleTalked:false,done:false,catState:"stuck",talk:{},w1:false,w2:false,nibCheer:false};fsm=[]}
+  fightDone:false,drain:0,tearT:0,roofChest:false,cloudCoins:[0,0,0,0],fairy:0,fx:0,fy:0,foe:null,doorY:null,doorOpen:false,mapleDone:false,maple:null,mapleTalked:false,done:false,catState:"stuck",talk:{},w1:false,w2:false,nibCheer:false};fsm=[]}
 resetL2();
 function npcX(n){if(n==="Brie")return l2.brieX;if(l2.results&&n==="Mr. Umber")return 3010;if(l2.results&&n==="Pippa")return 3045;return NPC_X[n]}
 function tcount(n){l2.talk[n]=(l2.talk[n]||0)+1;return l2.talk[n]-1}
 
 function startLevel2(){
   level=2;resetL2();scene="festival";s.x=80;s.y=G-s.h;s.vy=0;s.face=1;s.flip=1;dab.x=50;dab.y=G-50;
-  showEndScreen=false;complete=false;invOpen=false;gateOpen=true;gateAnim=1;checkpoint=700;checkpointScene="festival";camera=0;parts=[];hasDab=true;health=10;
+  showEndScreen=false;complete=false;invOpen=false;gateOpen=true;gateAnim=1;checkpoint=700;checkpointScene="festival";camera=0;parts=[];hasDab=true;health=maxHealth;
   if(!hasNib)equipped="Dab";
   start([
     ["Narrator","The gate creaks open, and the Town Art Festival spills out to meet Sarah: music, bunting, and the smell of kettle corn."],
@@ -966,7 +978,7 @@ function festInteract(){
   if(near(3420,36)&&l2.catState==="judge")return T("Greet Mr. Biscuits",()=>sayToast("Mr. Biscuits gives you one slow blink. In cat, that's a standing ovation."));
   return null;
 }
-function umber(){const l=l2.results?["Told you. Called it. Somebody write down that I called it."]:["In my day, legendary adventurers wore capes. Do you own a cape? You should own a cape.","That butter swan took Brie three weeks, four hundred pounds of butter and one very cold room.","The sky did something funny this morning. Rumbled. Skies shouldn't rumble at a festival."];start([["Mr. Umber",l[tcount("umber")%l.length]]])}
+function umber(){if(!l2.talk.umberTip){l2.talk.umberTip=1;start([["Mr. Umber","A tip from an old-timer: if you ever need to hide, crouch down behind something — a crate, a hay bale — by holding Down (or S)."],["Mr. Umber","Works on angry sculptors, nosy neighbors and the tax collector. Ask me how I know."]]);return}const l=l2.results?["Told you. Called it. Somebody write down that I called it."]:["In my day, legendary adventurers wore capes. Do you own a cape? You should own a cape.","That butter swan took Brie three weeks, four hundred pounds of butter and one very cold room.","The sky did something funny this morning. Rumbled. Skies shouldn't rumble at a festival."];start([["Mr. Umber",l[tcount("umber")%l.length]]])}
 function pippa(){const l=hasNib?["Is that a PENCIL with a FACE? Best. Festival. EVER."]:["Can Dab paint ME? Make me purple! Make me a DRAGON!","Mom says the butter swan is \"art.\" I say it's breakfast.","My balloon is named Gerald. Gerald is shy."];start([["Pippa",l[tcount("pippa")%l.length]]])}
 const ENTRIES={"Ball of Clay":{short:"ball",enter:"\"Ball of Clay.\" Bold. Round. Unapologetic. Entered!",run:"Your ball is officially in the running! Spherically speaking, it's a frontrunner.",after:"Congratulations on your… participation! Spherically speaking, you were a frontrunner.",award:"for her sculpture \"Ball of Clay\""},
   "Lopsided Teapot":{short:"teapot",enter:"\"Lopsided Teapot.\" It leans. It dares. It probably leaks. Entered!",run:"Your teapot is officially in the running! It's leaning toward victory. Literally.",after:"Congratulations! Your teapot tried its best. Mostly sideways.",award:"for her ceramic \"Lopsided Teapot\""}};
@@ -1003,18 +1015,24 @@ function potter(){
   }]]));
 }
 function saveFest(x){
-  checkpoint=x-s.w/2;checkpointScene="festival";health=10;burst(x,G-70,12,["#f4c84f","#fff"]);
+  checkpoint=x-s.w/2;checkpointScene="festival";health=maxHealth;burst(x,G-70,12,["#f4c84f","#fff"]);
   sayToast("Saved! Health restored. Press R any time to come back to this Save Block.");
 }
 function chef(){
   const pre=l2.chefMet?[]:[["Chef Crumb","Bonjour! I am Chef Crumb. I cook healing recipes — but only from proper recipe cards. Fire codes. Also, feelings."]];l2.chefMet=true;
-  if(!has("Recipe Card")){start(pre.concat([["Chef Crumb","Bring me a recipe card and the ingredients, and I will cook! I saw a card blowing around by the café table, near the Clay Corner."]]));return}
-  start(pre.concat([["Chef Crumb","Ah, a recipe card! What shall I cook, chérie?",["Turnip-Butter Tonic (Turnip + Butter Pat)","Nothing right now"],i=>{
-    if(i===1){start([["Chef Crumb","Très bien. My stove is always warm. Like my heart."]]);return}
-    const miss=[];if(!has("Turnip"))miss.push("a Turnip");if(!has("Butter Pat"))miss.push("a Butter Pat");
-    if(miss.length){start([["Chef Crumb","For the Tonic I need "+miss.join(" and ")+"."+(miss.includes("a Butter Pat")?" Butter is hard to find today… everyone is staring at that swan.":"")]]);return}
-    useOne("Turnip");useOne("Butter Pat");addItem("Health Potion");burst(860,G-90,20);
-    start([["Chef Crumb","Sizzle… whisk… a pinch of courage… VOILÀ!"],["Chef Crumb","One Turnip-Butter Tonic! It is a Health Potion now. Do not ask me how. Cooking is magic."]],()=>sayToast("Got a Health Potion!"));
+  const menu=[];if(has("Recipe Card"))menu.push(["Turnip-Butter Tonic (Turnip + Butter Pat)","tonic"]);if(has("Cheese Recipe"))menu.push(["Butter Cheese (2 Butter Pats)","cheese"]);menu.push(["Nothing right now",null]);
+  if(menu.length===1){start(pre.concat([["Chef Crumb","Bring me a recipe card and the ingredients, and I will cook! I saw a card blowing around by the café table, near the Clay Corner."]]));return}
+  start(pre.concat([["Chef Crumb","Ah, recipe cards! What shall I cook, chérie?",menu.map(m=>m[0]),i=>{
+    const what=menu[i][1];
+    if(!what){start([["Chef Crumb","Très bien. My stove is always warm. Like my heart."]]);return}
+    if(what==="tonic"){
+      const miss=[];if(!has("Turnip"))miss.push("a Turnip");if(!has("Butter Pat"))miss.push("a Butter Pat");
+      if(miss.length){start([["Chef Crumb","For the Tonic I need "+miss.join(" and ")+"."+(miss.includes("a Butter Pat")?" Butter is hard to find today… everyone is staring at that swan.":"")]]);return}
+      useOne("Turnip");useOne("Butter Pat");addItem("Health Potion");burst(860,G-90,20);
+      start([["Chef Crumb","Sizzle… whisk… a pinch of courage… VOILÀ!"],["Chef Crumb","One Turnip-Butter Tonic! It is a Health Potion now. Do not ask me how. Cooking is magic."]],()=>sayToast("Got a Health Potion!"));return}
+    if(count("Butter Pat")<2){start([["Chef Crumb","Butter Cheese needs TWO Butter Pats. You have "+count("Butter Pat")+". I am a chef, not a magician. Well. A little bit a magician."]]);return}
+    useOne("Butter Pat");useOne("Butter Pat");addItem("Cheese Wedge");burst(860,G-90,20,["#f4c84f","#fff"]);
+    start([["Chef Crumb","Butter… plus butter… plus a wink… = CHEESE! Science cannot explain it. I do not let science in my kitchen."]],()=>sayToast("Got a Cheese Wedge! Eat it from your Pockets to restore 3 health."));
   }]]));
 }
 function gus(){
@@ -1066,9 +1084,9 @@ function inka(){
   const hi=l2.talk.inka?"Back for more? Balloons are 5 coins. Brushes are free to look at. Glitter is forever.":"Art supplies! Brushes, paints, glitter — and balloons, 5 coins each! Hold one and your next jump goes twice as high.";l2.talk.inka=1;
   start([["Inka",hasNib&&l2.talk.inkaNib!==1?(l2.talk.inkaNib=1,"Is that pencil talking? Don't tell the other pencils. They'll unionize. Anyway — "+hi):hi,["Buy a balloon (5 coins)","Just browsing"],i=>{
     if(i===1){start([["Inka","Browse away! Don't touch the glitter. It touches back."]]);return}
-    if(coins<5){start([["Inka","That's 5 coins, sweetie. Have Dab sniff around with Q — hidden doodles pop into coins!"]]);return}
+    if(coins<5){start([["Inka","That's 5 coins, sweetie — you've got "+coins+". Have Dab sniff around with Q: hidden doodles pop into coins!"]],()=>sayToast("Not enough coins for a balloon (you have "+coins+", need 5)."));return}
     coins-=5;addItem("Balloon");burst(2470,G-120,10,["#e5577b","#7cc6f2","#f4c84f"]);
-    start([["Inka","One balloon! Use it from your Pockets, then jump. Pro tip: somebody left a chest on the Library roof ages ago. Nobody can reach it. Well. Nobody WITHOUT a balloon."]],()=>sayToast("Got a Balloon! Use it from your Pockets (Items), then jump."));
+    start([["Inka","One balloon! Use it from your Pockets, then jump. Pro tip: somebody left a chest on the Library roof ages ago. Nobody can reach it. Well. Nobody WITHOUT a balloon. And people say there\'s something living in the clouds above it."]],()=>{sayToast("Got a Balloon! Open Pockets (I), pick the balloon in Items, then click Use — and jump!")});
   }]]);
 }
 function announcer(){
@@ -1120,8 +1138,20 @@ function startFinale(){
     fsm=[[3120,3230],[3200,3330],[3300,3460],[3150,3440]].map(([a,b],i)=>({x:i%2?b:a,min:a,max:b,dir:i%2?-1:1,alive:true,flat:0,speed:70+i*12,key:i===2}))});
 }
 function roofChest(){
-  l2.roofChest=true;coins+=25;addItem("Health Potion");burst(2150,LIB_ROOF.y-30,30,["#f4c84f","#fff","#e5577b"]);
-  start([["Narrator","The rooftop chest creaks open. Inside: a pile of coins, a Health Potion and a note."],["Narrator","The note says: \"If you can read this, you are VERY tall. Or you have a balloon. Either way — congratulations.\""]],()=>sayToast("Got 25 coins and a Health Potion!"));
+  l2.roofChest=true;coins+=15;addItem("Turnip");addItem("Cheese Recipe");burst(2150,LIB_ROOF.y-30,30,["#f4c84f","#fff","#e5577b"]);
+  start([["Narrator","The rooftop chest creaks open. Inside: a Turnip, a pile of coins and a recipe card for… cheese?"],["Narrator","Tucked underneath is a note: \"Look up. Waaaay up. The clouds around here are sturdier than they look.\""]],()=>sayToast("Got a Turnip, a Cheese Recipe and 15 coins! Those clouds look jumpable…"));
+}
+function fairyVisit(){
+  l2.fairy=1;l2.fx=SKYTOP.x+SKYTOP.w+40;l2.fy=SKYTOP.y-70;
+  start([
+    ["Fairy","Well, well, WELL! Nobody's climbed my clouds in a hundred years. You must be very determined. Or very bored."],
+    ["Sarah","A little of both?"],
+    ["Fairy","Ha! I like you. Hold still — this tickles."],
+    ["Narrator","Sparkles swirl around Sarah. Her heart feels bigger. Literally. Maximum health +5, and fully healed!"],
+    ["Fairy","Spend it wisely! Now, if you'll excuse me — I've been sitting on this cloud for a century, and I'd like to see literally anything else. Toodles!"]
+  ],()=>{maxHealth+=5;health=maxHealth;l2.fairy=2;s.inv=1.5;burst(center(),s.y+20,30,["#ffb3e6","#fff","#f4c84f","#7cc6f2"]);
+    l2.foe={x:center()<SKYTOP.x+SKYTOP.w/2?SKYTOP.x+SKYTOP.w-16:SKYTOP.x+16,min:SKYTOP.x+14,max:SKYTOP.x+SKYTOP.w-14,base:SKYTOP.y,dir:-1,alive:true,flat:0,speed:55};
+    sayToast("Max health is now "+maxHealth+"! …Uh-oh. Something nasty drifted in on the wind as the fairy left.")});
 }
 function skyDoor(){
   if(!has("Smudgy Key")){sayToast(l2.fightDone?"Locked. The keyhole is inky and smudge-shaped. One of those Smudges dropped a key, didn't it?":"Locked tight. One of the Smudges is carrying the key!");return}
@@ -1147,13 +1177,21 @@ function mapleFinale(){
 }
 function dropDoorKey(m){spill(m.x,G-60,"item","Smudgy Key",-s.face*60);burst(m.x,G-50,18,["#b98ad8","#fff","#f4c84f"]);sayToast("The Smudge drops a key! Grab it!")}
 function nibJab(){
-  if(jabT>0)return;jabT=.32;const hx=center()+s.face*55,list=scene==="festival"?fsm:scene==="outside"?smudges:[];let hit=0;
-  for(const m of list){if(!m.alive)continue;if(Math.abs(m.x-hx)<44&&s.y+s.h>G-80){m.alive=false;hit++;if(m.key)dropDoorKey(m);burst(m.x,G-20,14,[INK,"#5b5277","#fff"]);spill(m.x,G-40,"coin",null,s.face*80)}}
+  if(jabT>0)return;jabT=.32;const hx=center()+s.face*55,list=scene==="festival"?fsm.concat(l2.foe?[l2.foe]:[]):scene==="outside"?smudges:[];let hit=0;
+  for(const m of list){if(!m.alive)continue;const base=m.base??G;if(Math.abs(m.x-hx)<44&&s.y+s.h>base-80&&s.y<base){m.alive=false;hit++;if(m.key)dropDoorKey(m);burst(m.x,G-20,14,[INK,"#5b5277","#fff"]);spill(m.x,G-40,"coin",null,s.face*80)}}
   if(hit&&!l2.nibCheer){l2.nibCheer=true;sayToast("JAB! Nib pokes the Smudge into confetti — and a coin pops out!")}
 }
 
 // ---- per-frame festival logic ----
 function updateFestival(dt,oldFeet){
+  CLOUDS.forEach((c,i)=>{if(!l2.cloudCoins[i]&&Math.abs(center()-(c.x+c.w/2))<26&&s.y<c.y-8&&s.y+s.h>c.y-40){l2.cloudCoins[i]=1;coins++;burst(c.x+c.w/2,c.y-22,8,["#f4c84f","#fff"])}});
+  if(l2.fairy===2&&l2.fy>-400){l2.fx+=160*dt;l2.fy-=120*dt}
+  if(!l2.fairy&&s.ground&&s.y+s.h<=SKYTOP.y+2&&s.x+s.w>SKYTOP.x&&s.x<SKYTOP.x+SKYTOP.w){fairyVisit();return}
+  const m=l2.foe;if(m){if(!m.alive)m.flat=Math.min(1,m.flat+dt*3);else{
+    m.x+=m.dir*m.speed*dt;if(m.x<m.min||m.x>m.max){m.dir*=-1;m.x=clamp(m.x,m.min,m.max)}
+    const top=m.base-32;if(s.x+s.w>m.x-20&&s.x<m.x+20&&s.y+s.h>top&&s.y<m.base){
+      if(s.vy>0&&oldFeet<=top+14){m.alive=false;s.vy=-430;burst(m.x,top,14,[INK,"#5b5277","#fff"]);coins+=3;sayToast("Stomped the sky Smudge! +3 coins.")}
+      else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;if(health<=0){health=maxHealth;scene=checkpointScene;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples… then uncrumples at the Save Block.")}else sayToast("Ouch! Smudged! (-1 health)")}}}}
   if(l2.doorY!=null&&l2.doorY<G){l2.doorY=Math.min(G,l2.doorY+dt*900);if(l2.doorY>=G){shake=.6;burst(DOOR_X,G-10,20,["#5b5277","#fff","#b98ad8"])}}
   if(!l2.cardTaken&&Math.abs(center()-640)<26){l2.cardTaken=true;addItem("Recipe Card");burst(640,G-64,16,["#f4c84f","#fff","#e5577b"]);sayToast("Found a Recipe Card: Turnip-Butter Tonic! (Turnip + Butter Pat → Health Potion.) Chef Crumb can cook it.")}
   if(l2.trail&&!l2.nibMet&&Math.abs(center()-2770)<40&&s.y+s.h<=170){meetNib();return}
@@ -1178,7 +1216,7 @@ function updateFestival(dt,oldFeet){
       const top=G-32;if(s.x+s.w>m.x-20&&s.x<m.x+20&&s.y+s.h>top&&s.y<G){
         if(s.vy>0&&oldFeet<=top+14){m.alive=false;s.vy=-430;burst(m.x,top,14,[INK,"#5b5277","#fff"]);spill(m.x,top-6,"coin",null,m.dir*70);if(m.key)dropDoorKey(m)}
         else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;
-          if(health<=0){health=10;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}}
+          if(health<=0){health=maxHealth;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}}
     l2.drain=Math.min(.9,l2.drain+alive*.03*dt);
     if(!alive){l2.fightDone=true;start([["Nib","Pointy justice!"],["Dab","Look — the painting's getting its color back!"]],()=>{l2.maple=camera-60})}
   }
@@ -1354,6 +1392,25 @@ function drawSkyDoor(){
     g.fillStyle="#3a3352";for(const [dx,h] of[[-18,22],[-4,34],[12,18]]){rr(DOOR_X+dx,y-140,7,h,3);g.fill()}
     cut(()=>{g.beginPath();g.arc(DOOR_X+16,y-70,6,0,7)},"#b98ad8",{edge:3,shadow:false});g.fillStyle=INK;circle(DOOR_X+16,y-71,2);g.fill();g.fillRect(DOOR_X+15,y-70,2,6)}
 }
+function drawSkyClouds(){
+  CLOUDS.forEach((c,i)=>{const x=c.x,y=c.y,w=c.w;cut(()=>{g.beginPath();g.moveTo(x,y+16);g.arc(x+w*.22,y+6,w*.2,Math.PI*.8,Math.PI*1.9);g.arc(x+w*.52,y,w*.26,Math.PI*1.05,Math.PI*1.95);g.arc(x+w*.8,y+6,w*.2,Math.PI*1.2,Math.PI*2.2);g.lineTo(x+w,y+16);g.closePath()},"#fffdf8",{edge:6,line:2});
+    g.strokeStyle="#c8dff0";g.lineWidth=2;g.setLineDash([6,6]);g.beginPath();g.moveTo(x+8,y+12);g.lineTo(x+w-8,y+12);g.stroke();g.setLineDash([]);
+    if(!l2.cloudCoins[i])drawCoin(x+w/2,y-20+Math.sin(time*4+i)*3,9)});
+  if(l2.fairy&&l2.fy>-380){const bob=Math.sin(time*5)*5;sprite(l2.fx,l2.fy+40+bob,40,52,drawFairyBody,{sx:l2.fairy===2?1:-1});if(Math.random()<.4)parts.push({scene,x:l2.fx+(Math.random()-.5)*20,y:l2.fy+20,vx:(Math.random()-.5)*40,vy:20,life:.8,rot:0,vr:3,color:["#ffb3e6","#fff","#f4c84f"][Math.floor(Math.random()*3)]})}
+  const m=l2.foe;if(m){if(m.alive){sprite(m.x,m.base+2,46,36,drawSmudgeBody,{sx:m.dir>0?-1:1,sy:1+Math.sin(time*10)*.06})}else if(m.flat<1)sprite(m.x,m.base+2,46,36,drawSmudgeBody,{sy:Math.max(.05,.2-m.flat*.2),sx:1.4,alpha:1-m.flat})}
+}
+function drawFairyBody(){
+  g.strokeStyle=INK;g.lineWidth=1.8;
+  g.save();g.globalAlpha=.75;g.fillStyle="#cfeeff";const f=Math.sin(time*30)*.25;
+  g.beginPath();g.ellipse(9,20,9,14,-.6+f,0,7);g.fill();g.stroke();g.beginPath();g.ellipse(31,20,9,14,.6-f,0,7);g.fill();g.stroke();g.restore();
+  g.fillStyle="#ff8fc8";g.beginPath();g.moveTo(14,26);g.lineTo(26,26);g.lineTo(31,46);g.lineTo(9,46);g.closePath();g.fill();g.stroke();
+  g.strokeStyle="#ffdec2";g.lineWidth=3;g.beginPath();g.moveTo(26,30);g.lineTo(34,24);g.stroke();
+  g.fillStyle="#f4c84f";g.strokeStyle=INK;g.lineWidth=1.2;star(36,20,5,2);g.fill();g.stroke();
+  g.lineWidth=1.8;g.fillStyle="#ffdec2";circle(20,16,8);g.fill();g.stroke();
+  g.fillStyle="#7a4ab0";g.beginPath();g.arc(20,13,8.5,Math.PI,0);g.fill();g.stroke();circle(20,4,3.5);g.fill();g.stroke();
+  g.fillStyle=INK;circle(17,17,1.3);g.fill();circle(23,17,1.3);g.fill();g.lineWidth=1.2;g.beginPath();g.arc(20,19,2,.2,2.9);g.stroke();
+  g.lineWidth=2;g.strokeStyle=INK;g.beginPath();g.moveTo(16,46);g.lineTo(16,51);g.moveTo(24,46);g.lineTo(24,51);g.stroke();
+}
 function drawTrail(){
   if(!l2.trail){g.save();g.translate(2770,128);g.rotate(time*2);g.fillStyle="#fff6a8";g.strokeStyle="#fff";g.lineWidth=2;star(0,0,11+Math.sin(time*6)*3,3);g.fill();g.stroke();g.restore();return}
   for(const p of TRAIL){g.save();g.setLineDash([7,5]);cut(()=>rr(p.x,p.y,p.w,14,5),"#c9f2f5",{edge:5,line:2.5,ink:"#2a8c99"});g.restore();
@@ -1361,8 +1418,10 @@ function drawTrail(){
   if(!l2.nibMet)sprite(2770,165,24,58,drawNibBody,{rot:Math.sin(time*3)*.12});
 }
 function drawFestival(){
+  sky();g.save();g.translate(0,-camY);
   drawOutsideBackground(l2.tearT>0?{x:2050,t:l2.tearT}:null);
   g.save();g.translate(-camera,0);
+  drawSkyClouds();
   drawGround();drawBunting();drawGate(20);
   shopFront(1060,140,"HATTER'S","#f7d6e0","#d0648f");shopFront(1820,140,"BAKERY","#ffe9c7","#f08a3c");shopFront(2080,140,"LIBRARY","#e3f2ff","#3b8fd6");drawChest(2121,LIB_ROOF.y-38,l2.roofChest,"#f4c84f");if(!l2.roofChest){g.fillStyle="#fff6a8";star(2172,LIB_ROOF.y-52,6+Math.sin(time*6)*2,2.4);g.fill()}shopFront(2830,120,"WEATHER","#e9f4e0","#5fb35a");
   booth(420,120,"REGISTRATION","#17a398",()=>npc("Registrar",420));
@@ -1384,7 +1443,7 @@ function drawFestival(){
   drawLoot();drawDoodles();drawParticles();drawSarah();
   const hs=hideSpot();if(hs)drawCrate(hs);
   if(l2.maple!=null){groundShadow(l2.maple,G+2,20);sprite(l2.maple,G+3,50,76,drawMapleBody,{sy:1+Math.abs(Math.sin(time*9))*.03})}
-  g.restore();
+  g.restore();g.restore();
 }
 function objectiveL2(){
   if(l2.done)return"Level 2 complete! Level 3 is coming soon.";

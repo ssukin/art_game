@@ -50,7 +50,9 @@ Sarah steps through the gate into the Town Art Festival. Townsfolk recognize Dab
 6. **Contest results.** Juniper wins with a painting of the legendary adventurer, who looks a lot like Sarah, plus Dab. The town connects the dots. Sarah isn't so sure.
 7. **The sky cracks again.** Smudges drain color from the painting, and a door falls out of the sky. Jab or stomp the Smudges. One of them drops the **Smudgy Key**. Mrs. Maple arrives to tell Sarah she must save the town. Unlock the sky door to finish Level 2 ("Level 3 coming soon!").
 
-**Balloons:** Inka at the art-supply stand sells balloons for 5 coins. Use one from your Pockets and Sarah's next jump goes twice as high, which is the only way up to the treasure chest on the Library roof (25 coins and a Health Potion).
+**Balloons and the sky:** Inka at the art-supply stand sells balloons for 5 coins. Use one from your Pockets and Sarah's next jump goes twice as high, the only way onto the Library roof. The rooftop chest holds a Turnip, a Butter Cheese recipe (2 Butter Pats → Cheese Wedge, +3 health) and 15 coins. From the roof, four clouds with a coin each lead up to a fairy who raises max health by 5 and heals Sarah, once. After she flies off, a Smudge guards the top cloud.
+
+Mr. Umber (the first townsperson) teaches the hiding trick: hold Down/S next to a crate or hay bale.
 
 The town is set up as a future hub. It has Chef Crumb's healing recipes, Gus and his clogged pipe (a hook for later), shops "Closed for Festival" with joke signs, two Save Blocks, and hidden doodles for Dab to find.
 
