@@ -991,7 +991,6 @@ function festInteract(){
   const T=(label,fn)=>[label,fn,true];
   if(near(npcX("Mr. Umber"),26))return T("Talk to Mr. Umber",umber);
   if(near(npcX("Pippa"),24))return T("Talk to Pippa",pippa);
-  if(near(LAKE_DOOR,36))return["Go to the lake",()=>{l2.lakeFrom="festival";goScene("lake",170)}];
   if(near(1112,22))return["Inspect the balloon dog",()=>sayToast(l2.dogGone?"The empty pedestal says \"Good Boy\" (on loan). On loan to you, technically.":"A giant balloon dog sculpture titled \"Good Boy.\" It squeaks when the wind blows. Very good boy.")];
   if(near(1166,16))return["Inspect the ice duck",()=>sayToast("\"Ice Duck (Melting).\" The artist calls it a meditation on impermanence. It is mostly a puddle now.")];
   if(near(560,40))return T("Talk to Potter Pat",potter);
@@ -1557,7 +1556,7 @@ function drawFossil(){
 const SCENE_NPCS={orchard:{"Registrar":1250},lake:{"Waffles":530},under:{"Bouncer":770,"Bartender":570}};
 let pinWorn=false,hasReel=false,dogOn=false;
 const fish={ph:0,t:0,bx:1360,need:0,n:0,next:0,dip:0,wait:0};
-function resetL2Extra(){Object.assign(l2,{lakeFrom:"festival",lakeCoins:[0,0,0,0,0],holeSign:false,festReg:false,orchCoins:[0,0,0,0,0],orchMsg:false,mapTaken:false,underIntro:false,dogUsed:false,tramp:false,on2F:false,dogGone:false,wafflesTalk:0,bouncerTalk:0,barTalk:0,reelMet:false,fishCaught:0});fish.ph=0}
+function resetL2Extra(){Object.assign(l2,{lakeFrom:"orchard",lakeCoins:[0,0,0,0,0],holeSign:false,festReg:false,orchCoins:[0,0,0,0,0],orchMsg:false,mapTaken:false,underIntro:false,dogUsed:false,tramp:false,on2F:false,dogGone:false,wafflesTalk:0,bouncerTalk:0,barTalk:0,reelMet:false,fishCaught:0});fish.ph=0}
 const worldMin=()=>scene==="festival"?FEST_MIN:0;
 function goScene(name,x,y){scene=name;s.x=x-s.w/2;s.y=y??G-s.h;s.vy=0;fish.ph=0;camY=0;camera=clamp(s.x-350,worldMin(),Math.max(worldMin(),worldW()-W));dab.x=center()-30;dab.y=s.y+20}
 
@@ -1652,7 +1651,6 @@ function drawFestEntrance(){
   else{cut(()=>rr(-38,-16,76,34,6),"#b7b5ae",{edge:5,ink:"#77746c"});g.strokeStyle="#9a9890";g.lineWidth=2;for(const y of[-4,6]){g.beginPath();g.moveTo(-26,y);g.lineTo(26,y);g.stroke()}}
   g.restore();g.textAlign="left";
   // door to the lake
-  drawLakeDoor(LAKE_DOOR);
   cut(()=>rr(-886,G-70,4,70,1),"#a8714a");cut(()=>rr(-900,G-96,74,24,5),"#fff3d6",{edge:4,shadow:false});g.fillStyle=INK;g.font="bold 10px "+FONT;g.fillText("← ORCHARD",-896,G-80);
 }
 function drawLakeDoor(x){cut(()=>{g.beginPath();g.moveTo(x-40,G);g.lineTo(x-40,G-110);g.arc(x,G-110,40,Math.PI,0);g.lineTo(x+40,G);g.closePath()},"#7cc488",{edge:8});
