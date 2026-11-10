@@ -40,7 +40,7 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 
 ## Level 2 — The Festival Fiasco
 
-**The orchard.** Level 2 starts in the town orchard: a sign that says "The Orchard" and four apple trees (apples out of reach for now). At the end is the **Registration table**. Entry costs 5 coins, or it's free if you're *wearing* your Festival Pin (Pockets → Key Items → Festival Pin → Wear). The Registrar notices whether you're wearing it, then tells Sarah about the art contest. The same Registrar takes your contest entry later.
+**The orchard.** Level 2 starts in the town orchard: a sign that says "The Orchard" and four apple trees (apples out of reach for now). A path in the orchard leads to the lake, where a lakeside tree has 5 coins in its branches, so you can earn the entry fee before registering. Walk left out of the orchard to go back to the (cleared) Level 1 road. If you skipped the Festival Pin on Mrs. Maple's roof, it's still there. At the end is the **Registration table**. Entry costs 5 coins, or it's free if you're *wearing* your Festival Pin (Pockets → Key Items → Festival Pin → Wear). The Registrar notices whether you're wearing it, then tells Sarah about the art contest. The same Registrar takes your contest entry later.
 
 **The main story:**
 1. **Arrive.** Townsfolk recognize Dab from the old stories and wonder whether Sarah is the legendary adventurer. Mr. Umber teaches the hiding trick (hold Down/S by a crate).
