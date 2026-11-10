@@ -6,26 +6,34 @@ A small, self-contained 2D browser game prototype. It uses one HTML file, simple
 
 Open `index.html` in a desktop browser, or upload it to a GitHub repository and enable GitHub Pages.
 
+## Look and feel
+
+Level 1 is styled as a paper-craft adventure: characters are flat cut-outs with white paper borders that flip paper-thin when they turn around, the world is built from blocky cardstock hills and patterned ground blocks, and everyone talks in comic speech bubbles. Everything is still drawn in code on a canvas, with no downloaded art.
+
 ## Controls
 
 - **A/D** or **Left/Right arrows**: move
-- **W** or **Up arrow**: jump or climb up Mrs. Maple's ladder
-- **S** or **Down arrow**: climb down Mrs. Maple's ladder
-- **Space**: activate nearby doors, chests, and people; advance dialogue
-- **Q**: use little buddy power to reveal nearby hidden things
-- **I**: open or close inventory; current objective appears under **Hints**
-- **R**: return to the last Save Block
+- **W** or **Up arrow**: jump, or climb up Mrs. Maple's ladder
+- **S** or **Down arrow**: climb down the ladder
+- **Space**: activate nearby doors, chests, signs and people; advance dialogue
+- **Q**: Buddy power — with Dab, sniff out hidden doodles (they burst into coins)
+- **I**: open or close Sarah's Pockets (inventory)
+- **R**: return to the Save Block
 
-Health is shown as a number out of 10.
+A pink **!** appears over Sarah when she's next to someone she can talk to (people, flowers and the Save Block). The on-screen Activate button works like Space (and becomes **Continue** during dialogue). You can also click the screen to advance dialogue.
 
-The on-screen **Activate** button works like Space. Dialogue advances with Space or the Continue button; arrow keys do not advance it.
+## Sarah's Pockets
+
+The inventory has four pockets: **Items**, **Keys**, **Buddy** (Dab) and **Hints** (current goal plus a checklist of what you've done). Use the arrow keys to pick a slot, **Tab / Q / E** to switch pockets, and **Space** to use an item (the Health Potion restores your health). Mouse clicks work too.
 
 ## Level 1 path
 
-Sarah starts in her bedroom with a jumpable bed and is on her way to the town art festival. Open the wardrobe, then walk into the Health Potion and Road Chest Key to collect each; each disappears when touched. Open her front door with Space, then press Space again to go outside. The town gate has appeared overnight; the gate dialogue plays only on Sarah's first exit. Explore the road. The first flower points her toward the fountain's upward stream, and another flower gives her three coins.
+Sarah starts in her bedroom (the bed is bouncy). Open the wardrobe, then walk into the Health Potion and Road Chest Key to pick them up. Open the front door with Space, then press Space again to go outside. On her first exit Sarah notices a gate that appeared overnight — locked, with the art festival on the other side.
 
-Use the Road Chest Key from the wardrobe to unlock the first chest and collect its **Turnip** from the ground. Jump into the fountain's upward-moving water to get **Grandma's Chest Key**. At Mrs. Maple's house, use the nearby stack of art crates to jump onto the roof and collect the Festival Pin. A lightning quake reveals the crying gray flower. Continue past it to find a ladder leaning against a tree, then return to Mrs. Maple. The ladder stays in inventory while she talks and sets it up; after the exchange it is removed from inventory and becomes climbable. Climb up or down to grandma's chest. Use Grandma's Chest Key to meet Dab, Sarah's paintbrush little buddy. Keys and Dab have separate sections in the inventory, which scrolls when its contents need more room. Talk to Mrs. Maple again after giving her the ladder to hear her ask whether you climbed it.
+Along the road: a mailbox with a letter from the Festival Committee and a flower that tells her the fountain is spraying the wrong way. Use the Road Chest Key on the chest to release a **Turnip**. Jump into the fountain's upward stream to ride it up and grab **Grandma's Chest Key**. The Save Block restores health (and has opinions). Another flower gives Sarah three coins. Climb the art crates onto Mrs. Maple's roof for the **Festival Pin**.
 
-Use Dab on the gray flower to restore its color. It thanks Sarah and gives her the **Town Gate Key**. Return to the gate at the left and unlock it to see: “Thanks for playing Level 1! Level 2 will be created soon!”
+Past Mrs. Maple's house, lightning rips the sky. One flower at the far end of the road turns gray and starts crying, and ink **Smudges** appear — stomp them for a coin, or lose 1 health if they touch you. Grab the ladder leaning against the tree and bring it to Mrs. Maple, who sets it against her shelf. Climb up and use Grandma's Chest Key to free **Dab**, Sarah's paintbrush little buddy.
+
+Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gate Key**. Return to the gate at the far left and unlock it to see: "Thanks for playing Level 1! Level 2 will be created soon!"
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.
