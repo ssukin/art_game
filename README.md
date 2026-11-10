@@ -24,6 +24,6 @@ Sarah starts in her bedroom with a bed and is on her way to the town art festiva
 
 Open the first chest and collect its **Turnip** from the ground. Jump into the fountain's upward-moving water to get the **Chest Key**. At Mrs. Maple's house, use the nearby stack of art crates to jump onto the roof and collect the Festival Pin. A lightning quake reveals the crying gray flower. Continue past it to find a ladder leaning against a tree, then return to Mrs. Maple, give her the ladder, and climb up or down to grandma's chest. Use the Chest Key to meet and equip Dab, Sarah's little buddy. Talk to Mrs. Maple again after giving her the ladder to hear her ask whether you climbed it.
 
-Use Dab on the gray flower to restore its color. It thanks Sarah and gives her the **Town Gate Key**. Return to the gate at the left and unlock it to finish Level 1.
+Use Dab on the gray flower to restore its color. It thanks Sarah and gives her the **Town Gate Key**. Return to the gate at the left and unlock it to see: “Thanks for playing Level 1! Level 2 will be created soon!”
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.
