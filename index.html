@@ -98,6 +98,7 @@ const useOne=n=>{if(!has(n))return;counts[n]=(counts[n]||1)-1;if(counts[n]<=0)re
 function sayToast(t){toastText=t;toastTimer=3.4;live.textContent=t}
 function burst(x,y,n=14,colors=["#f4c84f","#e5577b","#17a398","#7cc6f2","#fff"]){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=120+Math.random()*220;parts.push({scene,x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-160,life:1+Math.random()*.6,rot:Math.random()*6,vr:(Math.random()-.5)*12,color:colors[i%colors.length]})}}
 function spill(x,y,type,name,dx){loot.push({scene,x,y,vx:dx??(Math.random()-.5)*180,vy:-380,type,name,got:false,wait:.45})}
+function doorLabel(x,y,text,col="#3bb6c4"){g.font="bold 12px "+FONT;const w=Math.max(72,g.measureText(text).width+22);cut(()=>rr(x-w/2,y,w,24,8),col,{edge:5});g.fillStyle="#fff";g.textAlign="center";g.fillText(text,x,y+17);g.textAlign="left"}
 function rr(x,y,w,h,r){g.beginPath();g.roundRect(x,y,w,h,r)}
 function circle(x,y,r){g.beginPath();g.arc(x,y,r,0,Math.PI*2)}
 function wrap(text,maxW,font){g.font=font;const out=[];for(const para of text.split("\n")){let line="";for(const w of para.split(" ")){const t=line?line+" "+w:w;if(line&&g.measureText(t).width>maxW){out.push(line);line=w}else line=t}out.push(line)}return out}
@@ -216,6 +217,7 @@ function getInteract(){
     if(near(833,55))return[doorOpen?"Go outside":"Open the door",()=>{if(!doorOpen){doorOpen=true;sayToast("The door swings open. Fresh air! Unsupervised daylight!")}else goOutside()}];
   }
   if(scene==="outside"){
+    if(level===2&&near(255,60))return["Go through the gate",()=>goScene("orchard",70)];
     if(near(255)&&!gateOpen)return[gateKey?"Unlock the gate":"Inspect the gate",gate];
     if(near(465,50)&&onFloor())return[doorOpen?"Go inside":"Open your door",()=>{if(!doorOpen){doorOpen=true;sayToast("Your front door, reporting for duty.")}else{scene="bedroom";s.x=790;s.y=G-s.h;doorOpen=false;sayToast("Back in your room. It still smells like paint.")}}];
     if(near(1515,50)&&onFloor())return[residentDoorOpen?"Go inside":"Knock on the door",()=>{if(!residentDoorOpen){residentDoorOpen=true;sayToast("Knock knock. The door opens itself. Very trusting neighborhood.")}else{scene="resident";s.x=93;s.y=G-s.h;residentDoorOpen=false;camera=0}}];
@@ -282,7 +284,7 @@ function roadChest(){
   sayToast("Click! A Turnip bounces out and lands with tremendous dignity.");
 }
 function saveBlock(){
-  checkpoint=1180;health=maxHealth;burst(1201,G-70,12,["#f4c84f","#fff"]);
+  checkpoint=1180;checkpointScene="outside";health=maxHealth;burst(1201,G-70,12,["#f4c84f","#fff"]);
   sayToast("Saved! Health restored. Press R any time to come back to this Save Block.");
 }
 function sadFlower(){
@@ -871,7 +873,7 @@ function drawBedroom(){
     if(!roadChestKeyCollected)drawIcon("Road Chest Key",668,396+Math.sin(time*4+1)*3,.6);
   }else{cut(()=>rr(608,292,36,140,6),"#b07ab5",{edge:0,line:2,shadow:false});cut(()=>rr(646,292,36,140,6),"#b07ab5",{edge:0,line:2,shadow:false});g.fillStyle="#f4c84f";circle(638,362,4);g.fill();circle(652,362,4);g.fill()}
   // door
-  cut(()=>rr(784,262,98,180,14),"#8a5a8f",{edge:9});
+  cut(()=>rr(784,262,98,180,14),"#8a5a8f",{edge:9});doorLabel(833,226,"OUTSIDE →");
   if(doorOpen){g.fillStyle="#a6def5";rr(792,272,82,166,8);g.fill();g.fillStyle="#6cc06b";g.fillRect(792,400,82,38);cut(()=>{g.beginPath();g.moveTo(792,276);g.lineTo(770,284);g.lineTo(770,440);g.lineTo(792,438);g.closePath()},"#d08a52",{edge:5,shadow:false})}
   else{cut(()=>rr(792,272,82,166,8),"#d08a52",{edge:0,line:2,shadow:false});g.fillStyle="#f4c84f";circle(862,362,5);g.fill();g.strokeStyle=INK;g.lineWidth=1.5;g.stroke()}
   label("SARAH'S ROOM");drawLoot();drawDoodles();drawParticles();drawSarah();
@@ -887,7 +889,7 @@ function drawResident(){
   g.fillStyle="#f0a24a";g.strokeStyle=INK;g.lineWidth=2;for(const ex of[346,357]){g.beginPath();g.moveTo(ex-4,G-28);g.lineTo(ex,G-36);g.lineTo(ex+4,G-28);g.fill();g.stroke()}
   g.fillStyle=INK;g.fillRect(347,G-21,4,1.5);g.fillRect(355,G-21,4,1.5);g.font="bold 12px "+FONT;g.fillText("z",368,G-36-Math.sin(time*2)*4);
   // door
-  cut(()=>rr(68,272,92,170,16),"#3b8fd6",{edge:9});
+  cut(()=>rr(68,272,92,170,16),"#3b8fd6",{edge:9});doorLabel(114,236,"← OUTSIDE");
   if(residentDoorOpen){g.fillStyle="#a6def5";rr(76,282,76,156,8);g.fill();g.fillStyle="#6cc06b";g.fillRect(76,404,76,34)}else{cut(()=>rr(76,282,76,156,8),"#7cc6f2",{edge:0,line:2,shadow:false});g.fillStyle="#f4c84f";circle(140,370,5);g.fill()}
   // high shelf with grandma's chest
   cut(()=>rr(400,280,540,22,6),"#b5713f",{edge:8});cut(()=>rr(424,302,14,138,3),"#a8714a",{edge:5});cut(()=>rr(902,302,14,138,3),"#a8714a",{edge:5});
@@ -976,7 +978,7 @@ function startLevel2(){
   start([
     ["Narrator","The gate creaks open. Past it, the road winds through the town orchard, and festival music is already drifting over the trees."],
     ["Dab","Ooh, apples! Can we shake the trees?"],
-    ["Sarah","The sign says \"coming soon.\" I don't make the rules."]
+    ["Sarah","They're way too high. Maybe another day."]
   ],()=>sayToast("Walk through the orchard to the festival registration table →"));
 }
 
@@ -989,7 +991,6 @@ function festInteract(){
   const T=(label,fn)=>[label,fn,true];
   if(near(npcX("Mr. Umber"),26))return T("Talk to Mr. Umber",umber);
   if(near(npcX("Pippa"),24))return T("Talk to Pippa",pippa);
-  if(near(LAKE_DOOR,36))return["Go to the lake",()=>goScene("lake",170)];
   if(near(1112,22))return["Inspect the balloon dog",()=>sayToast(l2.dogGone?"The empty pedestal says \"Good Boy\" (on loan). On loan to you, technically.":"A giant balloon dog sculpture titled \"Good Boy.\" It squeaks when the wind blows. Very good boy.")];
   if(near(1166,16))return["Inspect the ice duck",()=>sayToast("\"Ice Duck (Melting).\" The artist calls it a meditation on impermanence. It is mostly a puddle now.")];
   if(near(560,40))return T("Talk to Potter Pat",potter);
@@ -1294,8 +1295,8 @@ function drawPersonBody(L){
   if(L.hat==="cap"){g.fillStyle=L.hatCol;g.beginPath();g.arc(25,16,12,Math.PI,0);g.closePath();g.fill();g.stroke();rr(25,14,18,4,2);g.fill();g.stroke()}
   if(L.hat==="top"){g.fillStyle=L.hatCol;rr(15,11,20,4,1);g.fill();g.stroke();rr(18,-1,14,13,2);g.fill();g.stroke();g.fillStyle="#e5577b";g.fillRect(18.5,8,13,3)}
 }
-function npc(name,x,face){const L=LOOKS[name],sc=L.kid?.78:1,f=face??(center()<x?-1:1);groundShadow(x,G+2,18*sc);
-  sprite(x,G+3,50,78,()=>drawPersonBody(L),{sx:sc*f,sy:sc*(1+Math.sin(time*2+x)*.012)});
+function npc(name,x,face,dy=0){const L=LOOKS[name],sc=L.kid?.78:1,f=face??(center()<x?-1:1);if(!dy)groundShadow(x,G+2,18*sc);
+  sprite(x,G+3+dy,50,78,()=>drawPersonBody(L),{sx:sc*f,sy:sc*(1+Math.sin(time*2+x)*.012)});
   if(name==="Pippa"){const bx=x+16*f,by=G-130+Math.sin(time*2)*4;g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(x+12*f,G-40);g.quadraticCurveTo(bx+6,G-80,bx,by+22);g.stroke();cut(()=>{g.beginPath();g.ellipse(bx,by,15,19,0,0,7)},"#e5577b",{edge:5});g.fillStyle="rgba(255,255,255,.6)";circle(bx-5,by-7,4);g.fill()}
 }
 function drawNibBody(){
@@ -1339,13 +1340,82 @@ function booth(cx,w,title,col,inside){
   for(let sx=x-12,i=0;sx<x+w+12;sx+=12,i++){g.fillStyle=i%2?"#fffdf6":col;g.beginPath();g.arc(sx+6,G-136,6,0,Math.PI);g.fill();g.strokeStyle=INK;g.lineWidth=1.5;g.stroke()}
   g.font="bold 12px "+FONT;const tw=g.measureText(title).width+20;cut(()=>rr(cx-tw/2,G-188,tw,22,11),"#fffdf6",{edge:5,shadow:false});g.fillStyle=INK;g.textAlign="center";g.fillText(title,cx,G-172);g.textAlign="left";
 }
-function shopFront(x,w,name,wall,trim){
-  const h=178;cut(()=>rr(x,G-h,w,h,6),wall,{edge:8});
-  cut(()=>rr(x-8,G-h-16,w+16,22,5),trim,{edge:6});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText(name,x+w/2,G-h);
-  cut(()=>rr(x+14,G-h+28,w-28,46,6),"#a6def5",{edge:5,shadow:false});g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(x+w/2,G-h+28);g.lineTo(x+w/2,G-h+74);g.stroke();
-  cut(()=>rr(x+w/2-22,G-86,44,86,6),"#b5713f",{edge:5,shadow:false});
-  g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(x+w/2-12,G-70);g.lineTo(x+w/2,G-82);g.lineTo(x+w/2+12,G-70);g.stroke();
-  g.save();g.translate(x+w/2,G-70);g.rotate(Math.sin(time*1.5+x)*.05);cut(()=>rr(-36,0,72,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
+// Storefronts share one body (cut-paper wall, name band, window, door with a "closed" sign)
+// so the town feels consistent; each kind adds its own silhouette, window display and props.
+function shopFront(x,w,name,wall,trim,kind){
+  const h=178,top=G-h,cx=x+w/2,wy=top+28,ww=w-28;
+  shopBack(kind,x,w,top,wall,trim);
+  if(kind==="hat")cut(()=>{g.beginPath();g.moveTo(x,G);g.lineTo(x+6,top+6);g.quadraticCurveTo(x+6,top,x+12,top);g.lineTo(x+w-12,top);g.quadraticCurveTo(x+w-6,top,x+w-6,top+6);g.lineTo(x+w,G);g.closePath()},wall,{edge:8});
+  else if(kind==="lost"){g.save();g.translate(x,G);g.rotate(-.025);cut(()=>rr(0,-h,w,h,6),wall,{edge:8});g.restore()}
+  else cut(()=>rr(x,top,w,h,kind==="toy"?2:kind==="bakery"?14:6),wall,{edge:8});
+  shopWall(kind,x,w,top,wall,trim);
+  cut(()=>rr(x-8,top-16,w+16,22,kind==="bakery"?11:5),trim,{edge:6});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText(name,cx,top);
+  if(kind==="arcade"){g.fillStyle="#1b1730";g.fillRect(x+14,wy,ww,46)}
+  else if(kind==="pet"||kind==="bakery"){cut(()=>{g.beginPath();g.moveTo(x+14,wy+46);g.lineTo(x+14,wy+14);g.quadraticCurveTo(x+14,wy,x+30,wy);g.lineTo(x+w-30,wy);g.quadraticCurveTo(x+w-14,wy,x+w-14,wy+14);g.lineTo(x+w-14,wy+46);g.closePath()},"#a6def5",{edge:5,shadow:false})}
+  else cut(()=>rr(x+14,wy,ww,46,6),kind==="library"?"#f7e6c4":"#a6def5",{edge:5,shadow:false});
+  shopWindow(kind,x,w,wy,ww);
+  g.strokeStyle=INK;g.lineWidth=2;if(kind!=="arcade"&&kind!=="library"){g.beginPath();g.moveTo(cx,wy);g.lineTo(cx,wy+46);g.stroke()}
+  const doorCol={pet:"#3bb6c4",hat:"#8a2f5a",toy:"#e5463f",bakery:"#c58a52",library:"#3b5a8f",weather:"#4f8a5a",lost:"#7a5c99",arcade:"#5b2a6e"}[kind]||"#b5713f";
+  if(kind==="bakery"||kind==="library"||kind==="pet")cut(()=>{g.beginPath();g.moveTo(cx-22,G);g.lineTo(cx-22,G-64);g.arc(cx,G-64,22,Math.PI,0);g.lineTo(cx+22,G);g.closePath()},doorCol,{edge:5,shadow:false});
+  else cut(()=>rr(cx-22,G-86,44,86,kind==="toy"?2:6),doorCol,{edge:5,shadow:false});
+  g.fillStyle="#f4c84f";circle(cx+14,G-40,3);g.fill();
+  shopProps(kind,x,w,top,trim);
+  g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(cx-12,G-70);g.lineTo(cx,G-82);g.lineTo(cx+12,G-70);g.stroke();
+  g.save();g.translate(cx,G-70);g.rotate(Math.sin(time*1.5+x)*.05);cut(()=>rr(-36,0,72,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
+}
+function shopBack(kind,x,w,top,wall,trim){
+  const cx=x+w/2;
+  if(kind==="pet"){cut(()=>{g.beginPath();g.moveTo(x-10,top-10);g.lineTo(cx,top-64);g.lineTo(x+w+10,top-10);g.closePath()},trim,{edge:8});g.fillStyle="rgba(255,255,255,.35)";for(const [dx,dy] of[[-20,-34],[0,-46],[20,-34]]){circle(cx+dx,top+dy,5);g.fill()}}
+  if(kind==="bakery"){cut(()=>{g.beginPath();g.moveTo(x,top-8);g.quadraticCurveTo(x,top-58,cx,top-62);g.quadraticCurveTo(x+w,top-58,x+w,top-8);g.closePath()},"#ffb3c9",{edge:8});g.fillStyle="#fff";for(let i=0;i<7;i++){g.beginPath();g.ellipse(x+12+i*(w-24)/6,top-14,10,6,0,0,7);g.fill()}
+    g.fillStyle="#e5463f";circle(cx,top-66,9);g.fill();g.strokeStyle=INK;g.lineWidth=2;g.stroke();g.strokeStyle="#5fb35a";g.beginPath();g.moveTo(cx,top-74);g.quadraticCurveTo(cx+6,top-82,cx+10,top-80);g.stroke();
+    for(const [dx,c] of[[-30,"#7cc6f2"],[0,"#f4c84f"],[30,"#7cc488"],[-14,"#e5577b"],[16,"#b98ad8"]]){g.fillStyle=c;g.fillRect(cx+dx-3,top-40+(dx%7),6,3)}}
+  if(kind==="toy"){const n=Math.floor((w+16)/22);for(let i=0;i<n;i++)if(i%2===0)cut(()=>rr(x-8+i*22,top-36,22,22,2),["#e5463f","#f4c84f","#3b8fd6","#5fb35a"][(i/2)%4],{edge:4,shadow:false})}
+  if(kind==="weather"){cut(()=>{g.beginPath();g.arc(cx,top-12,w/2-4,Math.PI,0);g.closePath()},"#c9d6d4",{edge:8});g.strokeStyle="#9fb0ae";g.lineWidth=2;for(let a=0.3;a<3;a+=.5){g.beginPath();g.moveTo(cx,top-12);g.lineTo(cx+Math.cos(Math.PI+a)*(w/2-6),top-12+Math.sin(Math.PI+a)*(w/2-6));g.stroke()}}
+  if(kind==="arcade"){cut(()=>{g.beginPath();g.moveTo(x-12,top-10);g.lineTo(x+16,top-56);g.lineTo(x+w-16,top-56);g.lineTo(x+w+12,top-10);g.closePath()},"#1b1730",{edge:8});g.save();g.shadowColor="#7cf2ff";g.shadowBlur=10;g.fillStyle="#7cf2ff";g.font="bold 16px "+FONT;g.textAlign="center";g.fillText("★ PLAY ★",cx,top-26);g.restore();g.textAlign="left"}
+}
+function shopWall(kind,x,w,top,wall,trim){
+  const cx=x+w/2;
+  if(kind==="pet"){g.fillStyle="rgba(59,182,196,.25)";for(const [px,py] of[[x+16,top+100],[x+w-22,top+120],[x+20,top+150],[x+w-18,top+90]]){circle(px,py,5);g.fill();for(const [a,b] of[[-6,-7],[0,-9],[6,-7]]){circle(px+a,py+b,2.4);g.fill()}}}
+  if(kind==="hat"){g.fillStyle="rgba(255,255,255,.4)";for(let yy=top+84;yy<G;yy+=16)for(let xx=x+10+((yy/16)%2)*8;xx<x+w-8;xx+=16){g.beginPath();g.moveTo(xx,yy-4);g.lineTo(xx+4,yy);g.lineTo(xx,yy+4);g.lineTo(xx-4,yy);g.fill()}}
+  if(kind==="toy"){g.fillStyle="rgba(229,70,63,.12)";for(let yy=top+8;yy<G;yy+=24)for(let xx=x+((yy/24)%2)*12;xx<x+w;xx+=24)g.fillRect(xx,yy,12,12)}
+  if(kind==="bakery"){g.fillStyle="rgba(240,138,60,.18)";for(let xx=x+8;xx<x+w-4;xx+=18)g.fillRect(xx,top+80,9,98)}
+  if(kind==="library"){for(const px of[x+6,x+w-18]){cut(()=>rr(px,top+6,12,172,2),"#fffdf6",{edge:3,shadow:false});g.strokeStyle="#c8d6e6";g.lineWidth=1.5;for(let i=1;i<3;i++){g.beginPath();g.moveTo(px+i*4,top+10);g.lineTo(px+i*4,G-4);g.stroke()}}}
+  if(kind==="weather"){cut(()=>rr(x+w-16,top+86,8,64,4),"#fffdf6",{edge:3,shadow:false});g.fillStyle="#e5463f";rr(x+w-14,top+110+Math.sin(time)*6,4,38-Math.sin(time)*6,2);g.fill();circle(x+w-12,top+150,6);g.fill()}
+  if(kind==="lost"){g.save();g.globalAlpha=.25;g.fillStyle="#2b2540";g.font="bold 60px "+FONT;g.textAlign="center";g.fillText("?",x+22,top+150);g.fillText("?",x+w-20,top+130);g.restore();g.textAlign="left"}
+  if(kind==="arcade"){for(let i=0;i<14;i++){const on=Math.floor(time*4+i)%2;g.fillStyle=on?"#f4c84f":"#5b5277";const px=i<7?x+6+i*(w-12)/6:x+6+(i-7)*(w-12)/6,py=i<7?top+6:G-6;circle(px,py,3);g.fill()}
+    for(let i=0;i<5;i++){const on=Math.floor(time*4+i)%2;g.fillStyle=on?"#ff8fe8":"#5b5277";circle(x+6,top+30+i*30,3);g.fill();circle(x+w-6,top+30+i*30,3);g.fill()}}
+}
+function shopWindow(kind,x,w,wy,ww){
+  const cx=x+w/2;g.strokeStyle=INK;g.lineWidth=1.5;
+  if(kind==="pet"){g.fillStyle="rgba(255,255,255,.7)";circle(x+40,wy+28,13);g.fill();g.stroke();g.fillStyle="#f08a3c";g.beginPath();g.ellipse(x+40+Math.sin(time*2)*4,wy+30,5,3,0,0,7);g.fill();
+    g.fillStyle="#2b2540";g.beginPath();g.ellipse(x+w-40,wy+36,10,8,0,0,7);g.fill();circle(x+w-40,wy+22,7);g.fill();g.beginPath();g.moveTo(x+w-46,wy+18);g.lineTo(x+w-45,wy+10);g.lineTo(x+w-41,wy+16);g.moveTo(x+w-34,wy+18);g.lineTo(x+w-35,wy+10);g.lineTo(x+w-39,wy+16);g.fill();g.strokeStyle="#2b2540";g.lineWidth=3;g.beginPath();g.moveTo(x+w-30,wy+40);g.quadraticCurveTo(x+w-22,wy+36+Math.sin(time*3)*4,x+w-26,wy+26);g.stroke()}
+  if(kind==="hat"){for(const [hx,c,tp] of[[x+38,"#2b2540","top"],[x+w-38,"#e5577b","bow"]]){g.fillStyle="#8a6a4d";g.fillRect(hx-1,wy+24,3,22);g.fillStyle=c;if(tp==="top"){rr(hx-14,wy+20,28,4,2);g.fill();g.stroke();rr(hx-9,wy+4,18,17,2);g.fill();g.stroke();g.fillStyle="#f4c84f";g.fillRect(hx-9,wy+15,18,3)}else{g.beginPath();g.ellipse(hx,wy+20,15,4,0,0,7);g.fill();g.stroke();g.beginPath();g.arc(hx,wy+18,10,Math.PI,0);g.fill();g.stroke()}}}
+  if(kind==="toy"){g.fillStyle="#c98a5a";circle(x+40,wy+28,11);g.fill();g.stroke();circle(x+32,wy+18,5);g.fill();g.stroke();circle(x+48,wy+18,5);g.fill();g.stroke();g.fillStyle=INK;circle(x+36,wy+27,1.5);g.fill();circle(x+44,wy+27,1.5);g.fill();
+    g.fillStyle="#e5463f";circle(x+w-40,wy+30,11);g.fill();g.stroke();g.strokeStyle="#fff";g.lineWidth=3;g.beginPath();g.arc(x+w-40,wy+30,11,-.6,.6);g.stroke();g.strokeStyle="#f4c84f";g.beginPath();g.arc(x+w-40,wy+30,11,2.5,3.7);g.stroke()}
+  if(kind==="bakery"){for(const [bx,c] of[[x+32,"#d9a066"],[x+52,"#c98a5a"],[x+w-52,"#e0b06d"],[x+w-32,"#d9a066"]]){g.fillStyle=c;g.beginPath();g.ellipse(bx,wy+36,10,7,0,0,7);g.fill();g.stroke();g.strokeStyle="#fff3d6";g.lineWidth=1.5;g.beginPath();g.moveTo(bx-4,wy+33);g.lineTo(bx-1,wy+37);g.moveTo(bx+2,wy+32);g.lineTo(bx+5,wy+36);g.stroke();g.strokeStyle=INK}
+    g.fillStyle="#fffdf6";rr(x+20,wy+42,w-40,4,2);g.fill()}
+  if(kind==="library"){const cols=["#e5577b","#3b8fd6","#5fb35a","#f4c84f","#b98ad8","#f08a3c"];for(const sy of[wy+4,wy+25]){let bx=x+18;let i=0;while(bx<x+w-22){const bw=7+(i*7)%6;g.fillStyle=cols[(i+sy)%6];g.fillRect(bx,sy+(i%3),bw,18-(i%3));bx+=bw+1;i++}g.fillStyle="#8a6a4d";g.fillRect(x+16,sy+18,w-32,3)}}
+  if(kind==="weather"){cut(()=>{g.beginPath();g.arc(x+40,wy+22,9,0,7)},"#ffd65c",{edge:3,shadow:false});cut(()=>{g.beginPath();g.arc(x+46,wy+30,7,0,7);g.arc(x+56,wy+28,9,0,7);g.arc(x+64,wy+32,6,0,7)},"#fffdf8",{edge:3,shadow:false});
+    g.fillStyle="#3b8fd6";for(let i=0;i<3;i++){const d=(time*30+i*12)%24;g.fillRect(x+w-44+i*8,wy+16+d,2,6)}cut(()=>{g.beginPath();g.arc(x+w-40,wy+12,7,0,7);g.arc(x+w-30,wy+12,8,0,7)},"#c9d6d4",{edge:3,shadow:false})}
+  if(kind==="lost"){g.fillStyle="#e5577b";g.save();g.translate(x+38,wy+12);g.rotate(Math.sin(time*2)*.2);rr(-4,0,8,22,3);g.fill();g.stroke();rr(-4,16,14,8,4);g.fill();g.stroke();g.restore();
+    g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.arc(x+w-40,wy+22,12,Math.PI,0);g.stroke();g.fillStyle="#3b8fd6";g.beginPath();g.arc(x+w-40,wy+22,12,Math.PI,0);g.closePath();g.fill();g.stroke();g.beginPath();g.moveTo(x+w-40,wy+22);g.lineTo(x+w-40,wy+40);g.quadraticCurveTo(x+w-40,wy+44,x+w-45,wy+42);g.stroke()}
+  if(kind==="arcade"){const px=(xx,yy,pat,c)=>{g.fillStyle=c;pat.forEach((row,r)=>[...row].forEach((ch,k)=>{if(ch==="#")g.fillRect(xx+k*3,yy+r*3,3,3)}))};
+    const inv=["..#.....#..","...#...#...","..#######..",".##.###.##.","###########","#.#######.#","#.#.....#.#","...##.##..."];px(x+24,wy+10,inv,"#7cf2c0");px(x+w-58,wy+10+Math.round(Math.sin(time*4))*2,inv,"#ff8fe8")}
+}
+function shopProps(kind,x,w,top,trim){
+  const cx=x+w/2;
+  if(kind==="pet"){cut(()=>{g.beginPath();g.arc(cx-18,top-86,7,0,7);g.arc(cx-18,top-74,7,0,7);g.rect(cx-18,top-84,36,8);g.arc(cx+18,top-86,7,0,7);g.arc(cx+18,top-74,7,0,7)},"#fffdf6",{edge:5})}
+  if(kind==="hat"){cut(()=>{g.beginPath();g.ellipse(cx,top-22,48,8,0,0,7)},"#2b2540",{edge:6});cut(()=>rr(cx-28,top-78,56,58,4),"#2b2540",{edge:6});g.fillStyle="#e5577b";g.fillRect(cx-28,top-38,56,10);cut(()=>{g.beginPath();g.arc(cx+20,top-33,6,0,7)},"#f4c84f",{edge:3,shadow:false})}
+  if(kind==="toy"){g.save();g.translate(x+w-8,top-52);cut(()=>rr(-2,0,4,40,2),"#8a6a4d",{edge:3,shadow:false});g.rotate(time*3);for(let i=0;i<4;i++){g.rotate(Math.PI/2);g.fillStyle=["#e5463f","#f4c84f","#3b8fd6","#5fb35a"][i];g.beginPath();g.moveTo(0,0);g.lineTo(14,-4);g.lineTo(14,6);g.closePath();g.fill();g.strokeStyle=INK;g.lineWidth=1.5;g.stroke()}g.restore()}
+  if(kind==="bakery"){const n=Math.floor((w-24)/14);for(let i=0;i<n;i++){g.fillStyle=i%2?"#fffdf6":"#e5577b";g.fillRect(x+12+i*14,top+16,14,10)}for(let i=0;i<n;i++){g.fillStyle=i%2?"#fffdf6":"#e5577b";g.beginPath();g.arc(x+19+i*14,top+26,7,0,Math.PI);g.fill();g.strokeStyle=INK;g.lineWidth=1.2;g.stroke()}g.strokeStyle=INK;g.lineWidth=2;g.strokeRect(x+12,top+16,n*14,10)}
+  if(kind==="library"){cut(()=>{g.beginPath();g.moveTo(cx-20,top+12);g.quadraticCurveTo(cx-10,top+6,cx,top+12);g.quadraticCurveTo(cx+10,top+6,cx+20,top+12);g.lineTo(cx+20,top+24);g.quadraticCurveTo(cx+10,top+18,cx,top+24);g.quadraticCurveTo(cx-10,top+18,cx-20,top+24);g.closePath()},"#fffdf6",{edge:3,shadow:false});g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(cx,top+12);g.lineTo(cx,top+24);g.stroke()
+    cut(()=>{g.beginPath();g.ellipse(x+16,top-30,8,10,0,0,7)},"#8a6a4d",{edge:4,shadow:false});g.fillStyle="#fff";circle(x+13,top-32,3);g.fill();circle(x+19,top-32,3);g.fill();g.fillStyle=INK;circle(x+13,top-32,1.3);g.fill();circle(x+19,top-32,1.3);g.fill()}
+  if(kind==="weather"){const vx=cx,vy=top-68;cut(()=>rr(vx-2,vy,4,30,2),"#8a6a4d",{edge:3,shadow:false});g.save();g.translate(vx,vy);g.rotate(Math.sin(time*.7)*.6);g.fillStyle=INK;g.beginPath();g.moveTo(-18,0);g.lineTo(14,0);g.lineTo(14,-4);g.lineTo(22,1);g.lineTo(14,6);g.lineTo(14,2);g.lineTo(-18,2);g.closePath();g.fill();g.fillRect(-20,-5,4,12);g.restore();
+    g.save();g.translate(x+20,top-42);g.rotate(time*4);for(let i=0;i<3;i++){g.rotate(Math.PI*2/3);g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(0,0);g.lineTo(10,0);g.stroke();g.fillStyle="#f4c84f";circle(12,0,3.5);g.fill();g.stroke()}g.restore()}
+  if(kind==="lost"){g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(x+20,top+6);g.lineTo(x+20,top+18);g.moveTo(x+w-24,top+6);g.lineTo(x+w-24,top+16);g.stroke();
+    g.save();g.translate(x+20,top+18);g.rotate(Math.sin(time*2)*.15);cut(()=>{g.beginPath();g.moveTo(-5,0);g.lineTo(5,0);g.lineTo(5,18);g.lineTo(12,22);g.lineTo(10,28);g.lineTo(-5,24);g.closePath()},"#7cc488",{edge:3,shadow:false});g.restore();
+    g.save();g.translate(x+w-24,top+16);g.rotate(Math.sin(time*2+1)*.15);cut(()=>{g.beginPath();g.arc(0,8,8,0,7)},"#f4c84f",{edge:3,shadow:false});g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("?",0,12);g.restore();g.textAlign="left"}
+  if(kind==="arcade"){g.save();g.translate(x+w-14,top-30);cut(()=>rr(-10,0,20,10,3),"#3a3352",{edge:3,shadow:false});g.rotate(Math.sin(time*3)*.4);cut(()=>rr(-2,-16,4,16,2),"#c9d6d4",{edge:2,shadow:false});cut(()=>{g.beginPath();g.arc(0,-18,5,0,7)},"#e5463f",{edge:3,shadow:false});g.restore()}
 }
 function drawBunting(){const y=G-225;for(let x=Math.floor((camera-400)/360)*360+180;x<camera+W+360;x+=360){if(x<0||x>FEST_W)continue;
   cut(()=>rr(x-4,y,8,G-y,3),"#8a6a4d",{edge:5});cut(()=>{g.beginPath();g.arc(x,y,8,0,7)},"#f4c84f",{edge:4,shadow:false});
@@ -1458,16 +1528,16 @@ function drawFestival(){
   g.save();g.translate(-camera,0);
   drawSkyClouds();
   drawGround();drawBunting();drawFestEntrance();
-  shopFront(1820,140,"BAKERY","#ffe9c7","#f08a3c");shopFront(2080,140,"LIBRARY","#e3f2ff","#3b8fd6");drawChest(2121,LIB_ROOF.y-38,l2.roofChest,"#f4c84f");if(!l2.roofChest){g.fillStyle="#fff6a8";star(2172,LIB_ROOF.y-52,6+Math.sin(time*6)*2,2.4);g.fill()}shopFront(2830,120,"WEATHER","#e9f4e0","#5fb35a");
-  booth(560,120,"CLAY CORNER","#c98a5a",()=>npc("Potter Pat",560));
+  shopFront(1820,140,"BAKERY","#ffe9c7","#f08a3c","bakery");shopFront(2080,140,"LIBRARY","#e3f2ff","#3b8fd6","library");drawChest(2121,LIB_ROOF.y-38,l2.roofChest,"#f4c84f");if(!l2.roofChest){g.fillStyle="#fff6a8";star(2172,LIB_ROOF.y-52,6+Math.sin(time*6)*2,2.4);g.fill()}shopFront(2830,120,"WEATHER","#e9f4e0","#5fb35a","weather");
+  booth(560,120,"CLAY CORNER","#c98a5a",()=>npc("Potter Pat",560,undefined,-26));
   cut(()=>rr(636,G-40,8,40,2),"#a8714a");cut(()=>{g.beginPath();g.ellipse(640,G-40,26,7,0,0,7)},"#fff3d6",{edge:5});
   if(!l2.cardTaken){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#fff6a8";circle(640,G-66,24);g.fill();g.restore();drawIcon("Recipe Card",640,G-66+Math.sin(time*3)*3,.7);g.fillStyle="#fff6a8";star(660,G-88,6+Math.sin(time*7)*2,2);g.fill()}
   for(const x of[700,2990]){sprite(x,G-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,G+2,20)}
-  booth(860,130,"CHEF CRUMB'S KITCHEN","#e5577b",()=>npc("Chef Crumb",860));
+  booth(860,130,"CHEF CRUMB'S KITCHEN","#e5577b",()=>npc("Chef Crumb",860,undefined,-26));
   drawElevator(1050);npc("Gus",1005);
   drawSwan(1300);drawSculptures();drawJungleGym(1565);
   for(const b of CRATES)drawCrate(b);
-  booth(2470,120,"ART SUPPLIES","#b98ad8",()=>npc("Inka",2470));
+  booth(2470,120,"ART SUPPLIES","#b98ad8",()=>npc("Inka",2470,undefined,-26));
   drawTrail();drawStage();drawBars();drawSkyDoor();
   for(const n of["Mr. Umber","Pippa","Lou","Announcer","Juniper"])npc(n,npcX(n));
   const bx=l2.brieX;if(l2.chase===1){const hop=Math.abs(Math.sin(time*12))*6;groundShadow(bx,G+2,18);sprite(bx,G+3-hop,50,78,()=>drawPersonBody(LOOKS.Brie),{sx:l2.brieFace});
@@ -1481,7 +1551,7 @@ function drawFestival(){
 }
 function objectiveL2(){
   if(l2.done)return"Level 2 complete! Level 3 is coming soon.";
-  if(scene==="orchard"&&!l2.festReg)return"Walk through the orchard to the Registration table. Entry is 5 coins — or wear your Festival Pin to get in free. (The last apple tree has a few coins in it…)";
+  if(scene==="orchard"&&!l2.festReg)return"Walk through the orchard to the Registration table. Entry is 5 coins — or wear your Festival Pin to get in free. (Short on coins? Try the tree by the lake. Missed the pin? It's still on Mrs. Maple's roof, back home.)";
   if(l2.mapleDone)return(has("Smudgy Key")?"":"Pick up the Smudgy Key a Smudge dropped. ")+(l2.on2F?"Unlock the door on the second floor.":dogOn?"With the balloon dog tied on, jump up to the bars on the right of the stage, then climb to the second floor and unlock the door.":"Climb the jump bars on the right of the stage to the second floor and unlock the door."+(l2.tramp?" (Use Mrs. Maple’s trampoline!)":""));
   if(l2.fightDone)return"The Smudges are gone! Someone familiar is hurrying over…";
   if(l2.finale)return"Defeat the Smudges before they drain Juniper's painting! With Nib equipped, press Q to jab — or stomp them.";
@@ -1504,13 +1574,40 @@ const FLOOR2={x:3040,y:-52,w:480,h:14};
 const TRAMP_F={x:3446,y:G-18,w:56,h:18},TRAMP_U={x:130,y:G-18,w:70,h:18};
 const DOCK={x:860,w:390};
 const ORCH_TREES=[450,650,850,1050];
-const ORCH_COINS=[[1022,G-118],[1040,G-138],[1060,G-122],[1078,G-140],[1050,G-100]];
+const ORCH_COINS=[];const ORCH_LAKE_DOOR=760;
+const LAKE_COINS=[[672,G-118],[690,G-138],[710,G-122],[728,G-140],[700,G-100]];
 const UNDER_W=3000;
 const UNDER_SIGNS=[[1085,"POTTER'S STUDIO — CLOSED FOR FESTIVAL. Gone upstairs to run the Clay Corner. Back soon! (Please do not lick the kiln.)"],
   [1500,"LOST & FOUND — CLOSED FOR FESTIVAL. If you found this sign, please return it. It's the only one we have."],
   [1900,"UNDERGROUND ARCADE — CLOSED FOR FESTIVAL. High score: \"KEVIN.\" Every game. Every machine. We're worried about Kevin."],
-  [2300,"MUSHROOM GROCER — CLOSED FOR FESTIVAL. Fresh fungus, fun guys. Opening soon (they grow fast)."],
+  [2305,"ALCHEMY SHOP — CLOSED FOR FESTIVAL. Bubbling resumes soon. Please do not drink anything you find on the doorstep. Especially if it winks."],
   [2760,"TUNNEL TO THE SEWERS — KEEP OUT. Construction coming soon. (Gus says hi.)"]];
+function drawAlchemyShop(x){
+  const cx=x+75;
+  // tower body with a rounded top
+  cut(()=>{g.beginPath();g.moveTo(x+6,G);g.lineTo(x+6,G-150);g.quadraticCurveTo(x+6,G-196,cx,G-198);g.quadraticCurveTo(x+144,G-196,x+144,G-150);g.lineTo(x+144,G);g.closePath()},"#3a2f5e",{edge:8});
+  g.fillStyle="rgba(255,255,255,.07)";for(let yy=G-180;yy<G;yy+=22)g.fillRect(x+14,yy,122,8);
+  g.fillStyle="#f4c84f";for(const [sx,sy] of[[x+24,G-170],[x+122,G-150],[x+30,G-110],[x+128,G-90]]){g.globalAlpha=.5+Math.sin(time*3+sx)*.4;star(sx,sy,3.5,1.4);g.fill()}g.globalAlpha=1;
+  // crooked witch-hat roof
+  cut(()=>{g.beginPath();g.moveTo(x-8,G-180);g.quadraticCurveTo(cx,G-200,x+158,G-180);g.lineTo(cx+18,G-292);g.quadraticCurveTo(cx+40,G-300,cx+44,G-286);g.lineTo(cx+10,G-270);g.closePath()},"#2b2540",{edge:8});
+  g.strokeStyle="#7cc488";g.lineWidth=4;g.beginPath();g.moveTo(x+4,G-186);g.quadraticCurveTo(cx,G-204,x+146,G-186);g.stroke();
+  cut(()=>{g.beginPath();g.arc(cx+46,G-292,8,.6,5.4);g.arc(cx+50,G-294,6,5.2,.9,true);g.closePath()},"#f4c84f",{edge:4,shadow:false});
+  // round glowing window with bottles
+  cut(()=>{g.beginPath();g.arc(cx,G-140,26,0,7)},"#7cf2c0",{edge:6});
+  g.save();g.globalAlpha=.35+Math.sin(time*2)*.15;g.fillStyle="#d8ffe9";circle(cx,G-140,20);g.fill();g.restore();
+  g.fillStyle="#2b2540";rr(cx-14,G-146,8,16,3);g.fill();g.fillRect(cx-12,G-150,4,5);rr(cx-2,G-152,10,22,4);g.fill();g.fillRect(cx+1,G-157,4,6);rr(cx+11,G-142,7,12,3);g.fill();
+  g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(cx-26,G-140);g.lineTo(cx+26,G-140);g.moveTo(cx,G-166);g.lineTo(cx,G-114);g.stroke();
+  // arched door
+  cut(()=>{g.beginPath();g.moveTo(cx-22,G);g.lineTo(cx-22,G-58);g.arc(cx,G-58,22,Math.PI,0);g.lineTo(cx+22,G);g.closePath()},"#5b2a6e",{edge:5,shadow:false});
+  g.fillStyle="#f4c84f";circle(cx+12,G-34,3);g.fill();
+  // name plate + closed sign
+  cut(()=>rr(cx-48,G-112,96,22,8),"#7cc488",{edge:5,shadow:false});g.fillStyle="#2b2540";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("ALCHEMY",cx,G-96);
+  g.save();g.translate(cx,G-70);g.rotate(Math.sin(time*1.5+x)*.05);cut(()=>rr(-36,0,72,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
+  // little cauldron outside, still bubbling
+  cut(()=>{g.beginPath();g.moveTo(x+150,G-30);g.quadraticCurveTo(x+148,G,x+170,G);g.quadraticCurveTo(x+192,G,x+190,G-30);g.closePath()},"#1b1730",{edge:5});
+  g.fillStyle="#7cf2c0";g.beginPath();g.ellipse(x+170,G-30,20,5,0,0,7);g.fill();
+  for(let i=0;i<3;i++){const k=(time*.8+i/3)%1;g.globalAlpha=1-k;g.fillStyle="#b6ffd9";circle(x+162+i*8,G-34-k*30,3+k*3);g.fill()}g.globalAlpha=1;
+}
 function drawFossil(){
   cut(()=>{g.beginPath();g.moveTo(2860,G);g.quadraticCurveTo(2870,G-170,2930,G-230);g.lineTo(3010,G-260);g.lineTo(3010,G);g.closePath()},"#7a5a3a",{edge:6});
   g.fillStyle="#6a4a2e";for(const [x,y,r] of[[2900,G-40,6],[2960,G-120,8],[2985,G-60,5],[2920,G-150,4],[2950,G-30,7]]){circle(x,y,r);g.fill()}
@@ -1528,19 +1625,26 @@ function drawFossil(){
 const SCENE_NPCS={orchard:{"Registrar":1250},lake:{"Waffles":530},under:{"Bouncer":770,"Bartender":570}};
 let pinWorn=false,hasReel=false,dogOn=false;
 const fish={ph:0,t:0,bx:1360,need:0,n:0,next:0,dip:0,wait:0};
-function resetL2Extra(){Object.assign(l2,{holeSign:false,festReg:false,orchCoins:[0,0,0,0,0],orchMsg:false,mapTaken:false,underIntro:false,dogUsed:false,tramp:false,on2F:false,dogGone:false,wafflesTalk:0,bouncerTalk:0,barTalk:0,reelMet:false,fishCaught:0});fish.ph=0}
+function resetL2Extra(){Object.assign(l2,{lakeFrom:"orchard",lakeCoins:[0,0,0,0,0],holeSign:false,festReg:false,orchCoins:[0,0,0,0,0],orchMsg:false,mapTaken:false,underIntro:false,dogUsed:false,tramp:false,on2F:false,dogGone:false,wafflesTalk:0,bouncerTalk:0,barTalk:0,reelMet:false,fishCaught:0});fish.ph=0}
 const worldMin=()=>scene==="festival"?FEST_MIN:0;
 function goScene(name,x,y){scene=name;s.x=x-s.w/2;s.y=y??G-s.h;s.vy=0;fish.ph=0;camY=0;camera=clamp(s.x-350,worldMin(),Math.max(worldMin(),worldW()-W));dab.x=center()-30;dab.y=s.y+20}
 
 // ---- orchard ----
 function orchardInteract(){
   if(!onFloor())return null;const T=(l,f)=>[l,f,true];
-  if(near(300,26))return["Read the sign",()=>start([["Sign","THE ORCHARD — Tree shaking coming soon! (Please do not shake the trees yet. They are not ready emotionally.)"]])];
-  for(const x of ORCH_TREES.slice(0,3))if(near(x,30))return["Look at the apples",()=>sayToast("Shiny red apples, juuust out of reach. Tree shaking is coming soon.")];
-  if(near(1050,30))return["Look at the apples",()=>sayToast(l2.orchCoins.every(Boolean)?"Apples, still out of reach. You already got the coins from this one.":"Apples out of reach… but something glints in the lower branches. Coins? Jump for them!")];
+  if(near(300,26))return["Read the sign",()=>start([["Sign","THE ORCHARD"]])];
+  for(const x of ORCH_TREES)if(near(x,30))return["Look at the apples",()=>sayToast("Shiny red apples, juuust out of reach. Maybe someday you'll be able to shake them loose.")];
   if(near(1250,46))return T("Talk to the Registrar",festRegistrar);
+  if(near(ORCH_LAKE_DOOR,34))return["Go to the lake",()=>{l2.lakeFrom="orchard";goScene("lake",170)}];
   return null;
 }
+function reelLines(){return hasReel?[]:[
+  ["Registrar","Oh! And before you go — take this fishing pole. He's been chattering at me all morning and I can't get a single thing registered."],
+  ["Reel","Hi hi hi! Name's Reel! Little buddy, professional fishing pole, amateur poet. Take me to the lake? Please? PLEASE?"],
+  ["Sarah","Is… is the fishing pole talking?"],
+  ["Dab","Another little buddy! The more the merrier!"],
+  ["Reel","At the end of the lake dock, press Space to cast. When the bobber gets yanked under, press Space again — fast! You've got two seconds. No pressure. Lots of pressure."]]}
+function reelGot(){if(hasReel)return;hasReel=true;l2.reelMet=true;burst(center(),s.y+10,14,["#7cc6f2","#fff","#f4c84f"]);sayToast("Reel joined you! Fish at the end of the lake dock. (E swaps buddies.)")}
 function festRegistrar(){
   if(l2.festReg){registrar();return}
   const contest=[
@@ -1549,13 +1653,31 @@ function festRegistrar(){
     ["Sarah","I left it at home. On my bed. Drying. Next to my dignity."],
     ["Registrar","Happens every year. The Clay Corner — the very first booth past the plaza — lets you whip something up. Bring it back here and I'll enter it."],
     ["Registrar","Totally optional, of course. Judging starts when our judge, Mr. Biscuits, shows up. He's… late. Someone heard yowling near the playground."]];
-  const done=(line)=>{l2.festReg=true;l2.registered=true;burst(1250,G-90,18);start((line?[["Registrar",line]]:[]).concat(contest),()=>sayToast("Registered! Head on through to the festival →"))};
-  const pay=()=>{if(coins<5){start([["Registrar","You've got "+coins+" coin"+(coins===1?"":"s")+". It's 5 to get in. Psst — I saw something glinting up in that last apple tree."]],()=>sayToast("Not enough coins (you have "+coins+", need 5)."));return}coins-=5;done("Five coins — received! Here's your wristband. Welcome to the Town Art Festival!")};
-  if(pinWorn){start([["Registrar","Welcome to the festival! Registration is 5 coi— oh! Is that an official Festival Pin you're wearing?"],["Registrar","Pin-wearers get in FREE! Put your coins away. Welcome, welcome!"]],()=>done(null));return}
-  if(has("Festival Pin")){start([["Registrar","Welcome! Festival registration is 5 coins."],["Registrar","Ooh — but is that a Festival Pin poking out of your pocket? If you WEAR it, you get in free! (Pockets → Key Items → Festival Pin → Wear.)",["Pay 5 coins","I'll put my pin on"],i=>{if(i===0)pay();else sayToast("Open your Pockets (I), go to Key Items, pick the Festival Pin and choose Wear. Then talk to the Registrar again.")}]]);return}
-  start([["Registrar","Welcome to the Town Art Festival! Registration is 5 coins. (Anyone wearing an official Festival Pin gets in free.)",["Pay 5 coins","Not right now"],i=>{if(i===0)pay();else start([["Registrar","No problem! The festival will be here. So will I. Forever, probably."]])}]]);
+  const done=lines=>{l2.festReg=true;l2.registered=true;burst(1250,G-90,18);start(lines.concat(contest,reelLines()),()=>{reelGot();sayToast("Registered! Head on through to the festival →")})};
+  const pay=()=>{if(coins<5){start([["Registrar","You've got "+coins+" coin"+(coins===1?"":"s")+". It's 5 to get in — or wear an official Festival Pin and walk right in! Psst: folks say there's a tree by the lake with coins in it. The lake path is just back that way."]],()=>sayToast("Not enough coins (you have "+coins+", need 5)."));return}coins-=5;done([["Registrar","Five coins — received! Here's your wristband. Welcome to the Town Art Festival!"]])};
+  const bargain=()=>{l2.bargained=true;start([
+    ["Sarah","Is there… any wiggle room on that price?"],
+    ["Registrar","Ooh, a haggler! Fine. Guess my favorite color and you get in free. One guess.",["Red","Blue","Green","Cyan"],k=>{
+      if(k===3){done([
+        ["Registrar","CYAN?! Nobody EVER guesses cyan! Everyone goes red, green or blue."],
+        ["Registrar","Which is wild, because we're all on a screen right now — you'd think I'd be an RGB girl. But no. I'm a printer at heart. CMYK forever. Cyan, magenta, yellow, key!"],
+        ["Registrar","Free entry for my fellow ink enthusiast. Welcome to the festival!"]]);return}
+      start([
+        ["Registrar",["Red","Blue","Green"][k]+"? Ohh, so close. That's an RGB answer."],
+        ["Registrar","I know, I know — we're all on a screen, so RGB makes sense. But I'm a printer at heart. CMYK! Cyan, magenta, yellow, key. Screens just aren't my type."],
+        ["Registrar","So… still 5 coins. Or a Festival Pin. Rules are rules, even for funny people."]
+      ].concat(reelLines()),reelGot)}]])};
+  const opts=has("Festival Pin")?["Pay 5 coins","I'll put my pin on"]:["Pay 5 coins"];if(!l2.bargained)opts.push("Try bargaining");if(!has("Festival Pin"))opts.push("Not right now");
+  const pick=i=>{const o=opts[i];if(o==="Pay 5 coins")pay();else if(o==="Try bargaining")bargain();else if(o==="I'll put my pin on")sayToast("Open your Pockets (I), go to Key Items, pick the Festival Pin and choose Wear. Then talk to the Registrar again.");else start([["Registrar","No problem! The festival will be here. So will I. Forever, probably."]])};
+  if(pinWorn){l2.bargained=true;start([["Registrar","Welcome to the festival! Registration is 5 coi— oh! Is that an official Festival Pin you're wearing?"],["Registrar","Pin-wearers get in FREE! Put your coins away. Welcome, welcome!"],
+    ["Registrar","Ooh, while you're here — a little fun quiz, just for pin people. Guess my favorite color!",["Red","Blue","Green","Cyan"],k=>{
+      done(k===3?[["Registrar","CYAN?! Nobody EVER guesses cyan! A pin AND good taste."],["Registrar","Which is wild, because we're all on a screen right now — you'd think I'd be an RGB girl. But I'm a printer at heart. CMYK forever. Cyan, magenta, yellow, key!"]]
+        :[["Registrar",["Red","Blue","Green"][k]+"? Ohh, so close. That's an RGB answer."],["Registrar","I know, I know — we're all on a screen, so RGB makes sense. But I'm a printer at heart. CMYK! Cyan, magenta, yellow, key. Screens just aren't my type."],["Registrar","Don't worry — the pin still gets you in. Rules are rules, and the rule is: pins rule."]])}]]);return}
+  if(has("Festival Pin")){start([["Registrar","Welcome! Festival registration is 5 coins."],["Registrar","Ooh — but is that a Festival Pin poking out of your pocket? If you WEAR it, you get in free! (Pockets → Key Items → Festival Pin → Wear.)",opts,pick]]);return}
+  start([["Registrar",(l2.bargained?"Back again! ":"Welcome to the Town Art Festival! ")+"Registration is 5 coins. (Anyone wearing an official Festival Pin gets in free.)",opts,pick]]);
 }
 function updateOrchard(){
+  if(s.x<=0&&(keys.has("a")||keys.has("ArrowLeft"))){goScene("outside",330);sayToast("Back on the road home. (Walk through the gate to return to the orchard.)");return}
   ORCH_COINS.forEach(([x,y],i)=>{if(!l2.orchCoins[i]&&Math.abs(center()-x)<22&&s.y<y+10&&s.y+s.h>y-10){l2.orchCoins[i]=1;coins++;burst(x,y,8,["#f4c84f","#fff"]);if(l2.orchCoins.every(Boolean))sayToast("Got all 5 coins from the last tree!")}});
   if(!l2.festReg&&s.x+s.w>1330){s.x=1330-s.w;if(!l2.orchMsg){l2.orchMsg=true;sayToast("A velvet rope blocks the way. Register at the table first!")}}
   if(l2.festReg&&center()>ORCH_W-24)goScene("festival",FEST_MIN+60);
@@ -1563,17 +1685,18 @@ function updateOrchard(){
 function drawOrchard(){
   drawOutsideBackground(null);g.save();g.translate(-camera,0);drawGround();
   drawGate(-30);
-  cut(()=>rr(296,G-80,8,80,2),"#a8714a");cut(()=>rr(236,G-128,128,56,8),"#fff3d6",{edge:7});g.fillStyle="#5fb35a";g.font="bold 15px "+FONT;g.textAlign="center";g.fillText("THE ORCHARD",300,G-106);g.fillStyle="#e5577b";g.font="bold 11px "+FONT;g.fillText("TREE SHAKING",300,G-90);g.fillText("COMING SOON!",300,G-77);g.textAlign="left";
+  cut(()=>rr(296,G-80,8,80,2),"#a8714a");cut(()=>rr(236,G-128,128,56,8),"#fff3d6",{edge:7});g.fillStyle="#5fb35a";g.font="bold 15px "+FONT;g.textAlign="center";g.font="bold 17px "+FONT;g.fillText("THE ORCHARD",300,G-94);g.textAlign="left";
+  drawLakeDoor(ORCH_LAKE_DOOR);
+  cut(()=>rr(-26,G-70,4,70,1),"#a8714a");cut(()=>rr(4,G-96,86,24,5),"#fff3d6",{edge:4,shadow:false});g.fillStyle=INK;g.font="bold 10px "+FONT;g.fillText("← BACK HOME",10,G-80);
   ORCH_TREES.forEach((x,i)=>{tree(x,G,1.15,i%2?"#66bf72":"#4fae67");for(const [dx,dy] of[[-26,-112],[18,-98],[0,-128],[-12,-84],[30,-118],[-34,-96]]){cut(()=>{g.beginPath();g.arc(x+dx,G+dy,6,0,7)},"#e5463f",{edge:3,shadow:false});g.fillStyle="#3a7a3a";g.fillRect(x+dx-1,G+dy-9,2,4)}});
   ORCH_COINS.forEach(([x,y],i)=>{if(!l2.orchCoins[i])drawCoin(x,y+Math.sin(time*4+i)*2,8)});
   // registration table + velvet rope
   cut(()=>rr(1190,G-46,130,46,5),"#fff3d6",{edge:7});g.fillStyle="#17a398";g.fillRect(1196,G-40,118,8);
-  cut(()=>rr(1205,G-150,100,28,8),"#17a398",{edge:6});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("REGISTRATION",1255,G-131);g.font="bold 10px "+FONT;g.fillStyle=INK;g.fillText("5 COINS · PINS FREE",1255,G-52);g.textAlign="left";
+  cut(()=>rr(1205,G-150,100,28,8),"#17a398",{edge:6});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("REGISTRATION",1255,G-131);g.textAlign="left";
   cut(()=>rr(1209,G-122,4,76,2),"#a8714a",{edge:3,shadow:false});cut(()=>rr(1297,G-122,4,76,2),"#a8714a",{edge:3,shadow:false});
-  npc("Registrar",1250);cut(()=>rr(1190,G-46,130,46,5),"#fff3d6",{edge:7,shadow:false});g.fillStyle="#17a398";g.fillRect(1196,G-40,118,8);
+  npc("Registrar",1250,undefined,-26);cut(()=>rr(1190,G-46,130,46,5),"#fff3d6",{edge:7,shadow:false});g.fillStyle="#17a398";g.fillRect(1196,G-40,118,8);
   for(const x of[1336,1420])cut(()=>rr(x-4,G-60,8,60,3),"#d4bf7d",{edge:4});
   if(!l2.festReg){g.strokeStyle="#c0392b";g.lineWidth=6;g.beginPath();g.moveTo(1336,G-52);g.quadraticCurveTo(1378,G-30,1420,G-52);g.stroke()}
-  cut(()=>rr(1440,G-170,40,26,6),"#e5577b",{edge:5});g.fillStyle="#fff";g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("FEST →",1460,G-152);g.textAlign="left";
   drawLoot();drawParticles();drawSarah();g.restore();
 }
 
@@ -1589,7 +1712,7 @@ function festIntroCheck(){if(!l2.intro&&center()>130){start([
 function drawFestEntrance(){
   cut(()=>{g.beginPath();g.moveTo(-890,G);g.lineTo(-890,G-200);g.quadraticCurveTo(-820,G-250,-750,G-200);g.lineTo(-750,G);g.lineTo(-770,G);g.lineTo(-770,G-190);g.quadraticCurveTo(-820,G-226,-870,G-190);g.lineTo(-870,G);g.closePath()},"#e5577b",{edge:8});
   cut(()=>rr(-905,G-262,170,30,10),"#f4c84f",{edge:6});g.fillStyle=INK;g.font="bold 14px "+FONT;g.textAlign="center";g.fillText("ART FESTIVAL",-820,G-241);g.textAlign="left";
-  shopFront(-720,140,"PET STORE","#e9f7ff","#3bb6c4");shopFront(-300,140,"HATTER'S","#f7d6e0","#d0648f");shopFront(-150,130,"TOY SHOP","#fff1d6","#f08a3c");
+  shopFront(-720,140,"PET STORE","#e9f7ff","#3bb6c4","pet");shopFront(-300,140,"HATTER'S","#f7d6e0","#d0648f","hat");shopFront(-150,130,"TOY SHOP","#fff1d6","#f08a3c","toy");
   // the hole
   g.fillStyle="#1b1730";g.fillRect(HOLE.x,G-8,HOLE.w,H);g.fillStyle="#3a3352";g.fillRect(HOLE.x,G-8,HOLE.w,10);g.strokeStyle=INK;g.lineWidth=2.5;g.strokeRect(HOLE.x,G-8,HOLE.w,H);
   cut(()=>rr(HOLE.x-34,G-70,6,70,2),"#a8714a");g.save();g.translate(HOLE.x-38,G-84);g.rotate(Math.sin(time*1.4)*.04);
@@ -1597,12 +1720,12 @@ function drawFestEntrance(){
   else{cut(()=>rr(-38,-16,76,34,6),"#b7b5ae",{edge:5,ink:"#77746c"});g.strokeStyle="#9a9890";g.lineWidth=2;for(const y of[-4,6]){g.beginPath();g.moveTo(-26,y);g.lineTo(26,y);g.stroke()}}
   g.restore();g.textAlign="left";
   // door to the lake
-  const x=LAKE_DOOR;cut(()=>{g.beginPath();g.moveTo(x-40,G);g.lineTo(x-40,G-110);g.arc(x,G-110,40,Math.PI,0);g.lineTo(x+40,G);g.closePath()},"#7cc488",{edge:8});
-  cut(()=>{g.beginPath();g.moveTo(x-28,G);g.lineTo(x-28,G-104);g.arc(x,G-104,28,Math.PI,0);g.lineTo(x+28,G);g.closePath()},"#4f8fb8",{edge:0,line:2,shadow:false});
-  g.fillStyle="#bfe6fb";g.beginPath();g.ellipse(x,G-60,20,6,0,0,7);g.fill();g.fillStyle="#7cc6f2";g.beginPath();g.ellipse(x,G-40,22,6,0,0,7);g.fill();
-  cut(()=>rr(x-36,G-182,72,24,8),"#3bb6c4",{edge:5});g.fillStyle="#fff";g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("THE LAKE",x,G-165);g.textAlign="left";
   cut(()=>rr(-886,G-70,4,70,1),"#a8714a");cut(()=>rr(-900,G-96,74,24,5),"#fff3d6",{edge:4,shadow:false});g.fillStyle=INK;g.font="bold 10px "+FONT;g.fillText("← ORCHARD",-896,G-80);
 }
+function drawLakeDoor(x){cut(()=>{g.beginPath();g.moveTo(x-40,G);g.lineTo(x-40,G-110);g.arc(x,G-110,40,Math.PI,0);g.lineTo(x+40,G);g.closePath()},"#7cc488",{edge:8});
+  cut(()=>{g.beginPath();g.moveTo(x-28,G);g.lineTo(x-28,G-104);g.arc(x,G-104,28,Math.PI,0);g.lineTo(x+28,G);g.closePath()},"#4f8fb8",{edge:0,line:2,shadow:false});
+  g.fillStyle="#bfe6fb";g.beginPath();g.ellipse(x,G-60,20,6,0,0,7);g.fill();g.fillStyle="#7cc6f2";g.beginPath();g.ellipse(x,G-40,22,6,0,0,7);g.fill();
+  doorLabel(x,G-182,"THE LAKE");}
 function drawElevator(x){
   cut(()=>rr(x-26,G-230,52,230,6),"#c9d6d4",{edge:8});g.fillStyle="#9fb0ae";for(let y=G-220;y<G-100;y+=24)g.fillRect(x-20,y,40,10);
   cut(()=>rr(x-20,G-96,40,96,4),"#8fa3a0",{edge:0,line:2,shadow:false});g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(x,G-96);g.lineTo(x,G);g.stroke();
@@ -1640,11 +1763,12 @@ function drawTramp(t){cut(()=>rr(t.x+4,t.y+6,6,12,2),"#5b5277",{edge:3});cut(()=
 // ---- lake ----
 function lakeInteract(){
   if(fish.ph>0)return null;const T=(l,f)=>[l,f,true];
-  if(near(70,44))return["Back to the festival",()=>goScene("festival",LAKE_DOOR)];
+  if(near(70,44))return[l2.lakeFrom==="orchard"?"Back to the orchard":"Back to the festival",()=>l2.lakeFrom==="orchard"?goScene("orchard",ORCH_LAKE_DOOR):goScene("festival",LAKE_DOOR)];
+  if(near(700,30))return["Look at the tree",()=>sayToast(l2.lakeCoins.every(Boolean)?"A nice lakeside tree. You already shook… er, jumped the coins out of it.":"Something glints in the lower branches. Coins? Jump for them!")];
   if(near(250,24))return["Read the sign",()=>start([["Sign","EGGS: ONLY FOR FRIENDS OF THE DOG. (The dog decides who his friends are. The dog is very picky.)"]])];
   if(near(395,50))return["Peek into the coop",()=>sayToast("Bawk. Three chickens eye you suspiciously. A very serious dog stands between you and the eggs.")];
   if(near(530,30))return T("Talk to the dog",waffles);
-  if(near(DOCK.x+DOCK.w-40,50))return[hasReel?"Cast your line":"Fish (you need a fishing pole)",()=>{if(!hasReel){sayToast("You'd need a fishing pole. Didn't you see one lying on the dock?");return}castLine()}];
+  if(near(DOCK.x+DOCK.w-40,50))return[hasReel?"Cast your line":"Fish (you need a fishing pole)",()=>{if(!hasReel){sayToast("You'd need a fishing pole. The Registrar at the orchard table had a very chatty one…");return}castLine()}];
   return null;
 }
 function waffles(){
@@ -1684,8 +1808,10 @@ function updateFishing(dt){
   else if(fish.ph===5&&fish.t>1.1)fish.ph=0;
 }
 function updateLake(){
-  if(!l2.reelMet&&Math.abs(center()-1000)<30){meetReel();return}
-  if(s.y>G+40){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=DOCK.x+DOCK.w-120;s.y=G-s.h;s.vy=0;sayToast("SPLASH! Sarah fishes herself out of the lake. 0/10, would not recommend.")}
+  LAKE_COINS.forEach(([x,y],i)=>{if(!l2.lakeCoins[i]&&Math.abs(center()-x)<22&&s.y<y+10&&s.y+s.h>y-10){l2.lakeCoins[i]=1;coins++;burst(x,y,8,["#f4c84f","#fff"]);if(l2.lakeCoins.every(Boolean))sayToast("Got all 5 coins from the lakeside tree!")}});
+  if(s.y>G+40){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=DOCK.x+DOCK.w-120;s.y=G-s.h;s.vy=0;shake=.3;health--;
+    if(health<=0){health=maxHealth;sayToast("SPLASH! Sarah crumples… soggily… then uncrumples back on the dock. Paper and water: not friends.")}
+    else sayToast("SPLASH! Sarah fishes herself out of the lake. (-1 health) 0/10, would not recommend.")}
 }
 function drawLake(){
   drawOutsideBackground(null);g.save();g.translate(-camera,0);drawGround();
@@ -1698,17 +1824,18 @@ function drawLake(){
   cut(()=>rr(DOCK.x,G-6,DOCK.w,14,3),"#c58a52",{edge:6});g.strokeStyle="#8d5a36";g.lineWidth=1.5;for(let x=DOCK.x+20;x<DOCK.x+DOCK.w;x+=20){g.beginPath();g.moveTo(x,G-5);g.lineTo(x,G+7);g.stroke()}
   cut(()=>rr(DOCK.x+DOCK.w-60,G-130,6,124,2),"#a8714a");cut(()=>rr(DOCK.x+DOCK.w-100,G-156,86,28,7),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("FISHING SPOT",DOCK.x+DOCK.w-57,G-138);g.textAlign="left";
   // exit door
-  cut(()=>rr(30,G-140,80,140,10),"#7cc488",{edge:8});cut(()=>rr(42,G-128,56,128,6),"#c58a52",{edge:0,line:2,shadow:false});g.fillStyle="#f4c84f";circle(88,G-64,4);g.fill();g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("← FESTIVAL",70,G-148);g.textAlign="left";
+  cut(()=>rr(30,G-140,80,140,10),"#7cc488",{edge:8});cut(()=>rr(42,G-128,56,128,6),"#c58a52",{edge:0,line:2,shadow:false});g.fillStyle="#f4c84f";circle(88,G-64,4);g.fill();doorLabel(70,G-172,l2.lakeFrom==="orchard"?"← ORCHARD":"← FESTIVAL");
   // coop + sign
   cut(()=>rr(246,G-70,6,70,2),"#a8714a");cut(()=>rr(206,G-118,90,52,6),"#fff3d6",{edge:6});g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("EGGS:",251,G-102);g.fillText("FRIENDS OF",251,G-89);g.fillText("THE DOG ONLY",251,G-76);
   cut(()=>{g.beginPath();g.moveTo(320,G);g.lineTo(320,G-80);g.lineTo(395,G-130);g.lineTo(470,G-80);g.lineTo(470,G);g.closePath()},"#e5463f",{edge:8});
   cut(()=>rr(372,G-56,46,56,6),"#8d5a36",{edge:0,line:2,shadow:false});g.fillStyle="#fff";g.font="bold 11px "+FONT;g.fillText("COOP",395,G-90);g.textAlign="left";
   g.strokeStyle="#c9a23a";g.lineWidth=2;for(let x=290;x<=500;x+=14){g.beginPath();g.moveTo(x,G);g.lineTo(x,G-30);g.stroke()}g.beginPath();g.moveTo(290,G-24);g.lineTo(500,G-24);g.stroke();
-  for(const [x,i] of[[340,0],[440,1],[460,2]]){const peck=Math.max(0,Math.sin(time*3+i*2))*5;cut(()=>{g.beginPath();g.ellipse(x,G-14,11,9,0,0,7)},"#fffdf6",{edge:4,shadow:false});cut(()=>{g.beginPath();g.arc(x+8,G-24+peck,5,0,7)},"#fffdf6",{edge:3,shadow:false});g.fillStyle="#e5463f";g.fillRect(x+6,G-31+peck,4,3);g.fillStyle="#f4c84f";g.beginPath();g.moveTo(x+13,G-24+peck);g.lineTo(x+17,G-22+peck);g.lineTo(x+13,G-20+peck);g.fill()}
+  for(const [x,i,f] of[[338,0,1],[438,1,-1],[466,2,1]])sprite(x,G-1,40,40,()=>drawChicken(Math.max(0,Math.sin(time*3+i*2))),{sx:f*1.2,sy:1.2,shadow:false});
+  tree(700,G,1.15,"#58b56a");for(const [dx,dy] of[[-24,-110],[20,-96],[-10,-86]]){cut(()=>{g.beginPath();g.arc(700+dx,G+dy,6,0,7)},"#e5463f",{edge:3,shadow:false})}
+  LAKE_COINS.forEach(([x,y],i)=>{if(!l2.lakeCoins[i])drawCoin(x,y+Math.sin(time*4+i)*2,8)});
   // Waffles
   groundShadow(530,G+2,22);sprite(530,G+2,58,48,drawDogBody,{sx:center()<530?-1:1});
   // Reel waiting on the dock
-  if(!l2.reelMet)sprite(1000,G-4,30,62,drawReelBody,{rot:.25+Math.sin(time*2)*.05});
   drawLoot();drawParticles();drawSarah();
   // fishing line + bobber
   if(fish.ph>0&&fish.ph<5){const [tx,ty]=rodTip();let bx=fish.bx,by=wy+Math.sin(time*3)*2+fish.dip*10;
@@ -1721,6 +1848,17 @@ function drawLake(){
     if(fish.ph===4){cut(()=>{g.beginPath();g.ellipse(center(),s.y-34,16,18,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 24px "+FONT;g.textAlign="center";g.fillText("!",center(),s.y-25);g.textAlign="left"}}
   if(fish.ph===5){const k=fish.t/1.1;drawIcon("Lake Perch",center()+10,s.y-40-k*20,1)}
   g.restore();
+}
+function drawChicken(peck){
+  const hy=peck*7;g.strokeStyle=INK;g.lineWidth=2;
+  g.fillStyle="#f08a3c";g.lineWidth=2;g.beginPath();g.moveTo(16,32);g.lineTo(14,39);g.moveTo(22,32);g.lineTo(23,39);g.stroke();g.beginPath();g.moveTo(11,39);g.lineTo(17,39);g.moveTo(20,39);g.lineTo(26,39);g.stroke();
+  g.fillStyle="#fffdf6";g.beginPath();g.moveTo(4,10);g.quadraticCurveTo(2,22,8,28);g.quadraticCurveTo(18,36,28,28);g.quadraticCurveTo(32,24,30,18);g.lineTo(22,18);g.quadraticCurveTo(12,18,8,6);g.closePath();g.fill();g.stroke();
+  g.fillStyle="#e9e2d0";g.beginPath();g.moveTo(5,6);g.lineTo(2,0);g.lineTo(8,4);g.lineTo(9,0);g.lineTo(11,6);g.closePath();g.fill();g.stroke();
+  g.beginPath();g.ellipse(17,24,8,5,-.3,0,7);g.fill();g.stroke();
+  g.fillStyle="#fffdf6";g.beginPath();g.arc(30,12+hy,7,0,7);g.fill();g.stroke();
+  g.fillStyle="#e5463f";for(const [cx,cy] of[[27,5],[30,4],[33,5]]){g.beginPath();g.arc(cx,cy+hy,2.4,0,7);g.fill()}g.beginPath();g.ellipse(34,19+hy,2,3,0,0,7);g.fill();
+  g.fillStyle="#f4c84f";g.beginPath();g.moveTo(36,11+hy);g.lineTo(41,13+hy);g.lineTo(36,15+hy);g.closePath();g.fill();g.lineWidth=1;g.stroke();
+  g.fillStyle=INK;circle(31,11+hy,1.4);g.fill();
 }
 function drawDogBody(){
   g.strokeStyle=INK;g.lineWidth=2;const wag=Math.sin(time*12)*.5;
@@ -1772,7 +1910,7 @@ function drawUnder(){
   drawTramp(TRAMP_U);g.fillStyle="#f4c84f";g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("↑ BOUNCE ↑",165,G-40);g.textAlign="left";
   cut(()=>rr(440,G-200,240,24,6),"#7a2f3a",{edge:6});g.fillStyle="#f4c84f";g.font="bold 15px "+FONT;g.fillText("THE BAR",560,G-182);
   for(let i=0;i<6;i++){g.fillStyle=["#7cc488","#e5577b","#7cc6f2","#f4c84f"][i%4];rr(460+i*36,G-160,12,30,3);g.fill()}
-  npc("Bartender",570);cut(()=>rr(440,G-62,240,62,5),"#5b3a28",{edge:7});g.fillStyle="#8d5a36";g.fillRect(446,G-56,228,8);
+  npc("Bartender",570,undefined,-26);cut(()=>rr(440,G-62,240,62,5),"#5b3a28",{edge:7});g.fillStyle="#8d5a36";g.fillRect(446,G-56,228,8);
   for(const x of[470,650])cut(()=>rr(x-10,G-30,20,30,4),"#7a2f3a",{edge:4,shadow:false});
   if(!l2.mapTaken){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#fff6a8";circle(500,G-76,20);g.fill();g.restore();drawIcon("Town Map",500,G-78,.6)}
   cut(()=>rr(820,G-170,110,170,6),"#1b1730",{edge:8});cut(()=>rr(840,G-120,70,120,4),"#5b2a6e",{edge:0,line:2,shadow:false});
@@ -1784,7 +1922,7 @@ function drawUnder(){
   cut(()=>rr(1030,G-160,50,44,6),"#a6def5",{edge:5,shadow:false});g.fillStyle="#8d5a36";for(const [x,h] of[[1040,14],[1056,20],[1070,12]]){rr(x-5,G-116-h,10,h,4);g.fill()}
   cut(()=>rr(1095,G-96,46,96,5),"#8d5a36",{edge:5,shadow:false});
   g.save();g.translate(1118,G-74);g.rotate(Math.sin(time*1.5)*.05);cut(()=>rr(-34,0,68,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
-  shopFront(1430,140,"LOST & FOUND","#d6d0e8","#7a5c99");shopFront(1830,140,"ARCADE","#2f2a4a","#ff8fe8");shopFront(2230,140,"MUSHROOMS","#efe3d0","#c0662e");
+  shopFront(1430,140,"LOST & FOUND","#d6d0e8","#7a5c99","lost");shopFront(1830,140,"ARCADE","#2f2a4a","#ff8fe8","arcade");drawAlchemyShop(2230);
   for(const [x,c] of[[1870,"#7cc6f2"],[1900,"#f4c84f"],[1930,"#e5577b"]]){g.save();g.globalAlpha=.5+Math.sin(time*5+x)*.3;g.fillStyle=c;g.fillRect(x-8,G-160,16,10);g.restore()}
   // tunnel to the sewers
   cut(()=>{g.beginPath();g.moveTo(2680,G);g.lineTo(2680,G-130);g.arc(2760,G-130,80,Math.PI,0);g.lineTo(2840,G);g.closePath()},"#5b5277",{edge:8});
@@ -1811,6 +1949,7 @@ resetL2Extra();
 // ---- Admin cheats ----
 function cheatBase(){items=[];for(const k in counts)delete counts[k];addItem("Turnip");addItem("Festival Pin");hasDab=true;hasNib=false;hasReel=false;pinWorn=false;dogOn=false;balloonOn=false;
   potionCollected=roadChestKeyCollected=homeIntroSeen=firstChestOpen=fountainKeyCollected=ladderGiven=grandChestOpen=flowerRestored=gateOpen=true;
+  stormStarted=stormDone=true;tearT=1;residentTalked=ladderCollected=flowerTalked=firstFlowerTalked=bonusFlowerTalked=mailRead=true;roofItemCollected=true;gateAnim=1;
   dlg.on=false;loot=[];startLevel2()}
 function cheatTele(x){dlg.on=false;scene="festival";l2.festReg=true;l2.registered=true;l2.intro=true;s.x=x-s.w/2;s.y=G-s.h;s.vy=0;camera=clamp(s.x-350,FEST_MIN,FEST_W-W)}
 const CHEATS={
