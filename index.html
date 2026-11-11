@@ -151,9 +151,9 @@ function speakerPos(who){
   if(scene==="festival"){
     if(who==="Nib")return[2770-camera,110];
     if(who==="Fairy")return[l2.fx-camera,l2.fy];
-    if(who==="Mr. Biscuits")return l2.catState==="stuck"?[1565-camera,G-140]:[3422-camera,G-110];
+    if(who==="Mr. Biscuits")return l2.catState==="stuck"?[1565-camera,G-140]:[catX()-camera,G-52-catLift()];
     if(who==="Mrs. Maple")return[(l2.maple??0)-camera,G-80];
-    if(who==="Save Block"){const x=Math.abs(center()-700)<Math.abs(center()-2945)?700:2945;return[x-camera,G-90]}
+    if(who==="Save Block"){const x=Math.abs(center()-700)<Math.abs(center()-SAVE2)?700:SAVE2;return[x-camera,G-90]}
     if(who==="Townsfolk")return[3030-camera,G-90];
     const x=npcX(who);if(x!=null)return[x-camera,G-92];
   }
@@ -550,6 +550,8 @@ function update(dt){
   s.flip+=(s.face-s.flip)*Math.min(1,dt*16);s.squash+=(1-s.squash)*Math.min(1,dt*12);
   // Dab follows behind Sarah
   const bx=center()-s.face*34,by=s.y+22+Math.sin(time*3)*4;dab.x+=(bx-dab.x)*Math.min(1,dt*6);dab.y+=(by-dab.y)*Math.min(1,dt*6);
+  if(level===2&&l2.results){if(!l2.curtain&&dlg.on&&dlg.pages[dlg.page]&&/^The cloth/.test(dlg.pages[dlg.page][1]))l2.curtain=.001;
+    if(l2.curtain>0)l2.curtain=Math.min(1,l2.curtain+dt/1.8);if(l2.finale)l2.curtain=1}
   if(dlg.on||invOpen||complete){updateAction();return}
   if(scene==="lake"&&fish.ph>0){updateFishing(dt);updateAction();return}
   let dir=(keys.has("ArrowRight")||keys.has("d")?1:0)-(keys.has("ArrowLeft")||keys.has("a")?1:0);
@@ -936,7 +938,10 @@ function drawEndScreen(){
 // ===========================================================================
 // LEVEL 2 — The Festival Fiasco
 // ===========================================================================
-const SPIKE_X=3005;
+const SPIKE_X=3005,SAVE2=2730,CROWD={"Announcer":[2850,3085],"Juniper":[2900,3160]},CAT_WAIT=2940;
+function ease(k){k=Math.max(0,Math.min(1,k));return k*k*(3-2*k)}
+function catX(){if(l2.catState==="stuck")return 1565;return CAT_WAIT+(3422-CAT_WAIT)*ease(l2.catWalk/.8)}
+function catLift(){const k=Math.max(0,(l2.catWalk-.8)/.2);return 58*k+Math.sin(k*Math.PI)*40}
 const FEST_W=3520,DOOR_X=3150,LIB_ROOF={x:2072,y:246,w:156,h:20};
 let balloonOn=false,balloonsAway=[];
 const CLOUDS=[{x:2228,y:192,w:84,h:16},{x:2128,y:132,w:84,h:16},{x:2232,y:72,w:84,h:16},{x:2110,y:12,w:140,h:18}];
@@ -969,9 +974,9 @@ const NPC_X={"Mr. Umber":250,"Pippa":305,"Potter Pat":560,"Chef Crumb":860,"Gus"
 let level=1,checkpointScene="outside",hasNib=false,equipped="Dab",jabT=0,l2={},fsm=[];
 function resetL2(){l2={intro:false,registered:false,clayMade:false,clayEntered:false,cardTaken:false,chefMet:false,catSeen:false,butterTaken:false,catFreed:false,
   chase:0,chaseT:0,chaseDone:false,brieX:1385,brieFace:-1,brieHid:{},confused:0,refusals:0,slapped:false,trail:false,nibMet:false,results:false,finale:false,
-  fightDone:false,drain:0,tearT:0,spikeDown:false,spikeHit:0,spikeTalk:0,roofChest:false,cloudCoins:[0,0,0,0],fairy:0,fx:0,fy:0,foe:null,doorY:null,doorOpen:false,mapleDone:false,maple:null,mapleTalked:false,done:false,catState:"stuck",talk:{},w1:false,w2:false,nibCheer:false};fsm=[]}
+  fightDone:false,drain:0,tearT:0,spikeDown:false,spikeHit:0,spikeTalk:0,spikeInv:0,spikeFlash:0,walk:0,catWalk:0,pendRes:false,curtain:0,roofChest:false,cloudCoins:[0,0,0,0],fairy:0,fx:0,fy:0,foe:null,doorY:null,doorOpen:false,mapleDone:false,maple:null,mapleTalked:false,done:false,catState:"stuck",talk:{},w1:false,w2:false,nibCheer:false};fsm=[]}
 resetL2();
-function npcX(n){if(n==="Brie")return l2.brieX;if(l2.results&&n==="Mr. Umber")return 3010;if(l2.results&&n==="Pippa")return 3045;return NPC_X[n]}
+function npcX(n){if(n==="Brie")return l2.brieX;if(CROWD[n]){const[a,b]=CROWD[n];return a+(b-a)*ease(l2.walk)}if(l2.results&&n==="Mr. Umber")return 3010;if(l2.results&&n==="Pippa")return 3045;return NPC_X[n]}
 function tcount(n){l2.talk[n]=(l2.talk[n]||0)+1;return l2.talk[n]-1}
 
 function startLevel2(){
@@ -1005,10 +1010,10 @@ function festInteract(){
   if(near(1565,50)&&l2.catState==="stuck")return T("Help Mr. Biscuits",catStuck);
   if(near(2365,28))return T("Talk to Lou",lou);
   if(near(2470,40))return T("Talk to Inka",inka);
-  if(near(2945,30))return["Save at the Save Block",()=>saveFest(2945)];
-  if(near(3085,28))return T("Talk to the Announcer",announcer);
-  if(near(3160,28))return T("Talk to Juniper",juniper);
-  if(near(3420,36)&&l2.catState==="judge")return T("Greet Mr. Biscuits",()=>sayToast("Mr. Biscuits gives you one slow blink. In cat, that's a standing ovation."));
+  if(near(SAVE2,30))return["Save at the Save Block",()=>saveFest(SAVE2)];
+  if(near(npcX("Announcer"),28))return T("Talk to the Announcer",announcer);
+  if(near(npcX("Juniper"),28))return T("Talk to Juniper",juniper);
+  if(l2.catState==="judge"&&near(catX(),36))return T("Greet Mr. Biscuits",()=>sayToast("Mr. Biscuits gives you one slow blink. In cat, that's a standing ovation."));
   return null;
 }
 function umber(){if(!l2.talk.umberTip){l2.talk.umberTip=1;start([["Mr. Umber","A tip from an old-timer: if you ever need to hide, crouch down behind something — a crate, a hay bale — by holding Down (or S)."],["Mr. Umber","Works on angry sculptors, nosy neighbors and the tax collector. Ask me how I know."]]);return}const l=l2.results?["Told you. Called it. Somebody write down that I called it."]:["In my day, legendary adventurers wore capes. Do you own a cape? You should own a cape.","That butter swan took Brie three weeks, four hundred pounds of butter and one very cold room.","The sky did something funny this morning. Rumbled. Skies shouldn't rumble at a festival."];start([["Mr. Umber",l[tcount("umber")%l.length]]])}
@@ -1147,7 +1152,7 @@ function meetNib(){
   ],()=>{hasNib=true;equipped="Nib";burst(2770,140,20);sayToast("Nib joined you! E swaps buddies. Q uses the equipped buddy's power.")});
 }
 function runResults(){
-  if(l2.results)return;l2.results=true;checkpoint=2945-s.w/2;checkpointScene="festival";
+  if(l2.results)return;l2.results=true;checkpoint=SAVE2-s.w/2;checkpointScene="festival";
   const p=[
     ["Announcer","Ladies, gentlemen and talking art supplies! Our judge, Mr. Biscuits, has reached a decision!"],
     ["Mr. Biscuits","Mrrp."],
@@ -1171,7 +1176,7 @@ function startFinale(){
     ["Narrator","Then — THUD. A door falls out of the sky and lands upright on the second-floor balcony above the stage. Just a door. No house. Very rude."],
     ["Dab","One of those Smudges is carrying something shiny… a key!"],
     ["Nib","FINALLY. Something to poke! Press Q to jab. Stomping works too!"]
-  ],()=>{equipped="Nib";checkpoint=2945-s.w/2;checkpointScene="festival";sayToast("Progress saved! Stop the Smudges before they drain the painting!");
+  ],()=>{equipped="Nib";checkpoint=SAVE2-s.w/2;checkpointScene="festival";sayToast("Progress saved! Stop the Smudges before they drain the painting!");
     fsm=[[3120,3230],[3200,3330],[3300,3460],[3150,3440]].map(([a,b],i)=>({x:i%2?b:a,min:a,max:b,dir:i%2?-1:1,alive:true,flat:0,speed:70+i*12,key:i===2}))});
 }
 function roofChest(){
@@ -1221,14 +1226,20 @@ function spikeChat(){
   start([
     ["Announcer","Careful! That spiky fellow rolled out of nowhere and parked himself right in front of the stage. Nobody can get past him!"],
     ["Juniper","He's way too tall to jump over, and somebody who tried is now a pincushion. We don't talk about it."],
-    ["Announcer",l2.catFreed?"Our judge is here and ready — but we can't start until that prickly guy moves.":"And our judge still hasn't shown up. Has anyone checked the playground? I keep hearing yowling."],
+    ["Announcer",l2.catFreed?"Mr. Biscuits made it — he's right here with us — but not even a cat can squeeze past that prickly guy to reach the judge's seat.":"And our judge still hasn't shown up. Has anyone checked the playground? I keep hearing yowling."],
     ["Juniper","Ooh — look! There's something sparkling up in the sky by the Weather Station! Maybe there's something up there that might help us!"]
   ]);
 }
+function hitSpike(){
+  if(l2.spikeInv>0)return;l2.spikeHit++;
+  if(l2.spikeHit>=2){defeatSpike();return}
+  l2.spikeInv=.6;l2.spikeFlash=.5;shake=.3;burst(SPIKE_X-20,G-90,16,["#7a5c99","#fff","#f4c84f"]);s.x-=30;
+  sayToast("Prickles wobbles! Half his health is gone — jab him one more time!");
+}
 function defeatSpike(){l2.spikeDown=true;burst(SPIKE_X,G-30,30,["#7a5c99","#fff","#f4c84f","#e5577b"]);for(let i=0;i<3;i++)spill(SPIKE_X,G-50,"coin",null,(i-1)*90);
-  start([["Nib","Got him! Pointy beats spiky. Every time."],["Announcer","The stage is clear!"+(l2.catFreed?" And our judge is in his seat — let the judging begin!":" Now we just need our judge…")]],()=>{if(l2.catFreed&&l2.chaseDone)runResults()})}
+  start([["Nib","Got him! Pointy beats spiky. Every time."],["Announcer","The stage is clear!"+(l2.catFreed?" Everybody to the stage — Mr. Biscuits, take your seat!":" Now we just need our judge…")]],()=>{l2.pendRes=l2.catFreed&&l2.chaseDone;if(l2.pendRes)sayToast("Everyone heads over to the stage…")})}
 function nibJab(){
-  if(jabT>0)return;jabT=.32;if(scene==="festival"&&!l2.spikeDown&&Math.abs(SPIKE_X-(center()+s.face*55))<60&&onFloor()){jabT=.32;defeatSpike();return}
+  if(jabT>0)return;jabT=.32;if(scene==="festival"&&!l2.spikeDown&&Math.abs(SPIKE_X-(center()+s.face*55))<60&&onFloor()){jabT=.32;hitSpike();return}
   const hx=center()+s.face*55,list=scene==="festival"?fsm.concat(l2.foe?[l2.foe]:[]):scene==="outside"?smudges:[];let hit=0;
   for(const m of list){if(!m.alive)continue;const base=m.base??G;if(Math.abs(m.x-hx)<44&&s.y+s.h>base-80&&s.y<base){m.alive=false;hit++;if(m.key)dropDoorKey(m);burst(m.x,G-20,14,[INK,"#5b5277","#fff"]);spill(m.x,G-40,"coin",null,s.face*80)}}
   if(hit&&!l2.nibCheer){l2.nibCheer=true;sayToast("JAB! Nib pokes the Smudge into confetti — and a coin pops out!")}
@@ -1262,8 +1273,12 @@ function updateFestival(dt,oldFeet){
     if(center()<SPIKE_X-200)l2.spikeTalk=0;
     if(!l2.spikeTalk&&center()>SPIKE_X-150&&onFloor()){l2.spikeTalk=1;spikeChat();return}
   }
-  if(!l2.results&&l2.spikeDown&&center()>3030){
-    if(l2.catFreed&&l2.chaseDone){runResults();return}
+  l2.spikeInv=Math.max(0,l2.spikeInv-dt);l2.spikeFlash=Math.max(0,l2.spikeFlash-dt);
+  if(l2.spikeDown)l2.walk=Math.min(1,l2.walk+dt/1.8);
+  if(l2.spikeDown&&l2.catState==="judge")l2.catWalk=Math.min(1,l2.catWalk+dt/1.8);
+  if(l2.pendRes&&!l2.results&&!dlg.on&&l2.walk>=1&&l2.catWalk>=1){l2.pendRes=false;runResults();return}
+  if(!l2.results&&l2.spikeDown&&center()>3030&&l2.walk>=1){
+    if(l2.catFreed&&l2.chaseDone&&l2.catWalk>=1){runResults();return}
     if(!l2.catFreed&&!l2.w1){l2.w1=true;announcer();return}
   }
   if(l2.finale&&!l2.fightDone&&fsm.length){
@@ -1500,13 +1515,17 @@ function drawStage(){
   // main easel
   cut(()=>{g.beginPath();g.moveTo(3230,G);g.lineTo(3262,G-230);g.lineTo(3294,G);g.lineTo(3286,G);g.lineTo(3262,G-190);g.lineTo(3238,G);g.closePath()},"#a8714a",{edge:5});
   cut(()=>rr(3180,G-222,164,124,4),"#d4bf7d",{edge:8});
-  if(l2.results)drawPainting(3187,G-215,150,110);
-  else{cut(()=>{g.beginPath();g.moveTo(3176,G-226);g.lineTo(3348,G-226);g.quadraticCurveTo(3340,G-160,3350,G-92);g.lineTo(3174,G-92);g.quadraticCurveTo(3184,G-160,3176,G-226);g.closePath()},"#8a5a8f",{edge:6});g.fillStyle="#fff";g.font="bold 34px "+FONT;g.textAlign="center";g.fillText("?",3262,G-150)}
-  g.textAlign="center";if(l2.results){g.font="italic bold 11px "+FONT;g.fillStyle="#fff";g.fillText("\"The Legend Returns\" — Juniper",3262,G-80)}
+  const cu=l2.curtain||0;if(cu>0)drawPainting(3187,G-215,150,110);
+  if(cu<1){const e=cu*cu,bot=G-92+70*e,h=134*(1-.6*e);g.save();g.beginPath();g.rect(3100,G-300,320,284);g.clip();g.globalAlpha=1-Math.max(0,(cu-.7)/.3);
+    g.translate(3262,bot-h);g.rotate(Math.sin(cu*9)*.05*cu);g.scale(1,h/134);g.translate(-3262,-(G-226));
+    cut(()=>{g.beginPath();g.moveTo(3176,G-226);g.lineTo(3348,G-226);g.quadraticCurveTo(3340,G-160,3350,G-92);g.lineTo(3174,G-92);g.quadraticCurveTo(3184,G-160,3176,G-226);g.closePath()},"#8a5a8f",{edge:6});
+    g.strokeStyle="rgba(0,0,0,.18)";g.lineWidth=2;for(const fx of[3210,3240,3285,3315]){g.beginPath();g.moveTo(fx,G-224);g.quadraticCurveTo(fx+6,G-160,fx-2,G-94);g.stroke()}
+    g.fillStyle="#fff";g.font="bold 34px "+FONT;g.textAlign="center";g.fillText("?",3262,G-150);g.restore()}
+  g.textAlign="center";if(cu>=1){g.font="italic bold 11px "+FONT;g.fillStyle="#fff";g.fillText("\"The Legend Returns\" — Juniper",3262,G-80)}
   cut(()=>rr(x0-10,G-16,x1-x0+20,16,3),"#b5713f",{edge:6});
   if(l2.clayEntered){cut(()=>rr(3346,G-46,36,46,3),"#fffdf6",{edge:5});drawIcon(l2.entry,3364,G-62,.6)}
   cut(()=>rr(3398,G-58,48,58,4),"#fffdf6",{edge:7});g.fillStyle=INK;g.font="bold 12px "+FONT;g.fillText("JUDGE",3422,G-30);
-  if(l2.catState==="judge")drawCatSit(3422,G-58);else{g.font="italic 10px "+FONT;g.fillText("(missing)",3422,G-14)}
+  if(l2.catState!=="judge"){g.font="italic 10px "+FONT;g.fillText("(missing)",3422,G-14)}
   g.textAlign="left";
 }
 function drawSkyDoor(){
@@ -1554,7 +1573,7 @@ function drawFestival(){
   booth(560,120,"CLAY CORNER","#c98a5a",()=>npc("Potter Pat",560,undefined,-26));
   cut(()=>rr(636,G-40,8,40,2),"#a8714a");cut(()=>{g.beginPath();g.ellipse(640,G-40,26,7,0,0,7)},"#fff3d6",{edge:5});
   if(!l2.cardTaken){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#fff6a8";circle(640,G-66,24);g.fill();g.restore();drawIcon("Recipe Card",640,G-66+Math.sin(time*3)*3,.7);g.fillStyle="#fff6a8";star(660,G-88,6+Math.sin(time*7)*2,2);g.fill()}
-  for(const x of[700,2945]){sprite(x,G-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,G+2,20)}
+  for(const x of[700,SAVE2]){sprite(x,G-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,G+2,20)}
   booth(860,130,"CHEF CRUMB'S KITCHEN","#e5577b",()=>npc("Chef Crumb",860,undefined,-26));
   drawElevator(1050);npc("Gus",1005);
   drawSwan(1300);drawSculptures();drawJungleGym(1565);
@@ -1565,7 +1584,12 @@ function drawFestival(){
   const bx=l2.brieX;if(l2.chase===1){const hop=Math.abs(Math.sin(time*12))*6;groundShadow(bx,G+2,18);sprite(bx,G+3-hop,50,78,()=>drawPersonBody(LOOKS.Brie),{sx:l2.brieFace});
     g.font="bold 22px "+FONT;g.fillStyle=l2.confused>0?"#3b8fd6":"#e5577b";g.textAlign="center";g.fillText(l2.confused>0?"?":"!!",bx,G-92);g.textAlign="left"}
   else npc("Brie",bx,center()<bx?-1:1);
-  if(!l2.spikeDown){groundShadow(SPIKE_X,G+2,26);sprite(SPIKE_X,G+3,72,170,drawSpikeBody,{sx:center()<SPIKE_X?1:-1,sy:1+Math.sin(time*4)*.02})}
+  if(l2.catState==="judge"){const cx=catX(),walking=l2.catWalk>0&&l2.catWalk<.8;if(l2.catWalk<.8)groundShadow(cx,G+2,14);drawCatSit(cx,G-catLift()-(walking?Math.abs(Math.sin(l2.catWalk*40))*5:0))}
+  if(!l2.spikeDown){groundShadow(SPIKE_X,G+2,26);const fl=l2.spikeFlash>0;sprite(SPIKE_X+(fl?Math.sin(time*60)*4:0),G+3,72,170,drawSpikeBody,{sx:center()<SPIKE_X?1:-1,sy:1+Math.sin(time*4)*.02,alpha:fl&&Math.sin(time*40)>0?.45:1});
+    if(l2.spikeHit>0||Math.abs(center()-SPIKE_X)<420){const bw=76,bx=SPIKE_X-bw/2,by=G-196,hp=(2-l2.spikeHit)/2;
+      cut(()=>rr(bx-4,by-4,bw+8,18,6),"#fffdf6",{edge:4});g.fillStyle="#3a3352";rr(bx,by,bw,10,4);g.fill();
+      g.fillStyle=hp>.5?"#5fb35a":"#e5577b";rr(bx,by,bw*hp,10,4);g.fill();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(bx+bw/2,by);g.lineTo(bx+bw/2,by+10);g.stroke();
+      g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("PRICKLES",SPIKE_X,by-8);g.textAlign="left"}}
   for(const m of fsm){if(m.alive){groundShadow(m.x,G+2,18);sprite(m.x,G+2,46,36,drawSmudgeBody,{sx:m.dir>0?-1:1,sy:1+Math.sin(time*10)*.06});if(m.key)drawIcon("Smudgy Key",m.x,G-52+Math.sin(time*5)*3,.5)}else if(m.flat<1){sprite(m.x,G+2,46,36,drawSmudgeBody,{sy:Math.max(.05,.2-m.flat*.2),sx:1.4,alpha:1-m.flat})}}
   drawLoot();drawDoodles();drawParticles();drawSarah();
   const hs=hideSpot();if(hs)drawCrate(hs);
@@ -1990,7 +2014,7 @@ const CHEATS={
   l2:()=>cheatBase(),
   plaza:()=>{cheatBase();cheatTele(FEST_MIN+200)},
   nib:()=>{cheatBase();l2.intro=true;l2.catSeen=l2.butterTaken=l2.catFreed=l2.chaseDone=true;l2.chase=2;l2.catState="judge";addItem("Butter Pat",2);cheatTele(2400)},
-  results:()=>{CHEATS.nib();l2.spikeDown=true;hasNib=true;l2.nibMet=true;l2.trail=true;equipped="Nib";cheatTele(2915)},
+  results:()=>{CHEATS.nib();l2.spikeDown=true;hasNib=true;l2.nibMet=true;l2.trail=true;equipped="Nib";cheatTele(2915);l2.walk=l2.catWalk=1},
   fight:()=>{CHEATS.results();l2.results=true;cheatTele(3010);startFinale()},
   coins:()=>{coins+=20;sayToast("+20 coins (cheater!)")},
   reload:()=>location.reload()
