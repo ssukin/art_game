@@ -760,11 +760,13 @@ function drawGround(){
     g.fillStyle=i%2?"#c98c5a":"#bd8150";g.fillRect(x,G+18,60,H-G-18);
     g.fillStyle="rgba(255,255,255,.18)";g.fillRect(x+8,G+30,10,10);g.fillRect(x+34,G+62,10,10);
     g.strokeStyle="#8d5a36";g.lineWidth=2;g.strokeRect(x,G+18,60,H-G-18);}
-  // grass strip with a zig-zag paper edge
+  // grass strip with a zig-zag paper edge (no grass over the festival hole)
+  g.save();if(scene==="festival"){g.beginPath();g.rect(camera-20,0,HOLE.x-camera+20,H);g.rect(HOLE.x+HOLE.w,0,camera+W+80-(HOLE.x+HOLE.w),H);g.clip()}
   g.fillStyle="#fff";g.beginPath();g.moveTo(camera-10,G-4);for(let x=x0;x<camera+W+60;x+=20){g.lineTo(x,G-4);g.lineTo(x+10,G-10)}g.lineTo(camera+W+40,G+26);g.lineTo(camera-10,G+26);g.fill();
   g.fillStyle="#6cc06b";g.beginPath();g.moveTo(camera-10,G);for(let x=x0;x<camera+W+60;x+=20){g.lineTo(x,G);g.lineTo(x+10,G-6)}g.lineTo(camera+W+40,G+20);g.lineTo(camera-10,G+20);g.fill();
   g.fillStyle="#5aae5c";g.beginPath();for(let x=x0;x<camera+W+60;x+=20){g.moveTo(x,G+20);g.lineTo(x+10,G+26);g.lineTo(x+20,G+20)}g.fill();
   g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(camera-10,G);for(let x=x0;x<camera+W+60;x+=20){g.lineTo(x,G);g.lineTo(x+10,G-6)}g.stroke();
+  g.restore();
 }
 function drawHouse(x,y,w,h,wall,roof,label,open){
   cut(()=>rr(x,y,w,h,8),wall,{edge:9});
@@ -1710,7 +1712,7 @@ function festIntroCheck(){if(!l2.intro&&center()>130){start([
 function drawFestEntrance(){
   shopFront(-720,140,"PET STORE","#e9f7ff","#3bb6c4","pet");shopFront(-300,140,"HATTER'S","#f7d6e0","#d0648f","hat");shopFront(-150,130,"TOY SHOP","#fff1d6","#f08a3c","toy");
   // the hole
-  g.fillStyle="#1b1730";g.fillRect(HOLE.x,G-8,HOLE.w,H);g.fillStyle="#3a3352";g.fillRect(HOLE.x,G-8,HOLE.w,10);g.strokeStyle=INK;g.lineWidth=2.5;g.strokeRect(HOLE.x,G-8,HOLE.w,H);
+  g.fillStyle="#1b1730";g.fillRect(HOLE.x,G,HOLE.w,H);g.fillStyle="#8d5a36";g.fillRect(HOLE.x,G,7,H);g.fillRect(HOLE.x+HOLE.w-7,G,7,H);g.fillStyle="rgba(0,0,0,.35)";g.fillRect(HOLE.x+7,G,HOLE.w-14,14);g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.moveTo(HOLE.x,G);g.lineTo(HOLE.x,H);g.moveTo(HOLE.x+HOLE.w,G);g.lineTo(HOLE.x+HOLE.w,H);g.stroke();
   cut(()=>rr(HOLE.x-34,G-70,6,70,2),"#a8714a");g.save();g.translate(HOLE.x-38,G-84);g.rotate(Math.sin(time*1.4)*.04);
   if(l2.holeSign){cut(()=>rr(-38,-16,76,34,6),"#f4c84f",{edge:5});g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("DIG CREW",0,-2);g.fillText("ENTRY HERE ↓",0,11)}
   else{cut(()=>rr(-38,-16,76,34,6),"#b7b5ae",{edge:5,ink:"#77746c"});g.strokeStyle="#9a9890";g.lineWidth=2;for(const y of[-4,6]){g.beginPath();g.moveTo(-26,y);g.lineTo(26,y);g.stroke()}}
