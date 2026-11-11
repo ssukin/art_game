@@ -1820,7 +1820,6 @@ function drawLake(){
   // dock
   for(let x=DOCK.x+20;x<DOCK.x+DOCK.w;x+=70)cut(()=>rr(x-5,G,10,70,2),"#8d5a36",{edge:4,shadow:false});
   cut(()=>rr(DOCK.x,G-6,DOCK.w,14,3),"#c58a52",{edge:6});g.strokeStyle="#8d5a36";g.lineWidth=1.5;for(let x=DOCK.x+20;x<DOCK.x+DOCK.w;x+=20){g.beginPath();g.moveTo(x,G-5);g.lineTo(x,G+7);g.stroke()}
-  cut(()=>rr(DOCK.x+DOCK.w-60,G-130,6,124,2),"#a8714a");cut(()=>rr(DOCK.x+DOCK.w-100,G-156,86,28,7),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("FISHING SPOT",DOCK.x+DOCK.w-57,G-138);g.textAlign="left";
   // exit door
   cut(()=>rr(30,G-140,80,140,10),"#7cc488",{edge:8});cut(()=>rr(42,G-128,56,128,6),"#c58a52",{edge:0,line:2,shadow:false});g.fillStyle="#f4c84f";circle(88,G-64,4);g.fill();doorLabel(70,G-172,l2.lakeFrom==="orchard"?"← ORCHARD":"← FESTIVAL");
   // coop + sign
