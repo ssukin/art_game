@@ -48,8 +48,9 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 3. **Free Mr. Biscuits.** His head is stuck in the jungle gym. Sneak a curl from Brie's butter swan (2 Butter Pats) and grease him free.
 4. **The chase.** Brie chases you. Jump crates, duck behind them, and choose "Sorry." when caught (refuse twice and you get a buttery slap).
 5. **Find Nib.** Dab's Q by the art-supply stand reveals a doodle staircase up to Nib the pencil (Q jabs).
-6. **Results.** Juniper's painting looks a lot like Sarah and Dab. The prophecy!
-7. **Finale.** The sky cracks. Smudges drain the painting, and a door falls onto the **second floor** balcony above the stage. One Smudge drops the Smudgy Key. Mrs. Maple says Sarah must save the town, then ties the **balloon dog** sculpture to her so she can float up to the jump bars on the right of the stage. Fall off and Mrs. Maple puts down a trampoline. Climb to the second floor and unlock the door: "Level 3 coming soon!"
+6. **Prickles.** A tall, spiky creature blocks the stage. You can't jump over him or on him, and touching him hurts. The waiting crowd points you to something sparkling by the Weather Station (Nib). One jab from Nib clears the way, and judging begins once Mr. Biscuits is free.
+7. **Results.** Juniper's painting looks a lot like Sarah and Dab. The prophecy!
+8. **Finale.** The sky cracks. Smudges drain the painting, and a door falls onto the **second floor** balcony above the stage. One Smudge drops the Smudgy Key. Mrs. Maple says Sarah must save the town, then ties the **balloon dog** sculpture to her so she can float up to the jump bars on the right of the stage. Fall off and Mrs. Maple puts down a trampoline. Climb to the second floor and unlock the door: "Level 3 coming soon!"
 
 **Around town (optional):**
 - **The lake** (door in the orchard): chicken coop, a sign ("Eggs: friends of the dog only") and Waffles the dog, who won't let you in but would love dog food. With **Reel** (from the Registrar) equipped, go to the end of the dock and press Space to cast, watch the bobber nibble 1–4 times, and when it's yanked under you have 2 seconds to press Space. Lake Perch stack in one slot. Falling off the dock costs 1 health and puts Sarah back on the dock.
