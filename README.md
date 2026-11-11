@@ -48,7 +48,7 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 3. **Free Mr. Biscuits.** His head is stuck in the jungle gym. Sneak a curl from Brie's butter swan (2 Butter Pats) and grease him free.
 4. **The chase.** Brie chases you. Jump crates, duck behind them, and choose "Sorry." when caught (refuse twice and you get a buttery slap).
 5. **Find Nib.** Dab's Q by the art-supply stand reveals a doodle staircase up to Nib the pencil (Q jabs).
-6. **Prickles.** A tall, spiky creature blocks the stage. You can't jump over him or on him, and touching him hurts. The waiting crowd points you to something sparkling by the Weather Station (Nib). One jab from Nib clears the way, and judging begins once Mr. Biscuits is free.
+6. **Prickles.** A tall, spiky creature blocks the stage. You can't jump over him or on him, and touching him hurts. The waiting crowd points you to something sparkling by the Weather Station (Nib). The crowd (and Mr. Biscuits, once freed) waits on this side of him. Prickles has a health bar and takes two Nib jabs. Then everyone walks to the stage, the cat hops onto the judge's seat, and the results begin; the cloth falls away before the painting is revealed.
 7. **Results.** Juniper's painting looks a lot like Sarah and Dab. The prophecy!
 8. **Finale.** The sky cracks. Smudges drain the painting, and a door falls onto the **second floor** balcony above the stage. One Smudge drops the Smudgy Key. Mrs. Maple says Sarah must save the town, then ties the **balloon dog** sculpture to her so she can float up to the jump bars on the right of the stage. Fall off and Mrs. Maple puts down a trampoline. Climb to the second floor and unlock the door: "Level 3 coming soon!"
 
