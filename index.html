@@ -1124,7 +1124,6 @@ function inka(){
 function announcer(){
   if(l2.results){start([["Announcer",l2.fightDone?"What a festival! Art! Butter! Ink monsters! Same time next year!":"Stay calm, everyone! This is fine! This is a normal festival!"]]);return}
   if(!l2.catFreed){start([["Announcer","Welcome to the judging stage! We'd start, but our judge, Mr. Biscuits, is missing. Has anyone checked the playground? I keep hearing yowling."]]);return}
-  if(!hasNib){start([["Announcer","Our judge has arrived! He is now \"deliberating.\" (He's asleep.) Come back in a bit — go enjoy the festival!"]]);return}
   runResults();
 }
 function juniper(){start([["Juniper",l2.results?"I painted the legend from the old stories. I never thought she was real. Is real. Is… you?":"I'm Juniper. I entered a painting. I'm not nervous. I've just eaten nine kettle corns in a row for no reason."]])}
@@ -1165,8 +1164,7 @@ function startFinale(){
     ["Narrator","Smudges tumble out of the tear and swarm Juniper's painting. The color starts draining right out of it!"],
     ["Narrator","Then — THUD. A door falls out of the sky and lands upright on the second-floor balcony above the stage. Just a door. No house. Very rude."],
     ["Dab","One of those Smudges is carrying something shiny… a key!"],
-    ["Nib","FINALLY. Something to poke! Press Q to jab. Stomping works too!"]
-  ],()=>{equipped="Nib";checkpoint=2990-s.w/2;checkpointScene="festival";sayToast("Progress saved! Stop the Smudges before they drain the painting!");
+  ].concat(hasNib?[["Nib","FINALLY. Something to poke! Press Q to jab. Stomping works too!"]]:[["Dab","Jump on them, Sarah! Squish those Smudges flat!"]]),()=>{if(hasNib)equipped="Nib";checkpoint=2990-s.w/2;checkpointScene="festival";sayToast("Progress saved! Stop the Smudges before they drain the painting!");
     fsm=[[3120,3230],[3200,3330],[3300,3460],[3150,3440]].map(([a,b],i)=>({x:i%2?b:a,min:a,max:b,dir:i%2?-1:1,alive:true,flat:0,speed:70+i*12,key:i===2}))});
 }
 function roofChest(){
@@ -1240,9 +1238,8 @@ function updateFestival(dt,oldFeet){
       start([["Brie","GOTCHA! That swan was a COMMISSIONED masterpiece! Butter doesn't grow on trees!"],["Brie","Well? What do you have to say for yourself?",SORRY,pickSorry]]);return}
   }
   if(!l2.results&&center()>3030){
-    if(l2.catFreed&&hasNib){runResults();return}
+    if(l2.catFreed&&l2.chaseDone){runResults();return}
     if(!l2.catFreed&&!l2.w1){l2.w1=true;announcer();return}
-    if(l2.catFreed&&!hasNib&&!l2.w2){l2.w2=true;announcer();return}
   }
   if(l2.finale&&!l2.fightDone&&fsm.length){
     let alive=0;
@@ -1253,7 +1250,7 @@ function updateFestival(dt,oldFeet){
         else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;
           if(health<=0){health=maxHealth;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}}
     l2.drain=Math.min(.9,l2.drain+alive*.03*dt);
-    if(!alive){l2.fightDone=true;start([["Nib","Pointy justice!"],["Dab","Look — the painting's getting its color back!"]],()=>{l2.maple=camera-60})}
+    if(!alive){l2.fightDone=true;start((hasNib?[["Nib","Pointy justice!"]]:[["Sarah","Squished. All of them. That's the most cardio I've done all year."]]).concat([["Dab","Look — the painting's getting its color back!"]]),()=>{l2.maple=camera-60})}
   }
   if(l2.fightDone){l2.drain=Math.max(0,l2.drain-dt*.5);for(const m of fsm)if(!m.alive)m.flat=Math.min(1,m.flat+dt*3)}
   if(l2.maple!=null&&!l2.mapleTalked){const target=center()-90;l2.maple+=Math.sign(target-l2.maple)*Math.min(Math.abs(target-l2.maple),150*dt);if(Math.abs(l2.maple-target)<4){l2.mapleTalked=true;mapleFinale()}}
@@ -1554,8 +1551,8 @@ function objectiveL2(){
   if(scene==="orchard"&&!l2.festReg)return"Walk through the orchard to the Registration table. Entry is 5 coins — or wear your Festival Pin to get in free. (Short on coins? Try the tree by the lake. Missed the pin? It's still on Mrs. Maple's roof, back home.)";
   if(l2.mapleDone)return(has("Smudgy Key")?"":"Pick up the Smudgy Key a Smudge dropped. ")+(l2.on2F?"Unlock the door on the second floor.":dogOn?"With the balloon dog tied on, jump up to the bars on the right of the stage, then climb to the second floor and unlock the door.":"Climb the jump bars on the right of the stage to the second floor and unlock the door."+(l2.tramp?" (Use Mrs. Maple’s trampoline!)":""));
   if(l2.fightDone)return"The Smudges are gone! Someone familiar is hurrying over…";
-  if(l2.finale)return"Defeat the Smudges before they drain Juniper's painting! With Nib equipped, press Q to jab — or stomp them.";
-  if(hasNib)return"Head to the judging stage at the far right to hear the contest results.";
+  if(l2.finale)return"Defeat the Smudges before they drain Juniper's painting! Stomp them"+(hasNib?" — or equip Nib and press Q to jab.":".");
+  if(l2.chaseDone&&!l2.results)return"Mr. Biscuits is at the judging post! Head to the stage at the far right for the contest results."+(hasNib||l2.trail?"":" (Lou also spotted something shiny in the sky above the art-supply stand — try Dab's Q nearby.)");
   if(l2.trail)return"Climb the doodle trail above the art-supply stand and reach the shiny thing.";
   if(l2.chaseDone)return"Lou saw something shiny in the sky above the art-supply stand. With Dab equipped, press Q nearby.";
   if(l2.chase===1)return"RUN! Jump over the crates. Hold S next to a crate to duck behind it.";
