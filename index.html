@@ -1432,7 +1432,7 @@ function drawSwan(x){
   g.strokeStyle="#e0b64a";g.lineWidth=2.5;g.beginPath();g.moveTo(x-30,G-74);g.quadraticCurveTo(x-6,G-88,x+18,G-72);g.moveTo(x-26,G-64);g.quadraticCurveTo(x-4,G-76,x+16,G-62);g.stroke();
   g.fillStyle="rgba(255,255,255,.7)";g.beginPath();g.ellipse(x-14,G-88,10,3,-.2,0,7);g.fill();
   if(l2.butterTaken){g.fillStyle="#fff7d6";g.beginPath();g.arc(x-44,G-80,7,0,7);g.fill();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.arc(x-44,G-80,7,-.4,2.2);g.stroke()}
-  cut(()=>rr(x-46,G-30,92,22,4),"#e5577b",{edge:4,shadow:false});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("DO NOT TOUCH",x,G-14);g.textAlign="left";
+  cut(()=>rr(x-48,G-30,96,22,4),"#e5577b",{edge:4,shadow:false});g.fillStyle="#fff";g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("DO NOT TOUCH",x,G-14);g.textAlign="left";
 }
 function drawJungleGym(cx){
   const x0=cx-90,x1=cx+90,top=G-170;
@@ -1724,9 +1724,10 @@ function drawLakeDoor(x){cut(()=>{g.beginPath();g.moveTo(x-40,G);g.lineTo(x-40,G
   g.fillStyle="#bfe6fb";g.beginPath();g.ellipse(x,G-60,20,6,0,0,7);g.fill();g.fillStyle="#7cc6f2";g.beginPath();g.ellipse(x,G-40,22,6,0,0,7);g.fill();
   doorLabel(x,G-182,"THE LAKE");}
 function drawElevator(x){
-  cut(()=>rr(x-26,G-230,52,230,6),"#c9d6d4",{edge:8});g.fillStyle="#9fb0ae";for(let y=G-220;y<G-100;y+=24)g.fillRect(x-20,y,40,10);
+  cut(()=>rr(x-26,-900,52,G+900,6),"#c9d6d4",{edge:8});g.fillStyle="#9fb0ae";for(let y=G-124;y>-900;y-=24)g.fillRect(x-20,y,40,10);
+  g.strokeStyle="#8fa3a0";g.lineWidth=2;g.beginPath();g.moveTo(x-6,-900);g.lineTo(x-6,G-100);g.moveTo(x+6,-900);g.lineTo(x+6,G-100);g.stroke();
   cut(()=>rr(x-20,G-96,40,96,4),"#8fa3a0",{edge:0,line:2,shadow:false});g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(x,G-96);g.lineTo(x,G);g.stroke();
-  cut(()=>rr(x-22,G-250,44,24,8),"#f4c84f",{edge:5});g.fillStyle=INK;g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("↑ 2F",x,G-233);
+
   g.save();g.translate(x,G-120);g.rotate(-.08);cut(()=>rr(-34,-10,68,20,4),"#e5577b",{edge:4,shadow:false});g.fillStyle="#fff";g.font="bold 9px "+FONT;g.fillText("OUT OF ORDER",0,4);g.restore();g.textAlign="left";
 }
 function drawBalloonDog(x,y,sc,c="#ff8fc8"){g.save();g.translate(x,y);g.scale(sc,sc);
