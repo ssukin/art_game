@@ -1124,7 +1124,11 @@ function inka(){
 function announcer(){
   if(l2.results){start([["Announcer",l2.fightDone?"What a festival! Art! Butter! Ink monsters! Same time next year!":"Stay calm, everyone! This is fine! This is a normal festival!"]]);return}
   if(!l2.catFreed){start([["Announcer","Welcome to the judging stage! We'd start, but our judge, Mr. Biscuits, is missing. Has anyone checked the playground? I keep hearing yowling."]]);return}
-  if(!hasNib){start([["Announcer","Our judge has arrived! He is now \"deliberating.\" (He's asleep.) Come back in a bit — go enjoy the festival!"]]);return}
+  if(!hasNib){start([
+    ["Announcer","Our judge has arrived and he's ready to go! But hold on — the contest can't start just yet."],
+    ["Juniper","There's something around here you need to find first. Look for something glittery up in the sky, over by the Weather Station."],
+    ["Announcer","Word is a certain paintbrush is great at revealing hidden things. (Stand near the art-supply stand with Dab and press Q!)"]
+  ]);return}
   runResults();
 }
 function juniper(){start([["Juniper",l2.results?"I painted the legend from the old stories. I never thought she was real. Is real. Is… you?":"I'm Juniper. I entered a painting. I'm not nervous. I've just eaten nine kettle corns in a row for no reason."]])}
@@ -1239,9 +1243,11 @@ function updateFestival(dt,oldFeet){
     if(Math.abs(l2.brieX-center())<30&&l2.confused<=0){l2.chase=2;s.vy=0;keys.clear();
       start([["Brie","GOTCHA! That swan was a COMMISSIONED masterpiece! Butter doesn't grow on trees!"],["Brie","Well? What do you have to say for yourself?",SORRY,pickSorry]]);return}
   }
+  if(center()<2990)l2.w2=false;
   if(!l2.results&&center()>3030){
     if(l2.catFreed&&hasNib){runResults();return}
     if(!l2.catFreed&&!l2.w1){l2.w1=true;announcer();return}
+    if(l2.catFreed&&l2.chaseDone&&!hasNib&&!l2.w2){l2.w2=true;s.vy=0;announcer();return}
     if(l2.catFreed&&!hasNib&&!l2.w2){l2.w2=true;announcer();return}
   }
   if(l2.finale&&!l2.fightDone&&fsm.length){
@@ -1557,7 +1563,7 @@ function objectiveL2(){
   if(l2.finale)return"Defeat the Smudges before they drain Juniper's painting! With Nib equipped, press Q to jab — or stomp them.";
   if(hasNib)return"Head to the judging stage at the far right to hear the contest results.";
   if(l2.trail)return"Climb the doodle trail above the art-supply stand and reach the shiny thing.";
-  if(l2.chaseDone)return"Lou saw something shiny in the sky above the art-supply stand. With Dab equipped, press Q nearby.";
+  if(l2.chaseDone)return"Find the glittery something in the sky by the Weather Station before judging can start. With Dab equipped, press Q near the art-supply stand to reveal the way up.";
   if(l2.chase===1)return"RUN! Jump over the crates. Hold S next to a crate to duck behind it.";
   if(has("Butter Pat")&&l2.catSeen)return"Smear a little butter on the jungle-gym bars to free Mr. Biscuits.";
   if(l2.catSeen)return"Mr. Biscuits needs something slippery. That butter swan is VERY slippery…";
