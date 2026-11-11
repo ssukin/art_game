@@ -1826,9 +1826,9 @@ function drawLake(){
   // coop + sign
   cut(()=>rr(246,G-70,6,70,2),"#a8714a");cut(()=>rr(206,G-118,90,52,6),"#fff3d6",{edge:6});g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("EGGS:",251,G-102);g.fillText("FRIENDS OF",251,G-89);g.fillText("THE DOG ONLY",251,G-76);
   cut(()=>{g.beginPath();g.moveTo(320,G);g.lineTo(320,G-80);g.lineTo(395,G-130);g.lineTo(470,G-80);g.lineTo(470,G);g.closePath()},"#e5463f",{edge:8});
-  cut(()=>rr(372,G-56,46,56,6),"#8d5a36",{edge:0,line:2,shadow:false});g.fillStyle="#fff";g.font="bold 11px "+FONT;g.fillText("COOP",395,G-90);g.textAlign="left";
-  g.strokeStyle="#c9a23a";g.lineWidth=2;for(let x=290;x<=500;x+=14){g.beginPath();g.moveTo(x,G);g.lineTo(x,G-30);g.stroke()}g.beginPath();g.moveTo(290,G-24);g.lineTo(500,G-24);g.stroke();
+  cut(()=>rr(372,G-56,46,56,6),"#8d5a36",{edge:0,line:2,shadow:false});g.textAlign="left";
   for(const [x,i,f] of[[338,0,1],[438,1,-1],[466,2,1]])sprite(x,G-1,40,40,()=>drawChicken(Math.max(0,Math.sin(time*3+i*2))),{sx:f*1.2,sy:1.2,shadow:false});
+  g.strokeStyle="#c9a23a";g.lineWidth=3;for(let x=290;x<=500;x+=14){g.beginPath();g.moveTo(x,G);g.lineTo(x,G-30);g.stroke()}g.beginPath();g.moveTo(290,G-24);g.lineTo(500,G-24);g.moveTo(290,G-10);g.lineTo(500,G-10);g.stroke();
   tree(700,G,1.15,"#58b56a");for(const [dx,dy] of[[-24,-110],[20,-96],[-10,-86]]){cut(()=>{g.beginPath();g.arc(700+dx,G+dy,6,0,7)},"#e5463f",{edge:3,shadow:false})}
   LAKE_COINS.forEach(([x,y],i)=>{if(!l2.lakeCoins[i])drawCoin(x,y+Math.sin(time*4+i)*2,8)});
   // Waffles
