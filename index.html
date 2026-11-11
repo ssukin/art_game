@@ -405,7 +405,7 @@ function useSelected(){
   if(n==="Recipe Card"){sayToast("Turnip + Butter Pat = Health Potion. Chef Crumb can cook it at his booth.");return}
   if(n==="Health Potion"){if(health>=maxHealth){sayToast("You're already at full health. Save it for a rainier day.");return}health=maxHealth;useOne(n);inv.sel=0;sayToast("Glug glug. Health fully restored! Strawberry courage achieved.");return}
   if(n==="Turnip"){sayToast("You consider eating the turnip. The turnip considers you back. You put it away.");return}
-  if(n==="Festival Pin"){pinWorn=!pinWorn;sayToast(pinWorn?"You pin the Festival Pin to your dress. Fancy! (Free festival entry!)":"You take off the Festival Pin and pocket it.");return}
+  if(n==="Festival Pin"){pinWorn=!pinWorn;invOpen=false;sayToast(pinWorn?"You pin the Festival Pin to your dress. Fancy! (Pin-wearers get into the festival free.)":"You take off the Festival Pin and pocket it.");return}
   if(n==="Town Map"){sayToast("You unfold the map. And unfold. And unfold. You'll figure out how to read it later.");return}
   if(n==="Lake Perch"){sayToast("The Lake Perch stares at you. You stare back. Nobody wins.");return}
 }
@@ -489,7 +489,7 @@ function drawHints(px,py,pw,ph){
 function invClick(mx,my){
   const px=90,py=46;for(let i=0;i<4;i++){const tx=px+60+i*120,ty=py+48;if(mx>tx&&mx<tx+108&&my>ty&&my<ty+40){inv.tab=i;inv.sel=0;return}}
   if(inv.tab<3&&mx>590+125-80&&mx<590+125+80&&my>156+290-48&&my<156+290-12){useSelected();return}
-  if(inv.tab<3){const list=pocketList();for(let i=0;i<list.length;i++){const [x,y]=slotPos(i);if(Math.hypot(mx-x,my-y)<SLOT.r){if(inv.sel===i)useSelected();inv.sel=i;return}}}
+  if(inv.tab<3){const list=pocketList();for(let i=0;i<list.length;i++){const [x,y]=slotPos(i);if(Math.hypot(mx-x,my-y)<SLOT.r){inv.sel=i;return}}}
 }
 
 // ---------------------------------------------------------------------------
@@ -1708,8 +1708,6 @@ function festIntroCheck(){if(!l2.intro&&center()>130){start([
     ["Narrator","The townsfolk exchange meaningful looks. Several of them are very bad at it."]
   ],()=>{l2.intro=true;sayToast("Explore the festival! The Clay Corner is the first booth.")});return true}return false}
 function drawFestEntrance(){
-  cut(()=>{g.beginPath();g.moveTo(-890,G);g.lineTo(-890,G-200);g.quadraticCurveTo(-820,G-250,-750,G-200);g.lineTo(-750,G);g.lineTo(-770,G);g.lineTo(-770,G-190);g.quadraticCurveTo(-820,G-226,-870,G-190);g.lineTo(-870,G);g.closePath()},"#e5577b",{edge:8});
-  cut(()=>rr(-905,G-262,170,30,10),"#f4c84f",{edge:6});g.fillStyle=INK;g.font="bold 14px "+FONT;g.textAlign="center";g.fillText("ART FESTIVAL",-820,G-241);g.textAlign="left";
   shopFront(-720,140,"PET STORE","#e9f7ff","#3bb6c4","pet");shopFront(-300,140,"HATTER'S","#f7d6e0","#d0648f","hat");shopFront(-150,130,"TOY SHOP","#fff1d6","#f08a3c","toy");
   // the hole
   g.fillStyle="#1b1730";g.fillRect(HOLE.x,G-8,HOLE.w,H);g.fillStyle="#3a3352";g.fillRect(HOLE.x,G-8,HOLE.w,10);g.strokeStyle=INK;g.lineWidth=2.5;g.strokeRect(HOLE.x,G-8,HOLE.w,H);
@@ -1718,7 +1716,6 @@ function drawFestEntrance(){
   else{cut(()=>rr(-38,-16,76,34,6),"#b7b5ae",{edge:5,ink:"#77746c"});g.strokeStyle="#9a9890";g.lineWidth=2;for(const y of[-4,6]){g.beginPath();g.moveTo(-26,y);g.lineTo(26,y);g.stroke()}}
   g.restore();g.textAlign="left";
   // door to the lake
-  cut(()=>rr(-886,G-70,4,70,1),"#a8714a");cut(()=>rr(-900,G-96,74,24,5),"#fff3d6",{edge:4,shadow:false});g.fillStyle=INK;g.font="bold 10px "+FONT;g.fillText("← ORCHARD",-896,G-80);
 }
 function drawLakeDoor(x){cut(()=>{g.beginPath();g.moveTo(x-40,G);g.lineTo(x-40,G-110);g.arc(x,G-110,40,Math.PI,0);g.lineTo(x+40,G);g.closePath()},"#7cc488",{edge:8});
   cut(()=>{g.beginPath();g.moveTo(x-28,G);g.lineTo(x-28,G-104);g.arc(x,G-104,28,Math.PI,0);g.lineTo(x+28,G);g.closePath()},"#4f8fb8",{edge:0,line:2,shadow:false});
