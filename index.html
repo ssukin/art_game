@@ -1734,7 +1734,8 @@ function drawElevator(x){
   g.strokeStyle="#8fa3a0";g.lineWidth=2;g.beginPath();g.moveTo(x-6,-900);g.lineTo(x-6,G-100);g.moveTo(x+6,-900);g.lineTo(x+6,G-100);g.stroke();
   cut(()=>rr(x-20,G-96,40,96,4),"#8fa3a0",{edge:0,line:2,shadow:false});g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(x,G-96);g.lineTo(x,G);g.stroke();
 
-  g.save();g.translate(x,G-120);g.rotate(-.08);cut(()=>rr(-34,-10,68,20,4),"#e5577b",{edge:4,shadow:false});g.fillStyle="#fff";g.font="bold 9px "+FONT;g.fillText("OUT OF ORDER",0,4);g.restore();g.textAlign="left";
+  g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(x-10,G-62);g.lineTo(x,G-74);g.lineTo(x+10,G-62);g.stroke();
+  g.save();g.translate(x,G-62);g.rotate(Math.sin(time*1.5+x)*.05-.04);cut(()=>rr(-20,0,40,30,4),"#e5577b",{edge:4,shadow:false});g.fillStyle="#fff";g.font="bold 9px "+FONT;g.textAlign="center";g.fillText("OUT OF",0,12);g.fillText("ORDER",0,24);g.restore();g.textAlign="left";
 }
 function drawBalloonDog(x,y,sc,c="#ff8fc8"){g.save();g.translate(x,y);g.scale(sc,sc);
   const bal=(cx,cy,rx,ry,a)=>cut(()=>{g.beginPath();g.ellipse(cx,cy,rx,ry,a,0,7)},c,{edge:4,shadow:false});
