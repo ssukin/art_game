@@ -76,7 +76,7 @@ Finishing Level 2 (through the door from the sky) continues into Level 3. The ch
 - With Red and Blue in hand, hop across a longer run of rocks (six of them, at different heights) past the boat to the sand where the lighthouse stands.
 
 **3-2: The Gray Lighthouse.** Every few seconds an ink drip falls from somewhere above (it hurts if it hits Sarah, and about 1 in 10 turns into a Smudge where it lands). A tall vertical climb (extra-long, with a new stretch above the big landing) with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) The only Save Block in Level 3 sits on the last platform before the boss deck; otherwise your checkpoint is the start of the beach, then the lighthouse entrance.
-- The **Green Gem** is hidden in a nook high on the left, reached from the big landing by a quick elevator, a tiny ledge and a fast sideways platform.
+- The **Green Gem** is hidden in a painted-over gray nook high on the left, above the big landing. Getting there: ride a lift up, step onto a cracked ledge that crumbles a second after you land on it, then jump onto a moving bar that's packed with Smudges. You have to land on top of them to make room. Once you're in the nook, use Dab (Q) to reveal the gem. The Smudges on the bar come back if you return to the landing.
 - At the top: a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down (a slam that lands on Sarah costs 2 health), dodge falling ink drops (watch their shadows; about 1 in 10 turns into a **Smudge** on the deck) and stomp its head when it rises over the railing (1 damage per stomp). It has a health bar.
 - Set the three gems in the lamp to light the lighthouse and bring the coast's colors back. If the Green Gem is missing, drop down the gap on the left of the deck to go find it.
 
@@ -89,6 +89,8 @@ Defeating creatures earns **XP**. A Smudge, Prickles and a Sidecrab are worth 1 
 The **Journal** tab in Pockets shows Sarah's level and XP, plus a page for each creature: how many you've defeated, how much XP each is worth, where it lives and how to beat it. Creatures you haven't beaten yet show as gray silhouettes.
 
 ## Admin Cheats Only
+
+The cheat panel under the game is collapsed by default; click **Admin Cheats Only** to open it.
 
 Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, Level 3 buttons jump to the beach, the tide flats, the hidden dock, the shipwreck chest, the fishing spot, the bottom of the lighthouse, the big landing (for the Green Gem detour), the top of the lighthouse and the boss fight, plus **Give all 3 gems** and **Give Shell Shield**. **+20 coins** tops up your wallet, **Level up now** triggers a level up, and **Fill & open Journal** fills in every Journal page. **Restart Level 1** reloads the page.
 

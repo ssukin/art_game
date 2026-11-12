@@ -20,7 +20,13 @@
   .button.action{background:#f08a3c}
   .button:disabled{background:#c9c0b0;cursor:default;box-shadow:0 4px 0 #8d8578}
   .cheats{margin-top:26px;padding:12px 16px 16px;border:3px dashed #c0392b;border-radius:14px;background:#fff5f2}
-  .cheats h2{margin:0 0 2px;font-size:16px;color:#c0392b;text-transform:uppercase;letter-spacing:1px}
+  .cheats h2{display:inline;margin:0;font-size:16px;color:#c0392b;text-transform:uppercase;letter-spacing:1px}
+  .cheats summary{cursor:pointer;list-style:none;padding:2px 0}
+  .cheats summary::-webkit-details-marker{display:none}
+  .cheats summary::before{content:"▸ ";color:#c0392b;font-weight:bold}
+  .cheats[open] summary::before{content:"▾ "}
+  .cheats[open] summary{margin-bottom:6px}
+  .cheats:not([open]){padding:8px 16px}
   .cheats p{margin:0 0 10px;font-size:13px;color:#7a5050}
   .cheats .button{background:#c0392b;font-size:14px;padding:5px 11px;margin:0 6px 6px 0}
   #message{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
@@ -35,8 +41,8 @@
     <button class="button action" id="activate" disabled>Activate</button>
     <button class="button" id="inventory">Pockets</button>
   </div>
-  <section class="cheats" aria-label="Admin cheats only">
-    <h2>Admin Cheats Only</h2>
+  <details class="cheats" aria-label="Admin cheats only">
+    <summary><h2>Admin Cheats Only</h2></summary>
     <p>Testing shortcuts. Level 2 jumps start you with the Turnip, Festival Pin and Dab. "Start Level 2" begins in the orchard.</p>
     <button class="button" data-cheat="l2">Start Level 2</button>
     <button class="button" data-cheat="plaza">L2: festival (registered)</button>
@@ -58,7 +64,7 @@
     <button class="button" data-cheat="xp">Level up now</button>
     <button class="button" data-cheat="journal">Fill & open Journal</button>
     <button class="button" data-cheat="reload">Restart Level 1</button>
-  </section>
+  </details>
   <p id="message" aria-live="polite"></p>
 </main>
 <script>
@@ -414,6 +420,7 @@ function grandmaChest(){
 function dabPower(){
   if(!hasDab)return;pulse=1;
   if(scene==="beach"&&dabBeach())return;
+  if(scene==="lighthouse"&&dabLH())return;
   if(scene==="festival"&&!l2.holeSign&&Math.abs(center()-(-578))<300){l2.holeSign=true;burst(-578,G-84,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming! That poor sign was grayer than a rainy Tuesday."],["Sarah","\"Dig crew entry here\"… with an arrow pointing straight down. Into the hole."],["Dab","So we're supposed to jump IN? I love a sign with commitment."]]);return}
   if(scene==="festival"&&!l2.trail&&Math.abs(center()-2560)<380){
     if(!l2.catFreed){sayToast("Dab: \"I smell a doodle trail up there… but I can't concentrate with that cat yowling. Somebody help him!\"");return}
@@ -1971,7 +1978,7 @@ function updateFishing(dt){
 function updateLake(){
   LAKE_COINS.forEach(([x,y],i)=>{if(!l2.lakeCoins[i]&&Math.abs(center()-x)<22&&s.y<y+10&&s.y+s.h>y-10){l2.lakeCoins[i]=1;coins++;burst(x,y,8,["#f4c84f","#fff"]);if(l2.lakeCoins.every(Boolean))sayToast("Got all 5 coins from the lakeside tree!")}});
   if(s.y>G+40){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=DOCK.x+DOCK.w-120;s.y=G-s.h;s.vy=0;shake=.3;health--;
-    if(health<=0){health=maxHealth;sayToast("SPLASH! Sarah crumples… soggily… then uncrumples back on the dock. Paper and water: not friends.")}
+    if(health<=0){health=maxHealth;sayToast("SPLASH! Sarah crumples… soggily… then uncrumples back on the dock.")}
     else sayToast("SPLASH! Sarah fishes herself out of the lake. (-1 health) 0/10, would not recommend.")}
 }
 function drawLake(){
@@ -2121,15 +2128,15 @@ const BEACH_SAVES=[];
 const LH_STATIC=[
   {x:560,y:355,w:150},{x:330,y:275,w:150},{x:700,y:115,w:150},{x:470,y:35,w:150},{x:250,y:-45,w:130},
   {x:270,y:-300,w:150},{x:500,y:-380,w:130},{x:100,y:-460,w:770,landing:1},
-  {x:230,y:-700,w:60},{x:100,y:-880,w:100,alcove:1},
+  {x:420,y:-700,w:60,crumble:1},{x:100,y:-850,w:100,alcove:1},
   {x:560,y:-545,w:130},{x:740,y:-625,w:120},{x:520,y:-705,w:130},
   {x:690,y:-865,w:130},{x:420,y:-1025,w:120},{x:620,y:-1105,w:130},
   {x:560,y:-1380,w:140},{x:330,y:-1460,w:140},{x:700,y:-1620,w:150},{x:180,y:DY,w:690,deck:1}];
 const LH_MOVERS=[{x0:420,y0:195,w:110,ax:220,ay:0,per:4.2},{x0:140,y0:-40,w:100,ax:0,ay:-190,per:5},{x0:430,y0:-945,w:100,ax:220,ay:0,per:4.4},
-  {x0:760,y0:-1110,w:90,ax:0,ay:-190,per:5},{x0:400,y0:-1540,w:100,ax:220,ay:0,per:4},{x0:120,y0:-470,w:70,ax:0,ay:-150,per:2.8},{x0:120,y0:-790,w:72,ax:180,ay:0,per:3.6},
-  {x0:380,y0:-785,w:100,ax:220,ay:0,per:4.4}];
+  {x0:760,y0:-1110,w:90,ax:0,ay:-190,per:5},{x0:400,y0:-1540,w:100,ax:220,ay:0,per:4},{x0:330,y0:-470,w:70,ax:0,ay:-150,per:2.8},{x0:110,y0:-755,w:160,ax:150,ay:0,per:5.5,smudgeBar:1},
+  {x0:430,y0:-785,w:100,ax:200,ay:0,per:4.4}];
 const LH_SAVES=[[775,-1620]];
-const GEM_G={x:150,y:-880},SHIELD_CHEST={x:630,y:-1380},POTION_TOP={x:310,y:DY},LAMP_X=540;
+const GEM_G={x:150,y:-850},SHIELD_CHEST={x:630,y:-1380},POTION_TOP={x:310,y:DY},LAMP_X=540;
 let l3={},shield=0,checkpointY=null,chapterCard=null;
 function resetL3(){
   l3={t:0,marina:false,marinaTalk:0,traded:false,dig:DIGS.map(()=>0),reel:false,blue:false,fishN:0,gemAt:1+Math.floor(Math.random()*5),lastCatch:"Sea Perch",
@@ -2141,7 +2148,7 @@ function resetL3(){
       {type:"hermit",scene:"beach",x:4910,min:4885,max:4945,base:WRECK.y},{type:"gull",scene:"beach",x:4200,min:4090,max:4420,base:DOCK3.y},{type:"gull",scene:"beach",x:4450,min:4300,max:4580,base:DOCK3.y},
       {type:"hermit",scene:"lighthouse",x:775,min:715,max:835,base:115},
       {type:"smudge",scene:"lighthouse",x:300,min:230,max:380,base:-460},{type:"hermit",scene:"lighthouse",x:700,min:620,max:800,base:-460},
-      {type:"hermit",scene:"lighthouse",x:680,min:640,max:730,base:-1105},{type:"smudge",scene:"lighthouse",x:400,min:350,max:450,base:-1460},{type:"hermit",scene:"lighthouse",x:600,min:570,max:680,base:-545}
+      {type:"hermit",scene:"lighthouse",x:680,min:640,max:730,base:-1105},{type:"smudge",scene:"lighthouse",x:400,min:350,max:450,base:-1460},{type:"hermit",scene:"lighthouse",x:600,min:570,max:680,base:-545},{type:"smudge",scene:"lighthouse",ride:6,dx:20,x:0,min:0,max:0,base:-755},{type:"smudge",scene:"lighthouse",ride:6,dx:60,x:0,min:0,max:0,base:-755},{type:"smudge",scene:"lighthouse",ride:6,dx:100,x:0,min:0,max:0,base:-755},{type:"smudge",scene:"lighthouse",ride:6,dx:140,x:0,min:0,max:0,base:-755}
     ].map((f,i)=>({...f,alive:true,flat:0,t:0,ph:i*.7,dir:i%2?1:-1,speed:f.type==="crab"?80:f.type==="hermit"?40:60,flip:0,mode:"fly",cool:1.5+i*.4,y:f.base-150,carry:0}))};
   shield=0;
 }
@@ -2164,7 +2171,7 @@ function respawnL3(){health=maxHealth;goScene(checkpointScene,checkpoint+s.w/2,c
 function hurtHP(n=1){if(shield>0){shield--;burst(center(),s.y+30,16,["#7cc6f2","#fff","#b98ad8"]);sayToast(shield===0?"CRACK! The Shell Shield breaks away. It did its best!":"The Shell Shield blocks the hit! (1 more hit left)");return false}health=Math.max(0,health-n);return true}
 function hurt3(fromX,msg,n=1){if(s.inv>0)return;s.inv=1.3;s.vy=-320;s.x+=center()<fromX?-46:46;shake=.3;const real=hurtHP(n);
   if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint. Paper is resilient like that.");return}if(real&&msg)sayToast(msg)}
-function l3Plats(){if(scene==="beach")return l3.dock?BEACH_SOLID:BEACH_SOLID.filter(p=>!p.hidden);return[{x:-50,y:G,w:1100,h:100},...LH_STATIC,...l3.movers]}
+function l3Plats(){if(scene==="beach")return l3.dock?BEACH_SOLID:BEACH_SOLID.filter(p=>!p.hidden);return[{x:-50,y:G,w:1100,h:100},...(l3.crumbleGone>0?LH_STATIC.filter(p=>!p.crumble):LH_STATIC),...l3.movers]}
 function onPlat(y){return s.ground&&Math.abs(s.y+s.h-y)<4}
 function fishSpot(){if(scene!=="beach")return null;
   if(onStern())return GEM_SPOT-20+Math.random()*50;
@@ -2280,17 +2287,19 @@ function killFoe(f){f.alive=false;burst(f.x,(f.type==="gull"?f.y:f.base-20),14,[
   gainXP(CRE_NAME[f.type],f.x,(f.type==="gull"?f.y:f.base)-50);if(f.carry)sayToast("You got your coin back! (+"+got+" coins)")}
 function updateFoes3(dt,oldFeet){
   for(const f of l3.foes){if(f.scene!==scene)continue;
-    if(!f.alive){f.flat=Math.min(1,f.flat+dt*3);continue}
+    if(!f.alive){if(f.ride!=null){const m=l3.movers[f.ride];f.x=m.x+f.dx;f.base=m.y}f.flat=Math.min(1,f.flat+dt*3);continue}
     f.t+=dt;
     if(f.type==="gull"){updateGull(f,dt,oldFeet);continue}
-    if(f.flip>0)f.flip-=dt;else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}}
+    if(f.ride!=null){const m=l3.movers[f.ride];f.x=m.x+f.dx;f.base=m.y}
+    else if(f.flip>0)f.flip-=dt;else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}}
     const top=f.base-32;
-    if(s.x+s.w>f.x-22&&s.x<f.x+22&&s.y+s.h>top&&s.y<f.base){
+    const hw=f.ride!=null?16:22;
+    if(s.x+s.w>f.x-hw&&s.x<f.x+hw&&s.y+s.h>top&&s.y<f.base){
       const stomp=s.vy>0&&oldFeet<=top+14;
       if(stomp){
         if(f.type==="crab"&&clawsUp(f)){hurt3(f.x,"PINCH! (-1 health)")}
         else if(f.type==="hermit"&&!(f.flip>0)){s.vy=-430;burst(f.x,top,6,["#fff","#c9d6d4"]);if(!l3.tinkTip){l3.tinkTip=true;sayToast("TINK!")}}
-        else{killFoe(f);s.vy=-430}
+        else{killFoe(f);s.vy=f.ride!=null?-320:-430}
       }else if(!(f.type==="hermit"&&f.flip>0))hurt3(f.x,f.type==="crab"?"Pinched by a Sidecrab! (-1 health)":"Ouch! (-1 health)");
     }
   }
@@ -2308,7 +2317,7 @@ function updateGull(f,dt,oldFeet){
 function l3Jab(hx){
   if(l3.boss&&jabBoss(hx))return true;
   let hit=false;
-  for(const f of l3.foes){if(f.scene!==scene||!f.alive)continue;const fy=f.type==="gull"?f.y+10:f.base;
+  for(const f of l3.foes){if(f.scene!==scene||!f.alive||f.ride!=null)continue;const fy=f.type==="gull"?f.y+10:f.base;
     if(Math.abs(f.x-hx)<46&&s.y+s.h>fy-90&&s.y<fy+10){hit=true;
       if(f.type==="hermit"&&!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#c9d6d4","#b98ad8"])}
       else killFoe(f)}}
@@ -2395,6 +2404,15 @@ function updateTide(){
     if(onFlat&&tideLevel()>.55&&s.y+s.h>tideY()+6){const sf=l3.tideSafe||{x:TIDE.x0-60,y:G-s.h};burst(center(),tideY(),22,["#7cc6f2","#fff"]);s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
     if(health<=0){respawnL3();sayToast("The tide sweeps Sarah away… she uncrumples back at your last checkpoint.")}else if(real)sayToast("WHOOSH! Swept back by the tide. (-1 health)")}
 }
+function updateGreenTricks(dt){
+  const riders=l3.foes.filter(f=>f.ride!=null);
+  if(riders.some(f=>!f.alive)&&onPlat(-460)&&center()<480){l3.riderT=(l3.riderT||0)+dt;if(l3.riderT>2){l3.riderT=0;for(const f of riders)if(!f.alive){f.alive=true;f.flat=0;burst(f.x,f.base-16,6,[INK,"#5b2a6e"])}}}
+  const cr=LH_STATIC.find(p=>p.crumble);
+  if(l3.crumbleGone>0){l3.crumbleGone-=dt;if(l3.crumbleGone<=0){l3.crumbleGone=0;l3.crumbleT=0;burst(cr.x+cr.w/2,cr.y,8,["#d9a86a","#fff"])}}
+  else if(s.ground&&s.plat===cr){l3.crumbleT=(l3.crumbleT||0)+dt;if(l3.crumbleT>1){l3.crumbleGone=3;burst(cr.x+cr.w/2,cr.y+6,16,["#d9a86a","#a8714a","#fff"])}}
+  else if(l3.crumbleT>0&&!(s.ground&&s.plat===cr))l3.crumbleT=Math.max(0,l3.crumbleT-dt*.5);
+}
+function dabLH(){if(l3.gemSeen||l3.green)return false;if(Math.abs(center()-GEM_G.x)<170&&Math.abs(s.y+s.h-GEM_G.y)<130){l3.gemSeen=true;burst(GEM_G.x,GEM_G.y-26,26,["#5fb35a","#a6e39a","#fff"]);return true}return false}
 function updateDrips(dt){
   if(!l3.drips)l3.drips=[];
   if(!l3.boss&&!l3.lit&&s.y+s.h>DY+20){l3.dripCD=(l3.dripCD??4)-dt;if(l3.dripCD<=0){l3.dripCD=3.5+Math.random()*3.5;l3.drips.push({x:clamp(center()+(Math.random()-.5)*520,110,850),y:camY+100,vy:0,form:.7})}}
@@ -2414,15 +2432,15 @@ function updateL3(dt,oldFeet){
   if(scene==="beach"){
     updateTide();
     if(s.y+s.h>G+34){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=l3.safe.x;s.y=l3.safe.y;s.vy=0;shake=.3;const real=hurtHP();
-      if(health<=0){respawnL3();sayToast("SPLASH! Sarah crumples… soggily… then uncrumples back at your last checkpoint.")}else if(real)sayToast("SPLASH! Sarah fishes herself out of the sea. (-1 health) Paper and water: not friends.")}
+      if(health<=0){respawnL3();sayToast("SPLASH! Sarah crumples… soggily… then uncrumples back at your last checkpoint.")}else if(real)sayToast("SPLASH! Sarah fishes herself out of the sea. (-1 health)")}
     if(s.x<=0&&(keys.has("a")||keys.has("ArrowLeft"))&&!l3.edgeTip){l3.edgeTip=true;sayToast("Nothing back that way but wet paint and the inky dark. Onward →")}
   }
   if(scene==="lighthouse"){
-    if(!l3.green&&Math.abs(center()-GEM_G.x)<30&&s.y+s.h>GEM_G.y-60&&s.y<GEM_G.y){l3.green=true;addItem("Green Gem");burst(GEM_G.x,GEM_G.y-30,26,["#5fb35a","#a6e39a","#fff"]);
+    if(!l3.green&&l3.gemSeen&&Math.abs(center()-GEM_G.x)<30&&s.y+s.h>GEM_G.y-60&&s.y<GEM_G.y){l3.green=true;addItem("Green Gem");burst(GEM_G.x,GEM_G.y-30,26,["#5fb35a","#a6e39a","#fff"]);
       start([["Narrator","Tucked into a dusty nook: a gem, glowing green as a fresh leaf."],["Dab","The GREEN GEM! Whoever hid it up here really didn't want it found."],["Reel","That's all three! Red, Green, Blue. Now up to the lamp!"]],()=>sayToast("Got the Green Gem!"));return}
     if(!l3.potion&&Math.abs(center()-POTION_TOP.x)<26&&onPlat(DY)){l3.potion=true;addItem("Health Potion");burst(POTION_TOP.x,DY-30,14,["#ff6f9c","#fff"]);sayToast("Found a Health Potion!")}
     if(!l3.bossDone&&!l3.boss&&onPlat(DY)&&center()>440){startBoss();return}
-    updateDrips(dt);
+    updateDrips(dt);updateGreenTricks(dt);
     updateBoss(dt,oldFeet);if(dlg.on)return;
   }
   updateFoes3(dt,oldFeet);
@@ -2532,10 +2550,14 @@ function drawLighthouse(){
   drawBlotBack();
   g.strokeStyle=INK;g.lineWidth=3;g.beginPath();g.moveTo(180,DY-46);g.lineTo(870,DY-46);g.stroke();for(let x=190;x<870;x+=40){g.beginPath();g.moveTo(x,DY-46);g.lineTo(x,DY);g.stroke()}
   // platforms
-  for(const p of LH_STATIC){cut(()=>rr(p.x,p.y,p.w,14,4),p.deck?"#c58a52":p.landing?"#b98a5a":"#d9a86a",{edge:5});if(!p.deck&&!p.landing){cut(()=>{g.beginPath();g.moveTo(p.x+p.w/2-8,p.y+14);g.lineTo(p.x+p.w/2,p.y+34);g.lineTo(p.x+p.w/2+8,p.y+14);g.closePath()},"#a8714a",{edge:3,shadow:false})}}
+  {const cr=LH_STATIC.find(p=>p.crumble);if(!(l3.crumbleGone>0)){const sh=(l3.crumbleT||0)>0?Math.sin(time*60)*2*l3.crumbleT:0;g.save();g.translate(sh,0);cut(()=>rr(cr.x,cr.y,cr.w,14,4),"#e8c79a",{edge:5});g.strokeStyle="#a8714a";g.lineWidth=1.5;g.beginPath();g.moveTo(cr.x+18,cr.y+2);g.lineTo(cr.x+26,cr.y+9);g.lineTo(cr.x+22,cr.y+13);g.moveTo(cr.x+40,cr.y+1);g.lineTo(cr.x+36,cr.y+8);g.stroke();g.restore()}}
+  if(!l3.green){g.save();if(!l3.gemSeen){cut(()=>{g.beginPath();g.ellipse(GEM_G.x,GEM_G.y-34,34,30,0,0,7)},l3.lit?"#cfc6b4":"#b8b4c2",{edge:4,shadow:false});g.fillStyle="rgba(255,255,255,.35)";g.fillRect(GEM_G.x-24,GEM_G.y-50,48,4);g.fillRect(GEM_G.x-20,GEM_G.y-36,40,4);
+      if(Math.sin(time*1.3)>.97){g.globalAlpha=.8;g.fillStyle="#a6e39a";star(GEM_G.x+12,GEM_G.y-44,5,2);g.fill()}}
+    g.restore()}
+  for(const p of LH_STATIC){if(p.crumble)continue;cut(()=>rr(p.x,p.y,p.w,14,4),p.deck?"#c58a52":p.landing?"#b98a5a":"#d9a86a",{edge:5});if(!p.deck&&!p.landing){cut(()=>{g.beginPath();g.moveTo(p.x+p.w/2-8,p.y+14);g.lineTo(p.x+p.w/2,p.y+34);g.lineTo(p.x+p.w/2+8,p.y+14);g.closePath()},"#a8714a",{edge:3,shadow:false})}}
   for(const m of l3.movers){cut(()=>rr(m.x,m.y,m.w,14,6),"#7cc6f2",{edge:5,ink:"#2a6c99"});g.fillStyle="#fff";g.font="bold 11px "+FONT;g.textAlign="center";g.fillText(m.ax?"◀ ▶":"▲▼",m.x+m.w/2,m.y+11);g.textAlign="left"}
   for(const [x,y] of LH_SAVES){sprite(x,y-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,y+2,20)}
-  if(!l3.green){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#a6e39a";circle(GEM_G.x,GEM_G.y-26,22);g.fill();g.restore();drawIcon("Green Gem",GEM_G.x,GEM_G.y-26+Math.sin(time*3)*3,.75)}
+  if(!l3.green&&l3.gemSeen){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#a6e39a";circle(GEM_G.x,GEM_G.y-26,22);g.fill();g.restore();drawIcon("Green Gem",GEM_G.x,GEM_G.y-26+Math.sin(time*3)*3,.75)}
   if(!l3.potion){cut(()=>rr(POTION_TOP.x-14,DY-22,28,22,4),"#a8714a",{edge:4});drawIcon("Health Potion",POTION_TOP.x,DY-40+Math.sin(time*3)*2,.6)}
   for(const f of l3.foes)if(f.scene==="lighthouse")drawFoe(f);
   drawBlotFront();drawDrips();
