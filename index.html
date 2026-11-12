@@ -44,6 +44,7 @@
     <button class="button" data-cheat="results">L2: contest results</button>
     <button class="button" data-cheat="fight">L2: Smudge fight</button>
     <button class="button" data-cheat="l3">Start Level 3 (3-1 beach)</button>
+    <button class="button" data-cheat="l3tide">L3: tide flats</button>
     <button class="button" data-cheat="l3wreck">L3: shipwreck chest (Reel)</button>
     <button class="button" data-cheat="l3fish">L3: fishing spot (with Reel)</button>
     <button class="button" data-cheat="l3lh">L3: lighthouse 3-2 (bottom)</button>
@@ -75,11 +76,10 @@ let maxHealth=10,camY=0;
 let xp=0,plv=1,journal={},xpPops=[],lvlUp=null,confetti=[];
 const XP_FOR=l=>5*(3+(l-1)*2);
 const CREATURES=[
-  {name:"Smudge",xp:1,where:"Everywhere the sky tears open",tip:"Jump on its head to flatten it, or jab it with Nib. Touching it from the side costs 1 health.",draw:()=>sprite(0,0,46,36,drawSmudgeBody,{shadow:false})},
+  {name:"Smudge",xp:1,where:"Everywhere the sky tears open — and from The Blot's ink drops",tip:"Jump on its head to flatten it, or jab it with Nib. Touching it from the side costs 1 health.",draw:()=>sprite(0,0,46,36,drawSmudgeBody,{shadow:false})},
   {name:"Sidecrab",xp:1,where:"Scuttling along the Watercolor Coast",tip:"Stomp it only when its claws are DOWN. Claws up = pinch! Nib's jab always works.",draw:()=>sprite(0,0,54,40,()=>drawCrabBody(false),{shadow:false})},
   {name:"Gull",xp:2,where:"Circling over the beach",tip:"Swoops down to snatch a coin. Jab or stomp it while it's low to get your coin back.",draw:()=>sprite(0,-10,56,40,()=>drawGullBody(0),{shadow:false})},
   {name:"Hermit Smudge",xp:2,where:"Hiding in shells on the coast and in the lighthouse",tip:"Too hard to stomp! Flip it onto its back with Nib (Q), then stomp it or jab it again.",draw:()=>sprite(0,0,50,40,()=>drawHermitBody(false),{shadow:false})},
-  {name:"Inklet",xp:1,where:"Sprouts from The Blot's ink drops",tip:"A tiny ink squid on little legs. Stomp it or jab it before it bumps into you.",draw:()=>{g.save();g.translate(0,-14);blotHead(0,0,.3,true);g.restore()}},
   {name:"The Blot",xp:10,where:"Climbs the lighthouse from the sea",tip:"Jab its tentacles when they slam down (a slam hurts 2!), dodge ink drops, stomp its head when it rises up.",draw:()=>{g.save();g.scale(.32,.32);blotHead(0,-40,1,true);g.restore()}},
   {name:"Prickles",xp:1,where:"In front of the judging stage",tip:"Way too tall to jump over, and all spikes — never stomp him! Stand close with Nib and jab twice.",draw:()=>sprite(0,0,72,170,drawSpikeBody,{sx:.42,sy:.42,shadow:false})}
 ];
@@ -209,7 +209,7 @@ const speakerColor={"Marina":"#e5577b","The Blot":"#5b2a6e","Registrar":"#17a398
 function speakerPos(who){
   if(who==="Sarah")return[center()-camera,s.y-4];
   if(who==="Dab"||(who==="Nib"&&hasNib)||(who==="Reel"&&hasReel))return[dab.x-camera,dab.y-30];
-  if(who==="Reel"&&scene==="beach")return[2560-camera,WRECK.y-60];
+  if(who==="Reel"&&scene==="beach")return[CHEST_X-camera,WRECK.y-60];
   if(who==="Reel")return[1000-camera,G-70];
   if(who==="The Blot")return[800-camera,DY-150];
   {const sn=SCENE_NPCS[scene];if(sn&&sn[who]!=null)return[sn[who]-camera,who==="Waffles"?G-50:G-92]}
@@ -2113,9 +2113,9 @@ resetL2Extra();
 // ===========================================================================
 // LEVEL 3 — The Watercolor Coast (3-1 beach & shipwreck, 3-2 the Gray Lighthouse)
 // ===========================================================================
-const BEACH_W=3600,WATER={x0:2150,x1:3010},LH_DOOR=3300,WRECK={x:2360,w:360,y:G-86},STERN=2690,GEM_SPOT=2790,DY=-1390;
-const BEACH_SOLID=[{x:-50,y:G,w:2200,h:100},{x:3010,y:G,w:700,h:100},{x:2205,y:G-22,w:64,h:22,rock:1},{x:2290,y:G-46,w:60,h:22,rock:1},{x:WRECK.x,y:WRECK.y,w:WRECK.w,h:16,deck:1},{x:2840,y:G-40,w:62,h:22,rock:1},{x:2930,y:G-22,w:64,h:22,rock:1}];
-const DIGS=[{x:430,item:"Seashell"},{x:760,coins:4},{x:1060,item:"Seashell"},{x:1330,item:"Heart Necklace"},{x:1620,item:"Seashell"},{x:1900,coins:5},{x:2040,item:"Seashell"}];
+const TIDE={x0:2150,x1:3350,rocks:[2575,2925]},BEACH_W=4800,WATER={x0:3350,x1:4210},LH_DOOR=4500,WRECK={x:3560,w:360,y:G-86},STERN=3890,GEM_SPOT=3990,CHEST_X=3760,DY=-1390;
+const BEACH_SOLID=[{x:-50,y:G,w:3400,h:100},{x:4210,y:G,w:700,h:100},{x:2540,y:G-64,w:70,h:22,rock:1,tide:1},{x:2890,y:G-64,w:70,h:22,rock:1,tide:1},{x:3405,y:G-22,w:64,h:22,rock:1},{x:3490,y:G-46,w:60,h:22,rock:1},{x:WRECK.x,y:WRECK.y,w:WRECK.w,h:16,deck:1},{x:4040,y:G-40,w:62,h:22,rock:1},{x:4130,y:G-22,w:64,h:22,rock:1}];
+const DIGS=[{x:430,item:"Seashell"},{x:760,coins:4},{x:1060,item:"Seashell"},{x:1330,item:"Heart Necklace"},{x:1620,item:"Seashell"},{x:1900,coins:5},{x:2040,item:"Seashell"},{x:2760,coins:6},{x:3120,item:"Seashell"}];
 const BEACH_SAVES=[];
 const LH_STATIC=[
   {x:560,y:355,w:150},{x:330,y:275,w:150},{x:700,y:115,w:150},{x:470,y:35,w:150},{x:250,y:-45,w:130},
@@ -2135,7 +2135,7 @@ function resetL3(){
     foes:[
       {type:"crab",scene:"beach",x:700,min:560,max:900,base:G},{type:"crab",scene:"beach",x:1250,min:1120,max:1420,base:G},{type:"crab",scene:"beach",x:1800,min:1680,max:1980,base:G},
       {type:"gull",scene:"beach",x:1000,min:820,max:1200,base:G},{type:"gull",scene:"beach",x:1700,min:1500,max:1950,base:G},
-      {type:"hermit",scene:"beach",x:2470,min:2445,max:2505,base:WRECK.y},
+      {type:"hermit",scene:"beach",x:3670,min:3645,max:3705,base:WRECK.y},
       {type:"hermit",scene:"lighthouse",x:775,min:715,max:835,base:115},
       {type:"smudge",scene:"lighthouse",x:300,min:230,max:380,base:-460},{type:"hermit",scene:"lighthouse",x:700,min:620,max:800,base:-460},
       {type:"hermit",scene:"lighthouse",x:680,min:640,max:730,base:-785},{type:"smudge",scene:"lighthouse",x:400,min:350,max:450,base:-1140}
@@ -2143,7 +2143,7 @@ function resetL3(){
   shield=0;
 }
 resetL3();
-const CRE_NAME={smudge:"Smudge",crab:"Sidecrab",hermit:"Hermit Smudge",gull:"Gull",inklet:"Inklet"};
+const CRE_NAME={smudge:"Smudge",crab:"Sidecrab",hermit:"Hermit Smudge",gull:"Gull"};
 function startLevel3(){
   level=3;resetL3();dogOn=false;balloonOn=false;showEndScreen=false;complete=false;invOpen=false;parts=[];loot=[];hasDab=true;health=maxHealth;
   goScene("beach",90);s.face=1;s.flip=1;checkpointScene="beach";checkpoint=170-s.w/2;checkpointY=G-s.h;if(hasNib)equipped="Nib";
@@ -2177,10 +2177,11 @@ function beachInteract(){
   if(near(330,40)&&onFloor())return T("Talk to Marina",marina);
   for(const x of BEACH_SAVES)if(near(x,30)&&onFloor())return["Save at the Save Block",()=>saveL3(x,G)];
   for(let i=0;i<DIGS.length;i++)if(l3.dig[i]===1&&near(DIGS[i].x,40)&&onFloor())return["Dig here",()=>dig(i)];
-  if(!l3.reel&&near(2560,46)&&onPlat(WRECK.y))return["Open the treasure chest",openReelChest];
+  if(!l3.reel&&near(CHEST_X,46)&&onPlat(WRECK.y))return["Open the treasure chest",openReelChest];
   if(onStern())return[hasReel?"Cast your line":"Look at the water",()=>{if(!hasReel){sayToast("Deep blue water… and something glinting way down below. You'd need a fishing pole.");return}castLine(GEM_SPOT-20+Math.random()*50)}];
   if(near(LH_DOOR,40)&&onFloor())return["Enter the lighthouse",lhDoor];
-  if(near(2110,22)&&onFloor())return["Read the sign",()=>start([["Sign","SHIPWRECK AHEAD → Hop the rocks. Mind the water. The water does not mind you."]])];
+  if(near(3310,22)&&onFloor())return["Read the sign",()=>start([["Sign","SHIPWRECK AHEAD → Hop the rocks. Mind the water. The water does not mind you."]])];
+  if(near(2100,22)&&onFloor())return["Read the sign",()=>start([["Sign","TIDE FLATS. When the tide is out, RUN. When the tide is in, climb a rock and wait. The sea is very punctual."]])];
   return null;
 }
 function lhInteract(){
@@ -2227,7 +2228,7 @@ function dig(i){
   sayToast("You dig up a Seashell! ("+count("Seashell")+" so far. Marina wants 3.)");
 }
 function openReelChest(){
-  l3.reel=true;burst(2560,WRECK.y-30,24,["#7cc6f2","#fff","#f4c84f"]);
+  l3.reel=true;burst(CHEST_X,WRECK.y-30,24,["#7cc6f2","#fff","#f4c84f"]);
   const red=has("Heart Necklace")?["Reel","Wait — that heart necklace in your pocket! That gem is glowing red. That's the Red gem!"]:["Reel","The Red gem washed up on this beach somewhere. Look for something buried — your paintbrush can sniff it out!"];
   start([
     ["Narrator","Sarah lifts the lid of the seaweedy treasure chest. It's heavier than it looks. It's also… humming?"],
@@ -2308,7 +2309,7 @@ function l3Jab(hx){
 }
 
 // ---- boss: The Blot ----
-function spawnInklet(x){l3.foes.push({type:"inklet",scene:"lighthouse",x,min:200,max:850,base:DY,alive:true,flat:0,t:0,ph:Math.random()*3,dir:Math.random()<.5?-1:1,speed:75,flip:0,mode:"walk",cool:0,y:DY,carry:0});burst(x,DY-14,12,["#b98ad8","#fff",INK]);if(!l3.inkletTip){l3.inkletTip=true;sayToast("One of the ink drops sprouted legs! It's an Inklet — stomp it or jab it.")}}
+function spawnInklet(x){l3.foes.push({type:"smudge",scene:"lighthouse",x,min:200,max:850,base:DY,fromInk:true,alive:true,flat:0,t:0,ph:Math.random()*3,dir:Math.random()<.5?-1:1,speed:75,flip:0,mode:"walk",cool:0,y:DY,carry:0});burst(x,DY-14,12,["#b98ad8","#fff",INK]);if(!l3.inkletTip){l3.inkletTip=true;sayToast("One of the ink drops turned into a Smudge! Stomp it or jab it.")}}
 function startBoss(){
   l3.boss={hp:8,max:8,ph:"intro",t:0,cycle:0,slams:0,tent:null,blobs:[],spawn:0,headUp:0,hurtT:0};
   const go=()=>{l3.boss.ph="tent";l3.boss.t=0;sayToast("Defeat The Blot! Jab tentacles (Q), dodge ink, stomp its head.")};
@@ -2328,7 +2329,7 @@ function jabBoss(hx){const b=l3.boss;if(!b||b.ph==="intro"||b.ph==="dead")return
   if(b.ph==="head"&&b.headUp>.8&&Math.abs(hx-800)<70&&s.y+s.h>DY-120){damageBoss(1,800,DY-80);b.t=Math.max(b.t,2.6);return true}
   return false}
 function damageBoss(n,x,y){const b=l3.boss;b.hp=Math.max(0,b.hp-n);b.hurtT=.5;shake=.4;burst(x,y,20,[INK,"#5b2a6e","#fff","#b98ad8"]);if(b.hp<=0)defeatBoss()}
-function defeatBoss(){for(const f of l3.foes)if(f.type==="inklet"&&f.alive){f.alive=false;burst(f.x,DY-16,10,[INK,"#5b2a6e","#fff"])}const b=l3.boss;b.ph="dead";b.tent=null;b.blobs=[];l3.bossDone=true;flash=.6;gainXP("The Blot",800,DY-140);
+function defeatBoss(){for(const f of l3.foes)if(f.fromInk&&f.alive){f.alive=false;burst(f.x,DY-16,10,[INK,"#5b2a6e","#fff"])}const b=l3.boss;b.ph="dead";b.tent=null;b.blobs=[];l3.bossDone=true;flash=.6;gainXP("The Blot",800,DY-140);
   start([
     ["Narrator","The Blot lets out a long, gurgly wail. It shrinks… and shrinks… until it's a tiny ink squid the size of a teacup."],
     ["The Blot","…bloop."],
@@ -2378,10 +2379,21 @@ function lamp(){
 }
 
 // ---- main per-frame update ----
+function tideLevel(){const p=l3.t%11;return p<6?0:p<7.2?(p-6)/1.2:p<9.6?1:Math.max(0,1-(p-9.6)/1.4)}
+const tideY=()=>G+12-tideLevel()*52;
+function updateTide(){
+  const onFlat=center()>TIDE.x0&&center()<TIDE.x1;
+  if(s.ground&&s.plat){if(center()<=TIDE.x0)l3.tideSafe={x:TIDE.x0-60,y:G-s.h};else if(center()>=TIDE.x1)l3.tideSafe={x:TIDE.x1+30,y:G-s.h};else if(s.plat.tide)l3.tideSafe={x:s.plat.x+s.plat.w/2-s.w/2,y:s.plat.y-s.h}}
+  if(onFlat&&!l3.tideTip){l3.tideTip=true;sayToast("Tide flats! Run across while the tide is out — or wait on a rock when the water comes in.")}
+  const p=l3.t%11;if(onFlat&&p>4.6&&p<6&&!l3.warned){l3.warned=true;sayToast("The tide's coming in! Get to a rock or off the flats!")}if(p<4.6)l3.warned=false;
+  if(onFlat&&tideLevel()>.55&&s.y+s.h>tideY()+6){const sf=l3.tideSafe||{x:TIDE.x0-60,y:G-s.h};burst(center(),tideY(),22,["#7cc6f2","#fff"]);s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
+    if(health<=0){respawnL3();sayToast("The tide sweeps Sarah away… she uncrumples back at your last checkpoint.")}else if(real)sayToast("WHOOSH! The tide swept you back! (-1 health) Wait for it to go out, then run.")}
+}
 function updateL3(dt,oldFeet){
   if(scene==="lighthouse")s.x=clamp(s.x,90,870-s.w);
   if(s.ground&&s.plat&&!s.plat.mover)l3.safe={x:s.x,y:s.y};
   if(scene==="beach"){
+    updateTide();
     if(s.y+s.h>G+34){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=l3.safe.x;s.y=l3.safe.y;s.vy=0;shake=.3;const real=hurtHP();
       if(health<=0){respawnL3();sayToast("SPLASH! Sarah crumples… soggily… then uncrumples back at your last checkpoint.")}else if(real)sayToast("SPLASH! Sarah fishes herself out of the sea. (-1 health) Paper and water: not friends.")}
     if(s.x<=0&&(keys.has("a")||keys.has("ArrowLeft"))&&!l3.edgeTip){l3.edgeTip=true;sayToast("Nothing back that way but wet paint and the inky dark. Onward →")}
@@ -2415,7 +2427,7 @@ function drawWreck(){
   cut(()=>rr(x,y,WRECK.w,14,3),"#c58a52",{edge:5});
   cut(()=>rr(x+116,y-170,12,170,3),"#a8714a",{edge:5});cut(()=>{g.beginPath();g.moveTo(x+128,y-160);g.quadraticCurveTo(x+190,y-120,x+128,y-60);g.lineTo(x+150,y-90);g.lineTo(x+132,y-110);g.closePath()},l3.lit?"#fffdf6":"#e2ded6",{edge:5});
   cut(()=>rr(x+112,y-176,20,8,3),"#a8714a",{edge:4,shadow:false});
-  drawChest(2531,y-38,l3.reel,"#b9693c");if(!l3.reel){g.fillStyle="#5fb35a";for(let i=0;i<3;i++){g.beginPath();g.ellipse(2540+i*18,y-28+Math.sin(time*2+i)*2,4,10,.5,0,7);g.fill()}}
+  drawChest(CHEST_X-29,y-38,l3.reel,"#b9693c");if(!l3.reel){g.fillStyle="#5fb35a";for(let i=0;i<3;i++){g.beginPath();g.ellipse(CHEST_X-20+i*18,y-28+Math.sin(time*2+i)*2,4,10,.5,0,7);g.fill()}}
   if(!l3.blue&&hasReel){g.save();g.globalAlpha=.4+Math.sin(time*4)*.3;g.fillStyle="#7cc6f2";star(GEM_SPOT,G+40,8,3);g.fill();g.restore()}
 }
 function drawShack(){
@@ -2441,7 +2453,7 @@ function drawDigMarks(){DIGS.forEach((d,i)=>{if(l3.dig[i]===1){g.save();g.stroke
   else if(l3.dig[i]===2){g.fillStyle="rgba(140,100,50,.35)";g.beginPath();g.ellipse(d.x,G+6,22,6,0,0,7);g.fill()}})}
 function drawFoe(f){
   if(!f.alive){if(f.flat<1){const y=f.type==="gull"?f.y+18:f.base+2;sprite(f.x,y,50,40,f.type==="crab"?()=>drawCrabBody(false):f.type==="gull"?()=>drawGullBody(0):f.type==="hermit"?()=>drawHermitBody(false):drawSmudgeBody,{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat})}return}
-  if(f.type==="gull"){const flap=Math.sin(f.t*(f.mode==="swoop"?6:12));sprite(f.x,f.y+18,56,40,()=>drawGullBody(flap),{sx:f.dir>0?-1:1});
+  if(f.type==="gull"){const flap=Math.sin(f.t*(f.mode==="swoop"?6:12));sprite(f.x,f.y+18,56,40,()=>drawGullBody(flap),{sx:f.dir>0?1:-1});
     if(f.mode==="swoop"&&f.st<.35){g.fillStyle="#e5577b";g.font="bold 22px "+FONT;g.textAlign="center";g.fillText("!",f.x,f.y-26);g.textAlign="left"}
     if(f.carry)drawCoin(f.x,f.y+22,6);return}
   groundShadow(f.x,f.base+2,18);
@@ -2460,14 +2472,19 @@ function drawBeach(){
   if(!lit){g.save();for(let i=0;i<9;i++){const x=((i*170-camera*.3)%1530+1530)%1530-60,y=hz+18+(i%3)*30;const c=["#e5577b","#f4c84f","#5fb35a","#b98ad8"][i%4];g.globalAlpha=.3;g.fillStyle=c;g.beginPath();g.ellipse(x+Math.sin(time*.6+i)*14,y,70+i%2*30,7,0,0,7);g.fill();g.beginPath();g.ellipse(x+40+Math.sin(time*.6+i)*14,y+8,40,5,0,0,7);g.fill()}g.restore()}
   g.save();g.translate(-camera,0);
   drawWater(WATER.x0,WATER.x1);drawSand(-50,WATER.x0);drawSand(WATER.x1,BEACH_W+60);
+  {const a=Math.max(TIDE.x0,camera-20),b=Math.min(TIDE.x1,camera+W+20);if(b>a){g.fillStyle=l3.lit?"rgba(150,120,70,.25)":"rgba(120,110,100,.22)";g.fillRect(a,G+2,b-a,H-G);g.fillStyle="rgba(255,255,255,.5)";for(let x=Math.ceil(a/90)*90;x<b;x+=90){g.beginPath();g.ellipse(x,G+30+(x/90%2)*24,18,3,0,0,7);g.fill()}}}
   for(const p of BEACH_SOLID)if(p.rock)drawRock(p);
   drawShack();drawWreck();drawLighthouseOutside();
-  cut(()=>rr(2106,G-70,8,70,2),"#a8714a");cut(()=>rr(2070,G-104,80,40,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("SHIPWRECK",2110,G-88);g.fillText("AHEAD →",2110,G-74);g.textAlign="left";
+  cut(()=>rr(3306,G-70,8,70,2),"#a8714a");cut(()=>rr(3270,G-104,80,40,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("SHIPWRECK",3310,G-88);g.fillText("AHEAD →",3310,G-74);g.textAlign="left";
+  cut(()=>rr(2096,G-70,8,70,2),"#a8714a");cut(()=>rr(2056,G-104,88,40,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("TIDE FLATS",2100,G-88);g.fillText("~ run! ~",2100,G-74);g.textAlign="left";
   for(const x of BEACH_SAVES){sprite(x,G-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,G+2,20)}
   drawDigMarks();
   groundShadow(330,G+2,26);sprite(330,G+2,74,66,drawMarinaBody,{sx:center()<330?-1:1});
   for(const f of l3.foes)if(f.scene==="beach")drawFoe(f);
   drawLoot();drawParticles();drawSarah();
+  {const lv=tideLevel(),wy=tideY();if(lv>0&&camera+W>TIDE.x0&&camera<TIDE.x1+40){g.save();g.globalAlpha=.78;const a=TIDE.x0+(1-lv)*260,b=TIDE.x1+10;const gr=g.createLinearGradient(0,wy,0,H);gr.addColorStop(0,l3.lit?"#6fc0ec":"#9ab9cf");gr.addColorStop(1,l3.lit?"#3a8fd0":"#7493ad");g.fillStyle=gr;
+      g.beginPath();g.moveTo(a,G+8);for(let x=a;x<=b;x+=14)g.lineTo(x,wy+Math.sin(x*.07+time*3)*3);g.lineTo(b,H);g.lineTo(a-30,H);g.closePath();g.fill();g.globalAlpha=.9;g.strokeStyle="#fff";g.lineWidth=3;g.beginPath();for(let x=a;x<=b;x+=14)g.lineTo(x,wy+Math.sin(x*.07+time*3)*3);g.stroke();g.restore()}
+    for(const r of BEACH_SOLID)if(r.tide&&r.x>camera-100&&r.x<camera+W+100){g.fillStyle="#fff";g.globalAlpha=.6;g.beginPath();g.ellipse(r.x+r.w/2,Math.min(G,wy)+2,r.w/2+10,4,0,0,7);g.fill();g.globalAlpha=1}}
   if(fish.ph>0)drawFishing(G+6,l3.lastCatch);
   g.restore();
 }
@@ -2608,7 +2625,8 @@ const CHEATS={
   fight:()=>{CHEATS.results();l2.results=true;cheatTele(3010);startFinale()},
   coins:()=>{coins+=20;sayToast("+20 coins (cheater!)")},
   l3:()=>cheat3(),
-  l3wreck:()=>{cheat3();cheatBeach(2610,WRECK.y)},
+  l3wreck:()=>{cheat3();cheatBeach(CHEST_X+50,WRECK.y)},
+  l3tide:()=>{cheat3();cheatBeach(2080)},
   l3fish:()=>{cheat3();cheatBeach(STERN,WRECK.y);l3.reel=true;hasReel=true;equipped="Reel"},
   l3lh:()=>{cheat3();cheatLH(300,G)},
   l3land:()=>{cheat3();cheatLH(480,-460)},
