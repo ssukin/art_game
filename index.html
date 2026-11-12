@@ -1102,7 +1102,7 @@ function festInteract(){
   if(near(700,30))return["Save at the Save Block",()=>saveFest(700)];
   if(near(860,45))return T("Talk to Chef Crumb",chef);
   if(near(1005,30))return T("Talk to Gus",gus);
-  if(near(-578,24))return["Read the sign",()=>{if(!l2.holeSign){sayToast("The sign is so faded and gray you can't read a word. Maybe Dab could bring its color back? (Q)");return}start([["Sign","DIG CREW ENTRY HERE. Hard hats recommended. Bravery required. Jump in if you dare! ♥"]])}];
+  if(near(-578,24))return["Read the sign",()=>{if(!l2.holeSign){sayToast("The sign is so faded and gray you can't read a word.");return}start([["Sign","DIG CREW ENTRY HERE. Hard hats recommended. Bravery required. Jump in if you dare! ♥"]])}];
   for(const [x,t] of SIGNS)if(near(x,24))return["Read the sign",()=>start([["Sign",t]])];
   if(near(l2.brieX,30))return T("Talk to Brie",brie);
   if(near(1300,40))return["Inspect the butter swan",swan];
@@ -1204,7 +1204,7 @@ function catStuck(){
     ["Narrator","This is, by far, the nicest thing Mr. Biscuits has ever said to anyone. He trots off toward the judging stage."]
   ],()=>{l2.catFreed=true;l2.catState="judge";burst(1565,G-110,16);
     start([["Brie","WHO. TOUCHED. MY. SWAN?!"],["Brie","YOU! With the buttery fingers! STOP RIGHT THERE!"],["Sarah","Uh-oh."],["Narrator","RUN!"]],
-      ()=>{l2.chase=1;l2.chaseT=0;l2.brieX=1385;sayToast("RUN! Jump over the crates. Hold S next to a crate to duck behind it!")});
+      ()=>{l2.chase=1;l2.chaseT=0;l2.brieX=1385;sayToast("RUN!")});
   });
 }
 const SORRY=["Sorry.","It was for a good cause!","What butter?"];
@@ -1223,7 +1223,7 @@ function inka(){
     if(i===1){start([["Inka","Browse away! Don't touch the glitter. It touches back."]]);return}
     if(coins<5){start([["Inka","That's 5 coins, sweetie — you've got "+coins+". Have Dab sniff around with Q: hidden doodles pop into coins!"]],()=>sayToast("Not enough coins for a balloon (you have "+coins+", need 5)."));return}
     coins-=5;addItem("Balloon");burst(2470,G-120,10,["#e5577b","#7cc6f2","#f4c84f"]);
-    start([["Inka","One balloon! Use it from your Pockets, then jump. Pro tip: somebody left a chest on the Library roof ages ago. Nobody can reach it. Well. Nobody WITHOUT a balloon. And people say there\'s something living in the clouds above it."]],()=>{sayToast("Got a Balloon! Open Pockets (I), pick the balloon in Items, then click Use — and jump!")});
+    start([["Inka","One balloon! Use it from your Pockets, then jump. Pro tip: somebody left a chest on the Library roof ages ago. Nobody can reach it. Well. Nobody WITHOUT a balloon. And people say there\'s something living in the clouds above it."]],()=>{sayToast("Got a Balloon! (It's in your Pockets.)")});
   }]]);
 }
 function announcer(){
@@ -1282,7 +1282,7 @@ function startFinale(){
 }
 function roofChest(){
   l2.roofChest=true;coins+=15;addItem("Turnip");addItem("Cheese Recipe");burst(2150,LIB_ROOF.y-30,30,["#f4c84f","#fff","#e5577b"]);
-  start([["Narrator","The rooftop chest creaks open. Inside: a Turnip, a pile of coins and a recipe card for… cheese?"],["Narrator","Tucked underneath is a note: \"Look up. Waaaay up. The clouds around here are sturdier than they look.\""]],()=>sayToast("Got a Turnip, a Cheese Recipe and 15 coins! Those clouds look jumpable…"));
+  start([["Narrator","The rooftop chest creaks open. Inside: a Turnip, a pile of coins and a recipe card for… cheese?"],["Narrator","Tucked underneath is a note: \"Look up. Waaaay up. The clouds around here are sturdier than they look.\""]],()=>sayToast("Got a Turnip, a Cheese Recipe and 15 coins!"));
 }
 function fairyVisit(){
   l2.fairy=1;l2.fx=SKYTOP.x+SKYTOP.w+40;l2.fy=SKYTOP.y-70;
@@ -1320,7 +1320,7 @@ function mapleFinale(){
     ["Mrs. Maple","Hold still. I brought a friend. He's been very patient about it."],
     ["Narrator","Mrs. Maple unties the balloon dog's string from her wrist and ties it firmly to Sarah's backpack."],
     ["Mrs. Maple","There! Float up to those jump bars by the stage, dear. Mind the dog — he's a good boy, but he's mostly air."]
-  ],()=>{l2.mapleDone=true;l2.dogGone=true;dogOn=true;sayToast((has("Smudgy Key")?"":"Grab the Smudgy Key first! ")+"Floaty! Jump up to the bars on the right side of the stage, then climb to the second floor.")});
+  ],()=>{l2.mapleDone=true;l2.dogGone=true;dogOn=true;sayToast("Floaty!")});
 }
 function dropDoorKey(m){spill(m.x,G-60,"item","Smudgy Key",-s.face*60);burst(m.x,G-50,18,["#b98ad8","#fff","#f4c84f"]);sayToast("The Smudge drops a key! Grab it!")}
 function spikeChat(){
@@ -1336,7 +1336,7 @@ function hitSpike(){
   if(l2.spikeInv>0)return;l2.spikeHit++;
   if(l2.spikeHit>=2){defeatSpike();return}
   l2.spikeInv=.6;l2.spikeFlash=.5;shake=.3;burst(SPIKE_X-20,G-90,16,["#7a5c99","#fff","#f4c84f"]);s.x-=30;
-  sayToast("Prickles wobbles! Half his health is gone — jab him one more time!");
+  sayToast("Prickles wobbles!");
 }
 function defeatSpike(){l2.spikeDown=true;gainXP("Prickles",SPIKE_X,G-190);burst(SPIKE_X,G-30,30,["#7a5c99","#fff","#f4c84f","#e5577b"]);for(let i=0;i<3;i++)spill(SPIKE_X,G-50,"coin",null,(i-1)*90);
   start([["Nib","Got him! Pointy beats spiky. Every time."],["Announcer","The stage is clear!"+(l2.catFreed?" Everybody to the stage — Mr. Biscuits, take your seat!":" Now we just need our judge…")]],()=>{l2.pendRes=l2.catFreed&&l2.chaseDone;if(l2.pendRes)sayToast("Everyone heads over to the stage…")})}
@@ -1371,7 +1371,7 @@ function updateFestival(dt,oldFeet){
   }
   if(!l2.spikeDown&&!l2.results){
     const wall=SPIKE_X-30;if(s.x+s.w>wall){s.x=wall-s.w;if(s.inv<=0){health--;s.inv=1.3;s.vy=-300;s.x-=40;shake=.35;burst(wall,s.y+30,10,["#7a5c99","#fff"]);
-      if(health<=0){health=maxHealth;s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0;sayToast("Sarah crumples… then uncrumples at the Save Block.")}else sayToast(hasNib?"OUCH! Prickles is all spikes. Don't touch him — jab him with Nib (Q)!":"OUCH! Prickles is all spikes. You can't jump on him or squeeze past.")}}
+      if(health<=0){health=maxHealth;s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0;sayToast("Sarah crumples… then uncrumples at the Save Block.")}else sayToast("OUCH! Prickles is all spikes. (-1 health)")}}
     if(center()<SPIKE_X-200)l2.spikeTalk=0;
     if(!l2.spikeTalk&&center()>SPIKE_X-150&&onFloor()){l2.spikeTalk=1;spikeChat();return}
   }
@@ -1922,7 +1922,7 @@ function drawTramp(t){cut(()=>rr(t.x+4,t.y+6,6,12,2),"#5b5277",{edge:3});cut(()=
 function lakeInteract(){
   if(fish.ph>0)return null;const T=(l,f)=>[l,f,true];
   if(near(70,44))return[l2.lakeFrom==="orchard"?"Back to the orchard":"Back to the festival",()=>l2.lakeFrom==="orchard"?goScene("orchard",ORCH_LAKE_DOOR):goScene("festival",LAKE_DOOR)];
-  if(near(700,30))return["Look at the tree",()=>sayToast(l2.lakeCoins.every(Boolean)?"A nice lakeside tree. You already shook… er, jumped the coins out of it.":"Something glints in the lower branches. Coins? Jump for them!")];
+  if(near(700,30))return["Look at the tree",()=>sayToast(l2.lakeCoins.every(Boolean)?"A nice lakeside tree. You already shook… er, jumped the coins out of it.":"Something glints in the lower branches.")];
   if(near(250,24))return["Read the sign",()=>start([["Sign","EGGS: ONLY FOR FRIENDS OF THE DOG. (The dog decides who his friends are. The dog is very picky.)"]])];
   if(near(395,50))return["Peek into the coop",()=>sayToast("Bawk. Three chickens eye you suspiciously. A very serious dog stands between you and the eggs.")];
   if(near(530,30))return T("Talk to the dog",waffles);
@@ -1964,7 +1964,7 @@ function updateFishing(dt){
   if(fish.ph===1&&fish.t>.6){fish.ph=2;fish.t=0;fish.wait=1+Math.random()*2}
   else if(fish.ph===2&&fish.t>fish.wait){fish.ph=3;fish.t=0;fish.need=1+Math.floor(Math.random()*4);fish.n=0;fish.next=.2}
   else if(fish.ph===3&&fish.t>fish.next){if(fish.n<fish.need){fish.n++;fish.dip=.3;fish.next=fish.t+.7+Math.random()*.7}else{fish.ph=4;fish.t=0}}
-  else if(fish.ph===4&&fish.t>2){fish.ph=0;sayToast("It got away! When the bobber gets pulled under, press Space within two seconds.")}
+  else if(fish.ph===4&&fish.t>2){fish.ph=0;sayToast("It got away!")}
   else if(fish.ph===5&&fish.t>1.1)fish.ph=0;
 }
 function updateLake(){
@@ -2154,7 +2154,7 @@ function startLevel3(){
     ["Dab","That's not sand, that's paint! This whole beach was painted so recently it's still dripping."],
     ["Nib","And the colors are running right down into the sea. That can't be good."],
     ["Narrator","Down the shore, someone is waving a claw from a little shell-shaped shack."]
-  ],()=>{chapterCard={t:0,title:"Chapter 3-1",sub:"The Watercolor Coast"};sayToast("Walk right and say hi to the hermit crab at the shell shack.")});
+  ],()=>{chapterCard={t:0,title:"Chapter 3-1",sub:"The Watercolor Coast"};0});
 }
 function saveL3(x,y){checkpoint=x-s.w/2;checkpointY=y-s.h;checkpointScene=scene;health=maxHealth;burst(x,y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back to this Save Block.")}
 function respawnL3(){health=maxHealth;goScene(checkpointScene,checkpoint+s.w/2,checkpointY??G-s.h);if(l3.boss&&!l3.bossDone){l3.boss=null}}
@@ -2201,8 +2201,8 @@ function marina(){
     ["Marina","But a mess brings treasure! The waves have been washing all sorts of things into the sand. And the sea's full of goodies too — there's a shipwreck right offshore."],
     ["Dab","Treasure buried in the sand? That's my specialty! Equip me (E) and press Q — I'll sniff out anything hiding down there."],
     ["Marina","And if you dig up any seashells, bring me 3. I'll trade you something nice. A crab's gotta decorate."],
-    ["Marina","Oh — and watch out for the Sidecrabs. When their claws are up, DON'T jump on them. Trust me. They're my cousins. They're the worst."]
-  ],()=>sayToast("Equip Dab (E) and press Q to sniff out buried treasure!"));return}
+    ["Marina","Oh — and watch out for the Sidecrabs. They're my cousins. They're the worst."]
+  ],()=>0);return}
   if(count("Seashell")>=3&&!l3.traded){start([["Marina","Ooh, is that a pocketful of shells I hear? Three seashells for a Health Potion — deal?",["Trade 3 shells","Not yet"],k=>{
     if(k===0){useOne("Seashell");useOne("Seashell");useOne("Seashell");l3.traded=true;addItem("Health Potion");burst(330,G-70,14);start([["Marina","Pleasure doing business! My shell's going to look FABULOUS."]],()=>sayToast("Traded 3 seashells for a Health Potion!"))}
     else start([["Marina","No rush. Shells keep. Mostly."]])}]]);return}
@@ -2215,7 +2215,7 @@ function marina(){
 function dabBeach(){
   const hit=DIGS.map((d,i)=>i).filter(i=>l3.dig[i]===0&&Math.abs(DIGS[i].x-center())<320);
   if(!hit.length)return false;hit.forEach(i=>{l3.dig[i]=1;burst(DIGS[i].x,G-10,12,["#3bb6c4","#fff","#f4c84f"])});
-  sayToast(hit.length>1?"Dab sniffed out "+hit.length+" buried treasures! Stand on an X and press Space to dig.":"Dab sniffed out something buried! Stand on the X and press Space to dig.");return true;
+  sayToast(hit.length>1?"Dab sniffed out "+hit.length+" buried treasures!":"Dab sniffed out something buried!");return true;
 }
 function dig(i){
   const d=DIGS[i];l3.dig[i]=2;burst(d.x,G-8,16,["#f1d39b","#e0b877","#fff"]);
@@ -2243,7 +2243,7 @@ function openReelChest(){
     red,
     ["Reel","The Blue gem sank right next to this wreck. Stand at the back of the ship, equip me and press Space to cast. We'll fish it out!"],
     ["Reel","And the Green gem is somewhere up inside the lighthouse. Somebody hid it really well."]
-  ],()=>{hasReel=true;equipped="Reel";sayToast("Reel joined you! Stand at the back of the shipwreck and press Space to fish.")});
+  ],()=>{hasReel=true;equipped="Reel";sayToast("Reel joined you!")});
 }
 function lhDoor(){
   if(!hasReel){sayToast("The lighthouse door is stuck tight. Maybe someone around here knows what's going on…");return}
@@ -2251,11 +2251,11 @@ function lhDoor(){
   goScene("lighthouse",230);checkpointScene="lighthouse";checkpoint=300-s.w/2;checkpointY=G-s.h;
   if(!l3.inLH){l3.inLH=true;start([
     ["Narrator","Inside, the lighthouse is gray from floor to ceiling, and a long, long way up."],
-    ["Reel","The lamp's at the very top. Ride the moving platforms!"],
+    ["Reel","The lamp's at the very top. It's a long way up."],
     ["Dab","And keep your eyes peeled for something green and sparkly."]],()=>{chapterCard={t:0,title:"Chapter 3-2",sub:"The Gray Lighthouse"}})}
 }
 function shieldChest(){l3.shieldChest=true;addItem("Shell Shield");burst(SHIELD_CHEST.x,SHIELD_CHEST.y-40,20,["#7cc6f2","#fff","#f4c84f"]);
-  start([["Narrator","Inside the chest: a shimmery shield made from a giant seashell."],["Nib","Ooh! Use it from your Pockets and it'll block two hits before it breaks. Save it for something big."]],()=>sayToast("Got the Shell Shield! Use it from Pockets (I) — it blocks 2 hits."))}
+  start([["Narrator","Inside the chest: a shimmery shield made from a giant seashell."],["Nib","Ooh, shiny. Save that for something big."]],()=>sayToast("Got the Shell Shield!"))}
 function useShield(){if(shield>0){sayToast("You're already shielded!");return}useOne("Shell Shield");shield=2;invOpen=false;burst(center(),s.y+30,18,["#7cc6f2","#fff","#b98ad8"]);sayToast("The Shell Shield wraps around you in a shimmery bubble. It'll block 2 hits!")}
 
 // ---- fishing at the shipwreck ----
@@ -2281,8 +2281,8 @@ function updateFoes3(dt,oldFeet){
     if(s.x+s.w>f.x-22&&s.x<f.x+22&&s.y+s.h>top&&s.y<f.base){
       const stomp=s.vy>0&&oldFeet<=top+14;
       if(stomp){
-        if(f.type==="crab"&&clawsUp(f)){hurt3(f.x,"PINCH! Never stomp a Sidecrab while its claws are up! (-1 health)")}
-        else if(f.type==="hermit"&&!(f.flip>0)){s.vy=-430;burst(f.x,top,6,["#fff","#c9d6d4"]);if(!l3.tinkTip){l3.tinkTip=true;sayToast("TINK! Its shell is too hard to stomp. Flip it over with Nib (Q) first!")}}
+        if(f.type==="crab"&&clawsUp(f)){hurt3(f.x,"PINCH! (-1 health)")}
+        else if(f.type==="hermit"&&!(f.flip>0)){s.vy=-430;burst(f.x,top,6,["#fff","#c9d6d4"]);if(!l3.tinkTip){l3.tinkTip=true;sayToast("TINK!")}}
         else{killFoe(f);s.vy=-430}
       }else if(!(f.type==="hermit"&&f.flip>0))hurt3(f.x,f.type==="crab"?"Pinched by a Sidecrab! (-1 health)":"Ouch! (-1 health)");
     }
@@ -2295,7 +2295,7 @@ function updateGull(f,dt,oldFeet){
     if(f.cool<=0&&Math.abs(center()-f.x)<240&&Math.abs(s.y+s.h-f.base)<60){f.mode="swoop";f.st=0;f.sdir=Math.sign(center()-f.x)||1;f.dir=f.sdir}}
   if(s.x+s.w>f.x-24&&s.x<f.x+24&&s.y+s.h>f.y-20&&s.y<f.y+8){
     if(s.vy>0&&oldFeet<=f.y-8){killFoe(f);s.vy=-430;return}
-    if(f.mode==="swoop"&&!f.stole){f.stole=true;if(coins>0){coins--;f.carry=(f.carry||0)+1;sayToast("SQUAWK! A Gull snatched a coin! Jab or stomp it to get it back.")}else hurt3(f.x,"SQUAWK! Pecked by a Gull! (-1 health)")}
+    if(f.mode==="swoop"&&!f.stole){f.stole=true;if(coins>0){coins--;f.carry=(f.carry||0)+1;sayToast("SQUAWK! A Gull snatched a coin!")}else hurt3(f.x,"SQUAWK! Pecked by a Gull! (-1 health)")}
   }
 }
 function l3Jab(hx){
@@ -2303,16 +2303,16 @@ function l3Jab(hx){
   let hit=false;
   for(const f of l3.foes){if(f.scene!==scene||!f.alive)continue;const fy=f.type==="gull"?f.y+10:f.base;
     if(Math.abs(f.x-hx)<46&&s.y+s.h>fy-90&&s.y<fy+10){hit=true;
-      if(f.type==="hermit"&&!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#c9d6d4","#b98ad8"]);sayToast("Nib flips the Hermit Smudge onto its back! Quick — stomp it or jab it again!")}
+      if(f.type==="hermit"&&!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#c9d6d4","#b98ad8"]);sayToast("Flipped!")}
       else killFoe(f)}}
   return hit;
 }
 
 // ---- boss: The Blot ----
-function spawnInklet(x){l3.foes.push({type:"smudge",scene:"lighthouse",x,min:200,max:850,base:DY,fromInk:true,alive:true,flat:0,t:0,ph:Math.random()*3,dir:Math.random()<.5?-1:1,speed:75,flip:0,mode:"walk",cool:0,y:DY,carry:0});burst(x,DY-14,12,["#b98ad8","#fff",INK]);if(!l3.inkletTip){l3.inkletTip=true;sayToast("One of the ink drops turned into a Smudge! Stomp it or jab it.")}}
+function spawnInklet(x){l3.foes.push({type:"smudge",scene:"lighthouse",x,min:200,max:850,base:DY,fromInk:true,alive:true,flat:0,t:0,ph:Math.random()*3,dir:Math.random()<.5?-1:1,speed:75,flip:0,mode:"walk",cool:0,y:DY,carry:0});burst(x,DY-14,12,["#b98ad8","#fff",INK]);}
 function startBoss(){
   l3.boss={hp:8,max:8,ph:"intro",t:0,cycle:0,slams:0,tent:null,blobs:[],spawn:0,headUp:0,hurtT:0};
-  const go=()=>{l3.boss.ph="tent";l3.boss.t=0;sayToast("Defeat The Blot! Jab tentacles (Q), dodge ink, stomp its head.")};
+  const go=()=>{l3.boss.ph="tent";l3.boss.t=0;0};
   if(l3.bossSeen){start([["The Blot","BLOOOORP! (It's back, and it looks annoyed.)"]],go);return}
   l3.bossSeen=true;
   start([
@@ -2320,9 +2320,9 @@ function startBoss(){
     ["Narrator","Then the whole tower shudders. Something huge is climbing up out of the sea…"],
     ["The Blot","BLOOOORP."],
     ["Reel","That's The Blot! It's been slurping the colors out of the whole coast!"],
-    ["Nib","When its tentacles slam down, I'll jab 'em! Stand close and press Q."],
-    ["Dab","Dodge the ink drops — watch for their shadows! And when it peeks over the railing, stomp its big squishy head!"]
-  ],()=>{l3.boss.ph="tent";l3.boss.t=0;sayToast("Defeat The Blot! Jab tentacles (Q), dodge ink, stomp its head.")});
+    ["Nib","I'm pointy. It's squishy. I like our odds."],
+    ["Dab","Careful, Sarah. That thing is ALL ink."]
+  ],()=>{l3.boss.ph="tent";l3.boss.t=0;0});
 }
 function jabBoss(hx){const b=l3.boss;if(!b||b.ph==="intro"||b.ph==="dead")return false;
   if(b.tent&&b.tent.st==="stuck"&&hx>b.tent.x-60){b.tent.st="back";b.tent.t=0;damageBoss(1,b.tent.x,DY-20);return true}
@@ -2336,7 +2336,7 @@ function defeatBoss(){for(const f of l3.foes)if(f.fromInk&&f.alive){f.alive=fals
     ["Reel","Aww. It's kind of cute now."],
     ["Dab","Ink monsters are always grumpy when they're big. It's the pressure."],
     ["Narrator","The tiny squid plops back into the sea with a sulky little splash. The lamp room is clear!"]
-  ],()=>{l3.boss=null;sayToast(has("Green Gem")?"Set the three gems in the lamp! (Space next to the lamp.)":"Set the gems in the lamp! (Space next to it.) …You'll need the Green Gem, too.")});
+  ],()=>{l3.boss=null;0});
 }
 function updateBoss(dt,oldFeet){
   const b=l3.boss;if(!b||b.ph==="intro"||b.ph==="dead")return;
@@ -2357,7 +2357,7 @@ function updateBoss(dt,oldFeet){
     b.headUp=b.t<.7?b.t/.7:b.t<3.6?1:Math.max(0,1-(b.t-3.6)/.6);
     if(b.headUp>.8){const top=DY-104;if(s.x+s.w>752&&s.x<848&&s.y+s.h>top&&s.y<DY){
       if(s.vy>0&&oldFeet<=top+16){s.vy=-560;damageBoss(1,800,top);if(b.ph==="head")b.t=Math.max(b.t,3.6)}
-      else hurt3(800,"The Blot bumps you away! Stomp its head from ABOVE. (-1 health)")}}
+      else hurt3(800,"BONK! (-1 health)")}}
     if(b.t>4.2){b.ph="tent";b.t=0;b.cycle++;b.headUp=0}
   }
 }
@@ -2384,10 +2384,10 @@ const tideY=()=>G+12-tideLevel()*52;
 function updateTide(){
   const onFlat=center()>TIDE.x0&&center()<TIDE.x1;
   if(s.ground&&s.plat){if(center()<=TIDE.x0)l3.tideSafe={x:TIDE.x0-60,y:G-s.h};else if(center()>=TIDE.x1)l3.tideSafe={x:TIDE.x1+30,y:G-s.h};else if(s.plat.tide)l3.tideSafe={x:s.plat.x+s.plat.w/2-s.w/2,y:s.plat.y-s.h}}
-  if(onFlat&&!l3.tideTip){l3.tideTip=true;sayToast("Tide flats! Run across while the tide is out — or wait on a rock when the water comes in.")}
-  const p=l3.t%11;if(onFlat&&p>4.6&&p<6&&!l3.warned){l3.warned=true;sayToast("The tide's coming in! Get to a rock or off the flats!")}if(p<4.6)l3.warned=false;
+  
+  const p=l3.t%11;if(onFlat&&p>4.6&&p<6&&!l3.warned){l3.warned=true;sayToast("Here comes the tide…")}if(p<4.6)l3.warned=false;
   if(onFlat&&tideLevel()>.55&&s.y+s.h>tideY()+6){const sf=l3.tideSafe||{x:TIDE.x0-60,y:G-s.h};burst(center(),tideY(),22,["#7cc6f2","#fff"]);s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
-    if(health<=0){respawnL3();sayToast("The tide sweeps Sarah away… she uncrumples back at your last checkpoint.")}else if(real)sayToast("WHOOSH! The tide swept you back! (-1 health) Wait for it to go out, then run.")}
+    if(health<=0){respawnL3();sayToast("The tide sweeps Sarah away… she uncrumples back at your last checkpoint.")}else if(real)sayToast("WHOOSH! Swept back by the tide. (-1 health)")}
 }
 function updateL3(dt,oldFeet){
   if(scene==="lighthouse")s.x=clamp(s.x,90,870-s.w);
@@ -2401,7 +2401,7 @@ function updateL3(dt,oldFeet){
   if(scene==="lighthouse"){
     if(!l3.green&&Math.abs(center()-GEM_G.x)<30&&s.y+s.h>GEM_G.y-60&&s.y<GEM_G.y){l3.green=true;addItem("Green Gem");burst(GEM_G.x,GEM_G.y-30,26,["#5fb35a","#a6e39a","#fff"]);
       start([["Narrator","Tucked into a dusty nook: a gem, glowing green as a fresh leaf."],["Dab","The GREEN GEM! Whoever hid it up here really didn't want it found."],["Reel","That's all three! Red, Green, Blue. Now up to the lamp!"]],()=>sayToast("Got the Green Gem!"));return}
-    if(!l3.potion&&Math.abs(center()-POTION_TOP.x)<26&&onPlat(DY)){l3.potion=true;addItem("Health Potion");burst(POTION_TOP.x,DY-30,14,["#ff6f9c","#fff"]);sayToast("Found a Health Potion! Use it from Pockets (I) if things get rough.")}
+    if(!l3.potion&&Math.abs(center()-POTION_TOP.x)<26&&onPlat(DY)){l3.potion=true;addItem("Health Potion");burst(POTION_TOP.x,DY-30,14,["#ff6f9c","#fff"]);sayToast("Found a Health Potion!")}
     if(!l3.bossDone&&!l3.boss&&onPlat(DY)&&center()>440){startBoss();return}
     updateBoss(dt,oldFeet);if(dlg.on)return;
   }
