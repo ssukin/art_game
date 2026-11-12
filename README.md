@@ -70,26 +70,27 @@ Finishing Level 2 (through the door from the sky) continues into Level 3. The ch
 **3-1: The Watercolor Coast.** Sarah lands face-first on a beach that's still wet paint, with the colors running into the sea.
 - **Marina**, a hermit crab who runs (and is) the Shell Shack, says the sand and sea are full of treasure. She trades **3 Seashells for a Health Potion**.
 - With Dab equipped, **Q** reveals buried treasure as pink X marks; stand on one and press Space to dig. You'll find Seashells, coins, and a **Heart Necklace** with a big red heart-shaped gem: the **Red gem**.
-- Hop across the rocks to the **shipwreck**. The treasure chest on its deck turns out to be **Reel**, the fishing-pole buddy. He explains the lighthouse lamp is failing and needs three gems: **Red, Green and Blue**.
+- Past the digging beach are the **Tide Flats**. The tide goes out for about 6 seconds, then rolls in and stays in for a few seconds. Run across while it's out, or wait it out on one of the two tall rocks. Get caught on the flats when the water's up and the tide sweeps you back to the last safe spot (-1 health). There's treasure to dig on the flats, too.
+- Then hop across the rocks to the **shipwreck**. The treasure chest on its deck turns out to be **Reel**, the fishing-pole buddy. He explains the lighthouse lamp is failing and needs three gems: **Red, Green and Blue**.
 - Fish from the back of the shipwreck. You'll catch between 1 and 5 Sea Perch, then hook the **Blue Gem**. Falling in the sea costs 1 health.
 - With Red and Blue in hand, cross the rocks to the lighthouse.
 
 **3-2: The Gray Lighthouse.** A tall vertical climb with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) The only Save Block in Level 3 sits on the last platform before the boss deck; otherwise your checkpoint is the start of the beach, then the lighthouse entrance.
 - The **Green Gem** is hidden in a nook high on the left, reached from the big landing by a quick elevator, a tiny ledge and a fast sideways platform.
 - A chest partway up holds the **Shell Shield**. Use it from Pockets: a bubble that blocks the next **2 hits** and then breaks away.
-- At the top: a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down (a slam that lands on Sarah costs 2 health), dodge falling ink drops (watch their shadows; about 1 in 10 sprouts legs and becomes an **Inklet**) and stomp its head when it rises over the railing (1 damage per stomp). It has a health bar.
+- At the top: a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down (a slam that lands on Sarah costs 2 health), dodge falling ink drops (watch their shadows; about 1 in 10 turns into a **Smudge** on the deck) and stomp its head when it rises over the railing (1 damage per stomp). It has a health bar.
 - Set the three gems in the lamp to light the lighthouse and bring the coast's colors back. If the Green Gem is missing, drop down the gap on the left of the deck to go find it.
 
-**New creatures:** Sidecrabs (stomp only when their claws are down), Gulls (swoop to steal a coin; hit them while they're low to get it back), Hermit Smudges (too hard to stomp until Nib flips them over; then stomp or jab again), Inklets (tiny ink squids from The Blot's drops).
+**New creatures:** Sidecrabs (stomp only when their claws are down), Gulls (swoop to steal a coin; hit them while they're low to get it back), Hermit Smudges (too hard to stomp until Nib flips them over; then stomp or jab again).
 
 ## XP and leveling up
 
-Defeating creatures earns **XP**. A Smudge, Prickles, a Sidecrab and an Inklet are worth 1 XP each, a Gull or a Hermit Smudge 2 XP, and The Blot 10 XP. The XP bar sits under the health counter. Level 2 needs 15 XP, and each level after that needs 10 more than the last (25, 35, 45…). On a level up the game freezes, confetti falls, and an announcement shows the new level: **+5 max health and health refilled**. Press Space to keep going.
+Defeating creatures earns **XP**. A Smudge, Prickles and a Sidecrab are worth 1 XP each, a Gull or a Hermit Smudge 2 XP, and The Blot 10 XP. The XP bar sits under the health counter. Level 2 needs 15 XP, and each level after that needs 10 more than the last (25, 35, 45…). On a level up the game freezes, confetti falls, and an announcement shows the new level: **+5 max health and health refilled**. Press Space to keep going.
 
 The **Journal** tab in Pockets shows Sarah's level and XP, plus a page for each creature: how many you've defeated, how much XP each is worth, where it lives and how to beat it. Creatures you haven't beaten yet show as gray silhouettes.
 
 ## Admin Cheats Only
 
-Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, Level 3 buttons jump to the beach, the shipwreck chest, the fishing spot, the bottom of the lighthouse, the big landing (for the Green Gem detour), the top of the lighthouse and the boss fight, plus **Give all 3 gems** and **Give Shell Shield**. **+20 coins** tops up your wallet, **Level up now** triggers a level up, and **Fill & open Journal** fills in every Journal page. **Restart Level 1** reloads the page.
+Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, Level 3 buttons jump to the beach, the tide flats, the shipwreck chest, the fishing spot, the bottom of the lighthouse, the big landing (for the Green Gem detour), the top of the lighthouse and the boss fight, plus **Give all 3 gems** and **Give Shell Shield**. **+20 coins** tops up your wallet, **Level up now** triggers a level up, and **Fill & open Journal** fills in every Journal page. **Restart Level 1** reloads the page.
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.
