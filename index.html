@@ -2536,7 +2536,7 @@ function drawBlotFront(){const b=l3.boss;if(!b)return;const shake2=b.hurtT>0?Mat
     g.save();g.lineCap="round";const path=()=>{g.beginPath();g.moveTo(900,DY+40);g.bezierCurveTo(880,DY-140,tipX+120,tipY-(T.st==="stuck"?20:120),tipX,tipY)};
     path();g.strokeStyle="#fff";g.lineWidth=36;g.stroke();path();g.strokeStyle=INK;g.lineWidth=30;g.stroke();path();g.strokeStyle=b.hurtT>0?"#b98ad8":"#5b2a6e";g.lineWidth=25;g.stroke();
     g.fillStyle="#d8b4e8";for(let k=.55;k<1;k+=.1){const t=k,mt=1-t;const bx=mt*mt*mt*900+3*mt*mt*t*880+3*mt*t*t*(tipX+120)+t*t*t*tipX,by=mt*mt*mt*(DY+40)+3*mt*mt*t*(DY-140)+3*mt*t*t*(tipY-(T.st==="stuck"?20:120))+t*t*t*tipY;circle(bx,by+6,4);g.fill()}
-    g.restore();if(T.st==="stuck"&&Math.floor(time*4)%2){g.fillStyle="#e5577b";g.font="bold 14px "+FONT;g.textAlign="center";g.fillText("JAB IT!",T.x,DY-40);g.textAlign="left"}}
+    g.restore();}
   for(const o of b.blobs){if(o.t<.9){g.save();g.globalAlpha=.2+o.t*.4;g.fillStyle=INK;g.beginPath();g.ellipse(o.x,DY+2,22,6,0,0,7);g.fill();g.restore();
       const yy=DY-420+Math.max(0,(o.t-.55)/.35)*412;if(o.t>.55){cut(()=>{g.beginPath();g.moveTo(o.x,yy-26);g.quadraticCurveTo(o.x+14,yy-4,o.x,yy+4);g.quadraticCurveTo(o.x-14,yy-4,o.x,yy-26);g.closePath()},"#3a3352",{edge:4})}}
     else{g.save();g.globalAlpha=1-(o.t-.9)/.5;g.fillStyle="#3a3352";g.beginPath();g.ellipse(o.x,DY-2,26,6,0,0,7);g.fill();g.restore()}}
