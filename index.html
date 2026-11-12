@@ -43,27 +43,27 @@
   </div>
   <details class="cheats" aria-label="Admin cheats only">
     <summary><h2>Admin Cheats Only</h2></summary>
-    <p>Testing shortcuts. Level 2 jumps start you with the Turnip, Festival Pin and Dab. "Start Level 2" begins in the orchard.</p>
-    <button class="button" data-cheat="l2">Start Level 2</button>
-    <button class="button" data-cheat="plaza">L2: festival (registered)</button>
-    <button class="button" data-cheat="nib">L2: after the chase (Nib trail)</button>
-    <button class="button" data-cheat="results">L2: contest results</button>
-    <button class="button" data-cheat="fight">L2: Smudge fight</button>
-    <button class="button" data-cheat="l3">Start Level 3 (3-1 beach)</button>
-    <button class="button" data-cheat="l3tide">L3: tide flats</button>
-    <button class="button" data-cheat="l3dock">L3: hidden dock</button>
-    <button class="button" data-cheat="l3wreck">L3: shipwreck chest (Reel)</button>
-    <button class="button" data-cheat="l3fish">L3: fishing spot (with Reel)</button>
-    <button class="button" data-cheat="l3lh">L3: lighthouse 3-2 (bottom)</button>
-    <button class="button" data-cheat="l3land">L3: lighthouse landing (Green Gem detour)</button>
-    <button class="button" data-cheat="l3top">L3: top of lighthouse (before boss)</button>
-    <button class="button" data-cheat="l3boss">L3: boss fight (The Blot)</button>
+    <p>Testing shortcuts. Level 0 is the town hub (Part 1: home and the road; Part 2: the festival). Part 2 jumps start you with the Turnip, Festival Pin and Dab. "Start Level 0 — Part 2" begins in the orchard.</p>
+    <button class="button" data-cheat="l2">Start Level 0 — Part 2</button>
+    <button class="button" data-cheat="plaza">L0-2: festival (registered)</button>
+    <button class="button" data-cheat="nib">L0-2: after the chase (Nib trail)</button>
+    <button class="button" data-cheat="results">L0-2: contest results</button>
+    <button class="button" data-cheat="fight">L0-2: Smudge fight</button>
+    <button class="button" data-cheat="l3">Start Level 1 (1-1 beach)</button>
+    <button class="button" data-cheat="l3tide">L1: tide flats</button>
+    <button class="button" data-cheat="l3dock">L1: hidden dock</button>
+    <button class="button" data-cheat="l3wreck">L1: shipwreck chest (Reel)</button>
+    <button class="button" data-cheat="l3fish">L1: fishing spot (with Reel)</button>
+    <button class="button" data-cheat="l3lh">L1: lighthouse 1-2 (bottom)</button>
+    <button class="button" data-cheat="l3land">L1: lighthouse landing (Green Gem detour)</button>
+    <button class="button" data-cheat="l3top">L1: top of lighthouse (before boss)</button>
+    <button class="button" data-cheat="l3boss">L1: boss fight (The Blot)</button>
     <button class="button" data-cheat="l3gems">Give all 3 gems</button>
     <button class="button" data-cheat="shield">Give Shell Shield</button>
     <button class="button" data-cheat="coins">+20 coins</button>
     <button class="button" data-cheat="xp">Level up now</button>
     <button class="button" data-cheat="journal">Fill & open Journal</button>
-    <button class="button" data-cheat="reload">Restart Level 1</button>
+    <button class="button" data-cheat="reload">Restart Level 0 (Part 1)</button>
   </details>
   <p id="message" aria-live="polite"></p>
 </main>
@@ -106,7 +106,7 @@ function drawLevelUp(){
   cut(()=>rr(-230,-120,460,240,30),"#fff3d6",{edge:10});
   cut(()=>{g.beginPath();g.ellipse(0,-118,150,34,-.03,0,7)},"#f08a3c",{edge:7});
   g.textAlign="center";g.fillStyle="#fff";g.font="bold 34px "+FONT;g.fillText("LEVEL UP!",0,-106);
-  g.fillStyle=INK;g.font="bold 26px "+FONT;g.fillText("Sarah is now Level "+L.level+"!",0,-40);
+  g.fillStyle=INK;g.font="bold 26px "+FONT;g.fillText("Sarah is now Lv "+L.level+"!",0,-40);
   g.save();g.translate(-118,10);cut(()=>{g.beginPath();g.moveTo(0,12);g.bezierCurveTo(-20,-2,-11,-18,0,-8);g.bezierCurveTo(11,-18,20,-2,0,12)},"#e5577b",{edge:4,shadow:false});g.restore();
   g.textAlign="left";g.fillStyle="#e5577b";g.font="bold 22px "+FONT;g.fillText("Max health +"+L.hp+"  →  "+maxHealth+" HP",-92,18);
   g.textAlign="center";g.fillStyle="#17a398";g.font="bold 18px "+FONT;g.fillText("Health refilled!",0,56);
@@ -116,7 +116,7 @@ function drawLevelUp(){
 function drawJournal(px,py,pw,ph){
   const nx=px+40,ny=py+100,nw=pw-80;
   cut(()=>rr(nx,ny,nw,52,14),"#fffef8",{edge:6});
-  g.fillStyle=INK;g.font="bold 20px "+FONT;g.fillText("Level "+plv,nx+20,ny+33);
+  g.fillStyle=INK;g.font="bold 20px "+FONT;g.fillText("Lv "+plv,nx+20,ny+33);
   const bx=nx+120,bw=nw-280;g.fillStyle="#e8dcc4";rr(bx,ny+18,bw,16,8);g.fill();g.fillStyle="#b98ad8";rr(bx,ny+18,Math.max(10,bw*xp/XP_FOR(plv)),16,8);g.fill();g.strokeStyle=INK;g.lineWidth=2;rr(bx,ny+18,bw,16,8);g.stroke();
   g.fillStyle="#4a4360";g.font="bold 16px "+FONT;g.fillText(xp+" / "+XP_FOR(plv)+" XP",bx+bw+14,ny+32);
   CREATURES.forEach((c,i)=>{const cols=4,cw=(nw-36)/cols,ch=118,cx=nx+(i%cols)*(cw+12),cy=ny+62+Math.floor(i/cols)*(ch+8),seen=journal[c.name]>0;
@@ -268,7 +268,7 @@ function drawDialogue(){
 function objective(){
   if(level===3)return objectiveL3();
   if(level===2)return objectiveL2();
-  if(complete)return"Level 1 complete! The festival awaits on the other side of the gate.";
+  if(complete)return"Part 1 complete! The festival awaits on the other side of the gate.";
   if(gateKey)return"Head all the way back left to the mysterious gate and unlock it with the Town Gate Key.";
   if(hasDab)return"Find the gray, crying flower near the end of the road and let Dab bring its color back (Space next to it).";
   if(ladderGiven)return grandChestOpen?"":(has("Grandma's Chest Key")?"Climb the ladder in Mrs. Maple's house and open Grandma's chest.":"Grandma's chest needs a key. Rumor has it the fountain's upside-down stream coughs things up. Jump in!");
@@ -331,7 +331,7 @@ function gate(){
     ["Sarah","The key fits! Of course it fits. It's shaped like a flower. Everything today is shaped like a flower."],
     ["Narrator","The gate swings wide. Beyond it, the town hums with music, banners, and the faint smell of wet paint."],
     ["Dab","Hang on. Where did that lightning come from? Who ripped the sky? Why doesn't anybody ask questions around here?!"],
-    ["Narrator","Excellent questions. Saved, for now, for Level 2."]
+    ["Narrator","Excellent questions. Saved, for now, for Part 2."]
   ],()=>{showEndScreen=true;endT=0});
 }
 function guideFlower(){
@@ -617,7 +617,7 @@ window.addEventListener("keydown",e=>{
   if(k===" "&&!e.repeat&&(scene==="lake"||scene==="beach")&&fish.ph>0){fishSpace();return}
   if(k===" "&&!e.repeat){const it=getInteract();if(it)it[1]();else sayToast("Nothing to activate here. You activate your imagination instead.");return}
   if((k==="ArrowUp"||k==="w")&&s.ground&&!e.repeat&&!onLadder()){
-    if(dogOn){s.vy=-620}else if(balloonOn){s.vy=-834;balloonOn=false;balloonsAway.push({scene,x:center()+8,y:s.y-40,t:0});sayToast("WHOOSH! The balloon yanks you sky-high… then drifts off to a better life.")}else s.vy=-590;s.ground=false}
+    if(dogOn){l2.rising=true;s.vy=-240}else if(balloonOn){s.vy=-834;balloonOn=false;balloonsAway.push({scene,x:center()+8,y:s.y-40,t:0});sayToast("WHOOSH! The balloon yanks you sky-high… then drifts off to a better life.")}else s.vy=-590;s.ground=false}
   if(k==="q"&&!e.repeat){if(!hasDab)sayToast("You don't have a little buddy yet. You wave at nobody. Nobody waves back.");else if(equipped==="Nib"&&hasNib)nibJab();else if(equipped==="Reel"&&hasReel){if(scene==="beach"&&fishSpot()!=null&&fish.ph===0)castLine(fishSpot());else if(scene==="lake"&&near(DOCK.x+DOCK.w-40,50)&&fish.ph===0)castLine();else sayToast("Reel: \"No water here. I'm a fishing pole, not a miracle worker.\"")}else dabPower()}
   if(k==="e"&&!e.repeat&&(hasNib||hasReel)){const b=[hasDab&&"Dab",hasNib&&"Nib",hasReel&&"Reel"].filter(Boolean);equipped=b[(b.indexOf(equipped)+1)%b.length];sayToast(equipped+" equipped! "+buddyBlurb(equipped))}
   if(k==="r"&&!e.repeat&&level===3){respawnL3();sayToast("Whoosh! Back to your last checkpoint.")}
@@ -660,12 +660,14 @@ function update(dt){
   if(scene==="festival")for(const b of CRATES){if(s.x+s.w>b.x&&s.x<b.x+b.w&&s.y+s.h>b.y+6&&s.y<b.y+b.h){if(oldX+s.w<=b.x+1)s.x=b.x-s.w;else if(oldX>=b.x+b.w-1)s.x=b.x+b.w}}if(dir)s.face=dir;s.walk=dir&&s.ground?s.walk+dt*14:0;
   s.inv=Math.max(0,s.inv-dt);
   if(level===3)l3Pre(dt);
+  if(dogOn&&l2.rising){s.vy=-240;if(s.y+s.h<=FLOOR2.y-26)l2.rising=false}
   const oldFeet=s.y+s.h;s.vy+=1450*(dogOn?.42:1)*dt;s.y+=s.vy*dt;s.wasGround=s.ground;s.ground=false;s.plat=null;
   const ps=scene==="beach"||scene==="lighthouse"?[...l3Plats()]:scene==="festival"?[{x:FEST_MIN-100,y:G,w:HOLE.x-FEST_MIN+100,h:100},{x:HOLE.x+HOLE.w,y:G,w:99999,h:100}]:scene==="lake"?[{x:-50,y:G,w:930,h:100},{x:DOCK.x,y:G,w:DOCK.w,h:100}]:[{x:-50,y:G,w:99999,h:100}];
   if(scene==="bedroom")ps.push({x:105,y:346,w:280,h:18,bed:true});
   if(scene==="resident"&&ladderGiven)ps.push({x:400,y:280,w:540,h:22});
   if(scene==="outside")ps.push(...platforms);
   if(scene==="under")ps.push({...TRAMP_U,tramp:-1150});
+  if(scene==="festival"&&s.y+s.h<=FLOOR2.y+2&&s.vy>=0&&!dogOn)s.x=clamp(s.x,FLOOR2.x+8,FLOOR2.x+FLOOR2.w-s.w-8);
   if(scene==="festival"){ps.push(...CRATES,LIB_ROOF,...CLOUDS,...BARS,FLOOR2);if(l2.tramp)ps.push({...TRAMP_F,tramp:-900});if(l2.trail)ps.push(...TRAIL)}
   for(const p of ps){if(s.vy>=0&&s.x+s.w>p.x&&s.x<p.x+p.w&&oldFeet<=(p.mover?Math.max(p.y,p.py)+2:p.y+1)&&s.y+s.h>=p.y){
     if(p.tramp){s.y=p.y-s.h;s.vy=p.tramp;s.squash=.7;burst(center(),p.y,6,["#3bb6c4","#fff"]);continue}
@@ -703,7 +705,7 @@ function update(dt){
   if(!s.wasGround&&s.ground&&s.squash>.95)s.squash=.9;
   if(s.y>H+40){if(scene==="festival"&&center()>HOLE.x-30&&center()<HOLE.x+HOLE.w+30){goScene("under",300,-90);sayToast("Wheeee— down the hole!")}else{s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0}}
   camera=worldW()>W?clamp(s.x-350,worldMin(),worldW()-W):0;
-  const ty=scene==="festival"?clamp(s.y-150,-320,0):scene==="lighthouse"?(l3.boss?DY-420:clamp(s.y-300,DY-420,0)):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
+  const ty=scene==="festival"?clamp(s.y-150,FLOOR2.y-250,0):scene==="lighthouse"?(l3.boss?DY-420:clamp(s.y-300,DY-420,0)):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
   updateAction();
 }
 function updateParticles(dt){for(const p of parts){p.vy+=600*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.98;p.rot+=p.vr*dt;p.life-=dt}parts=parts.filter(p=>p.life>0)}
@@ -1031,9 +1033,9 @@ function drawEndScreen(){
   const k=Math.min(1,endT*2),sc=.6+.4*(1-Math.pow(1-k,3));g.save();g.translate(W/2,H/2);g.scale(sc,sc);g.rotate(-.02);
   cut(()=>rr(-350,-125,700,250,30),"#fff3d6",{edge:12});
   for(let i=0;i<14;i++){g.fillStyle=["#e5577b","#f4c84f","#17a398","#7cc6f2"][i%4];g.beginPath();g.moveTo(-320+i*48,-125);g.lineTo(-296+i*48,-125);g.lineTo(-308+i*48,-100);g.fill()}
-  g.fillStyle=INK;g.textAlign="center";g.font="bold 36px "+FONT;g.fillText(level===1?"Level 1 complete!":level===2?"Level 2 complete!":"Chapter 3 complete!",0,-10);
+  g.fillStyle=INK;g.textAlign="center";g.font="bold 36px "+FONT;g.fillText(level===1?"Level 0 — Part 1 complete!":level===2?"Level 0 — Part 2 complete!":"Level 1 complete!",0,-10);
   g.fillStyle="#17a398";g.font="bold 26px "+FONT;
-  if(level<3){if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText("Press Space (or click) to continue to Level "+(level+1)+" →",0,40);g.globalAlpha=1}}
+  if(level<3){if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText("Press Space (or click) to continue to "+(level===1?"Part 2":"Level 1")+" →",0,40);g.globalAlpha=1}}
   else g.fillText("The lighthouse shines again! To be continued…",0,40);
   g.fillStyle="#7a7088";g.font="italic 16px "+FONT;g.fillText("Coins collected: "+coins+"  ·  Sarah is Lv "+plv+(level===1?(roofItemCollected?"  ·  Roof secret: found!":"  ·  Roof secret: still up there…"):(l2.clayEntered?"  ·  \""+l2.entry+"\": tried, and rewarded":"")),0,86);
   g.restore();g.textAlign="left";
@@ -1048,7 +1050,7 @@ const SPIKE_X=3005,SAVE2=2730,CROWD={"Announcer":[2850,3085],"Juniper":[2900,316
 function ease(k){k=Math.max(0,Math.min(1,k));return k*k*(3-2*k)}
 function catX(){if(l2.catState==="stuck")return 1565;return CAT_WAIT+(3422-CAT_WAIT)*ease(l2.catWalk/.8)}
 function catLift(){const k=Math.max(0,(l2.catWalk-.8)/.2);return 58*k+Math.sin(k*Math.PI)*40}
-const FEST_W=3520,DOOR_X=3150,LIB_ROOF={x:2072,y:246,w:156,h:20};
+const FEST_W=3520,DOOR_X=3380,DOOR_SLOTS=[3380,3000,2620,2240,1860,1480],LIB_ROOF={x:2072,y:246,w:156,h:20};
 let balloonOn=false,balloonsAway=[];
 const CLOUDS=[{x:2228,y:192,w:84,h:16},{x:2128,y:132,w:84,h:16},{x:2232,y:72,w:84,h:16},{x:2110,y:12,w:140,h:18}];
 const SKYTOP=CLOUDS[3];
@@ -1097,7 +1099,7 @@ function startLevel2(){
 // ---- who can Sarah talk to / activate? ----
 function festInteract(){
   if(l2.chase===1||(l2.finale&&!l2.fightDone)||l2.done)return null;
-  if(!l2.roofChest&&near(2150,40)&&s.y+s.h<=LIB_ROOF.y+2)return["Open the rooftop chest",roofChest];
+  if(!l2.roofChest&&near(2150,40)&&Math.abs(s.y+s.h-LIB_ROOF.y)<3)return["Open the rooftop chest",roofChest];
   if(near(SAVE_DOOR,30)&&s.ground&&s.y+s.h<=FLOOR2.y+2)return["Save at the Save Block",()=>{checkpoint=SAVE_DOOR-s.w/2;checkpointY=FLOOR2.y-s.h;checkpointScene="festival";health=maxHealth;burst(SAVE_DOOR,FLOOR2.y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back here.")}];
   if(l2.doorY!=null&&l2.doorY>=FLOOR2.y&&!l2.doorOpen&&near(DOOR_X,44)&&s.y+s.h<=FLOOR2.y+2)return[has("Smudgy Key")?"Unlock the sky door":"Inspect the sky door",skyDoor];
   if(!onFloor())return null;
@@ -1278,11 +1280,11 @@ function runResults(){
   start(p,()=>{if(l2.clayEntered){coins+=20;burst(center(),s.y,24,["#f4c84f","#fff"])}startFinale()});
 }
 function startFinale(){
-  l2.finale=true;l2.tearT=.01;l2.doorY=-760;flash=.9;shake=1.2;
+  l2.finale=true;l2.tearT=.01;l2.doorY=-1300;flash=.9;shake=1.2;
   start([
     ["Narrator","KRAKA-THOOM! Lightning splits the sky again — right above the stage!"],
     ["Narrator","Smudges tumble out of the tear and swarm Juniper's painting. The color starts draining right out of it!"],
-    ["Narrator","Then — THUD. A door falls out of the sky and lands upright on the second-floor balcony above the stage. Just a door. No house. Very rude."],
+    ["Narrator","Then — THUD. Way, way up, a door falls out of the sky and lands upright on the festival's second floor. Just a door. No house. Very rude."],
     ["Dab","One of those Smudges is carrying something shiny… a key!"],
     ["Nib","FINALLY. Something to poke! Press Q to jab. Stomping works too!"]
   ],()=>{equipped="Nib";checkpointY=null;checkpoint=SAVE2-s.w/2;checkpointScene="festival";sayToast("Progress saved! Stop the Smudges before they drain the painting!");
@@ -1324,11 +1326,11 @@ function mapleFinale(){
     ["Mrs. Maple","Sarah. You must save the town."],
     ["Sarah","…Can I at least finish my lemonade first?"],
     ["Mrs. Maple","Of course, dear. Finish your lemonade. Then save the town. I'll pack you a sandwich."],
-    ["Mrs. Maple","Oh, and dear? That door that fell out of the sky? I suspect it's meant for you. It's way up on the second floor, though, and Gus still hasn't fixed that elevator."],
+    ["Mrs. Maple","Oh, and dear? That door that fell out of the sky? I suspect it's meant for you. It landed way, way up on the festival's second floor, and Gus still hasn't fixed that elevator."],
     ["Mrs. Maple","Hold still. I brought a friend. He's been very patient about it."],
     ["Narrator","Mrs. Maple unties the balloon dog's string from her wrist and ties it firmly to Sarah's backpack."],
-    ["Mrs. Maple","There! Float up to those jump bars by the stage, dear. Mind the dog — he's a good boy, but he's mostly air."]
-  ],()=>{l2.mapleDone=true;l2.dogGone=true;dogOn=true;sayToast("Floaty!")});
+    ["Mrs. Maple","There! One good hop and he'll float you right up, dear. Mind the dog — he's a good boy, but he's mostly air."]
+  ].concat(has("Smudgy Key")?[]:[["Mrs. Maple","Oh! And this fell out of one of those Smudges. Shiny. I believe it's yours."]]),()=>{if(!has("Smudgy Key")){addItem("Smudgy Key");loot=loot.filter(l=>l.name!=="Smudgy Key")}l2.mapleDone=true;l2.dogGone=true;dogOn=true;sayToast("Floaty!")});
 }
 function dropDoorKey(m){spill(m.x,G-60,"item","Smudgy Key",-s.face*60);burst(m.x,G-50,18,["#b98ad8","#fff","#f4c84f"]);sayToast("The Smudge drops a key! Grab it!")}
 function spikeChat(){
@@ -1359,7 +1361,7 @@ function nibJab(){
 function updateFestival(dt,oldFeet){
   CLOUDS.forEach((c,i)=>{if(!l2.cloudCoins[i]&&Math.abs(center()-(c.x+c.w/2))<26&&s.y<c.y-8&&s.y+s.h>c.y-40){l2.cloudCoins[i]=1;coins++;burst(c.x+c.w/2,c.y-22,8,["#f4c84f","#fff"])}});
   if(l2.fairy===2&&l2.fy>-400){l2.fx+=160*dt;l2.fy-=120*dt}
-  if(!l2.fairy&&s.ground&&s.y+s.h<=SKYTOP.y+2&&s.x+s.w>SKYTOP.x&&s.x<SKYTOP.x+SKYTOP.w){fairyVisit();return}
+  if(!l2.fairy&&s.ground&&Math.abs(s.y+s.h-SKYTOP.y)<3&&s.x+s.w>SKYTOP.x&&s.x<SKYTOP.x+SKYTOP.w){fairyVisit();return}
   const m=l2.foe;if(m){if(!m.alive)m.flat=Math.min(1,m.flat+dt*3);else{
     m.x+=m.dir*m.speed*dt;if(m.x<m.min||m.x>m.max){m.dir*=-1;m.x=clamp(m.x,m.min,m.max)}
     const top=m.base-32;if(s.x+s.w>m.x-20&&s.x<m.x+20&&s.y+s.h>top&&s.y<m.base){
@@ -1367,7 +1369,7 @@ function updateFestival(dt,oldFeet){
       else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;if(health<=0){health=maxHealth;scene=checkpointScene;s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0;sayToast("Sarah crumples… then uncrumples at the Save Block.")}else sayToast("Ouch! Smudged! (-1 health)")}}}}
   if(l2.doorY!=null&&l2.doorY<FLOOR2.y){l2.doorY=Math.min(FLOOR2.y,l2.doorY+dt*900);if(l2.doorY>=FLOOR2.y){shake=.6;burst(DOOR_X,FLOOR2.y-10,20,["#5b5277","#fff","#b98ad8"])}}
   if(!l2.cardTaken&&Math.abs(center()-640)<26){l2.cardTaken=true;addItem("Recipe Card");burst(640,G-64,16,["#f4c84f","#fff","#e5577b"]);sayToast("Found a Recipe Card: Turnip-Butter Tonic! (Turnip + Butter Pat → Health Potion.) Chef Crumb can cook it.")}
-  if(l2.trail&&!l2.nibMet&&Math.abs(center()-2770)<40&&s.y+s.h<=170){meetNib();return}
+  if(l2.trail&&!l2.nibMet&&Math.abs(center()-2770)<40&&s.y+s.h<=170&&s.y+s.h>40){meetNib();return}
   if(l2.chase===1){
     l2.chaseT+=dt;s.x=Math.min(s.x,2330-s.w);
     const spot=hideSpot(),hideAt=spot&&spot.x,hidden=!!spot;
@@ -1715,9 +1717,9 @@ function drawFestival(){
   g.restore();g.restore();
 }
 function objectiveL2(){
-  if(l2.done)return"Level 2 complete! On to Level 3.";
+  if(l2.done)return"Level 0 complete! On to Level 1.";
   if(scene==="orchard"&&!l2.festReg)return"Walk through the orchard to the Registration table. Entry is 5 coins — or wear your Festival Pin to get in free. (Short on coins? Try the tree by the lake. Missed the pin? It's still on Mrs. Maple's roof, back home.)";
-  if(l2.mapleDone)return(has("Smudgy Key")?"":"Pick up the Smudgy Key a Smudge dropped. ")+(l2.on2F?"Unlock the door on the second floor.":dogOn?"With the balloon dog tied on, jump up to the bars on the right of the stage, then climb to the second floor and unlock the door.":"Climb the jump bars on the right of the stage to the second floor and unlock the door."+(l2.tramp?" (Use Mrs. Maple’s trampoline!)":""));
+  if(l2.mapleDone)return l2.on2F?"Unlock the door on the second floor.":"Float up to the second floor with the balloon dog and unlock the door.";
   if(l2.fightDone)return"The Smudges are gone! Someone familiar is hurrying over…";
   if(l2.finale)return"Defeat the Smudges before they drain Juniper's painting! With Nib equipped, press Q to jab — or stomp them.";
   if(hasNib&&!l2.spikeDown)return"A spiky guy (Prickles) is blocking the stage. Don't jump on him — stand close with Nib equipped (E) and press Q to jab!";
@@ -1735,8 +1737,8 @@ function objectiveL2(){
 // ===========================================================================
 const FEST_MIN=-900,ORCH_W=1500,LAKE_W=1500;
 const HOLE={x:-540,w:60},LAKE_DOOR=-390;
-const BARS=[{x:3440,y:180,w:60,h:10},{x:3370,y:122,w:60,h:10},{x:3440,y:64,w:60,h:10},{x:3370,y:6,w:60,h:10}];
-const FLOOR2={x:3040,y:-52,w:480,h:14},SAVE_DOOR=3250;
+const BARS=[];
+const FLOOR2={x:1000,y:-460,w:2520,h:16},SAVE_DOOR=3230;
 const TRAMP_F={x:3446,y:G-18,w:56,h:18},TRAMP_U={x:130,y:G-18,w:70,h:18};
 const DOCK={x:860,w:390};
 const ORCH_TREES=[450,650,850,1050];
@@ -1889,9 +1891,9 @@ function drawLakeDoor(x){cut(()=>{g.beginPath();g.moveTo(x-40,G);g.lineTo(x-40,G
   cut(()=>{g.beginPath();g.moveTo(x-28,G);g.lineTo(x-28,G-104);g.arc(x,G-104,28,Math.PI,0);g.lineTo(x+28,G);g.closePath()},"#4f8fb8",{edge:0,line:2,shadow:false});
   g.fillStyle="#bfe6fb";g.beginPath();g.ellipse(x,G-60,20,6,0,0,7);g.fill();g.fillStyle="#7cc6f2";g.beginPath();g.ellipse(x,G-40,22,6,0,0,7);g.fill();
   }
-function drawElevator(x){
-  cut(()=>rr(x-26,-900,52,G+900,6),"#c9d6d4",{edge:8});g.fillStyle="#9fb0ae";for(let y=G-124;y>-900;y-=24)g.fillRect(x-20,y,40,10);
-  g.strokeStyle="#8fa3a0";g.lineWidth=2;g.beginPath();g.moveTo(x-6,-900);g.lineTo(x-6,G-100);g.moveTo(x+6,-900);g.lineTo(x+6,G-100);g.stroke();
+function drawElevator(x){const top=FLOOR2.y+16;
+  cut(()=>rr(x-26,top,52,G-top,6),"#c9d6d4",{edge:8});g.fillStyle="#9fb0ae";for(let y=G-124;y>top;y-=24)g.fillRect(x-20,y,40,10);
+  g.strokeStyle="#8fa3a0";g.lineWidth=2;g.beginPath();g.moveTo(x-6,top);g.lineTo(x-6,G-100);g.moveTo(x+6,top);g.lineTo(x+6,G-100);g.stroke();
   cut(()=>rr(x-20,G-96,40,96,4),"#8fa3a0",{edge:0,line:2,shadow:false});g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(x,G-96);g.lineTo(x,G);g.stroke();
 
   g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(x-10,G-62);g.lineTo(x,G-74);g.lineTo(x+10,G-62);g.stroke();
@@ -1916,13 +1918,18 @@ function drawSculptures(){
 function drawBars(){
   for(const b of BARS){g.strokeStyle="#8a6a4d";g.lineWidth=2;g.beginPath();g.moveTo(b.x+6,b.y);g.lineTo(b.x+6,FLOOR2.y+14);g.moveTo(b.x+b.w-6,b.y);g.lineTo(b.x+b.w-6,FLOOR2.y+14);g.stroke();
     cut(()=>rr(b.x,b.y,b.w,b.h,5),"#b9c7c5",{edge:5});g.fillStyle="#fff";g.fillRect(b.x+6,b.y+2,b.w-12,2)}
-  // second-floor balcony
-  for(const x of[3060,3290,3500])cut(()=>rr(x-6,FLOOR2.y+14,12,G-292-FLOOR2.y-14,3),"#8a6a4d",{edge:5});
-  cut(()=>rr(FLOOR2.x,FLOOR2.y,FLOOR2.w,FLOOR2.h,4),"#c58a52",{edge:7});
-  sprite(SAVE_DOOR,FLOOR2.y-10+Math.sin(time*2)*3,50,50,drawSaveBody);groundShadow(SAVE_DOOR,FLOOR2.y+2,20);
-  g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(FLOOR2.x,FLOOR2.y-30);g.lineTo(FLOOR2.x+FLOOR2.w,FLOOR2.y-30);for(let x=FLOOR2.x+10;x<FLOOR2.x+FLOOR2.w;x+=30){g.moveTo(x,FLOOR2.y-30);g.lineTo(x,FLOOR2.y)}g.stroke();
-  cut(()=>rr(FLOOR2.x+8,FLOOR2.y-62,40,24,8),"#f4c84f",{edge:5});g.fillStyle=INK;g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("2F",FLOOR2.x+28,FLOOR2.y-45);g.textAlign="left";
-  if(l2.tramp)drawTramp(TRAMP_F);
+  // the festival's second floor: a long sky walkway with room for six level doors
+  const fy=FLOOR2.y,fx0=FLOOR2.x,fx1=FLOOR2.x+FLOOR2.w;
+  for(const x of[3060,3500])cut(()=>rr(x-6,fy+16,12,G-292-fy-16,3),"#8a6a4d",{edge:5});
+  for(let x=fx0+180;x<fx1-200;x+=420){cut(()=>{g.beginPath();g.ellipse(x,fy+34,70,22,0,0,7);g.ellipse(x-48,fy+30,40,16,0,0,7);g.ellipse(x+52,fy+32,44,18,0,0,7)},"#fffdf6",{edge:6,shadow:false})}
+  cut(()=>rr(fx0,fy,FLOOR2.w,FLOOR2.h,5),"#c58a52",{edge:7});
+  g.strokeStyle="#a8714a";g.lineWidth=1.5;for(let x=fx0+40;x<fx1;x+=40){g.beginPath();g.moveTo(x,fy+3);g.lineTo(x,fy+13);g.stroke()}
+  g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(fx0,fy-30);g.lineTo(fx1,fy-30);for(let x=fx0+10;x<fx1;x+=30){g.moveTo(x,fy-30);g.lineTo(x,fy)}g.stroke();
+  cut(()=>rr(fx0-4,fy-60,10,60,3),"#8a6a4d",{edge:4});cut(()=>rr(fx1-6,fy-60,10,60,3),"#8a6a4d",{edge:4});
+  cut(()=>rr(fx0+90,fy-64,44,24,8),"#f4c84f",{edge:5});g.fillStyle=INK;g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("2F",fx0+112,fy-47);g.textAlign="left";
+  // where Gus's elevator will arrive one day
+  cut(()=>rr(1022,fy-104,56,104,6),"#c9d6d4",{edge:7});cut(()=>rr(1030,fy-96,40,96,4),"#8fa3a0",{edge:0,line:2,shadow:false});g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(1050,fy-96);g.lineTo(1050,fy);g.stroke();
+  sprite(SAVE_DOOR,fy-10+Math.sin(time*2)*3,50,50,drawSaveBody);groundShadow(SAVE_DOOR,fy+2,20);
 }
 function drawTramp(t){cut(()=>rr(t.x+4,t.y+6,6,12,2),"#5b5277",{edge:3});cut(()=>rr(t.x+t.w-10,t.y+6,6,12,2),"#5b5277",{edge:3});cut(()=>{g.beginPath();g.ellipse(t.x+t.w/2,t.y+4,t.w/2,6,0,0,7)},"#3bb6c4",{edge:5});g.strokeStyle="#fff";g.lineWidth=1.5;g.setLineDash([4,4]);g.beginPath();g.ellipse(t.x+t.w/2,t.y+4,t.w/2-6,3,0,0,7);g.stroke();g.setLineDash([])}
 
@@ -2110,10 +2117,8 @@ function drawUnder(){
 function placeTrampoline(){l2.tramp=true;burst(TRAMP_F.x+28,G-20,20);start([["Mrs. Maple","Oh dear, oh dear! Hold on — I always carry a spare trampoline."],["Narrator","Mrs. Maple produces a trampoline from her handbag. Nobody asks how."],["Mrs. Maple","There! Bounce right up to the bars, dear."]])}
 function updateFinaleClimb(){
   if(!l2.mapleDone)return;
-  const under=groundUnder();
-  if(dogOn&&s.ground&&BARS.some(b=>under===b.y&&s.x+s.w>b.x&&s.x<b.x+b.w)){dogOn=false;l2.dogUsed=true;balloonsAway.push({scene,x:center(),y:s.y-60,t:0,dog:true});sayToast("The balloon dog slips loose and floats off, wagging. Keep climbing!")}
-  if(s.ground&&s.y+s.h<=FLOOR2.y+2)l2.on2F=true;
-  if(l2.dogUsed&&!l2.tramp&&!l2.on2F&&s.ground&&onFloor()&&!dlg.on){placeTrampoline();return}
+  const onF2=s.ground&&s.y+s.h<=FLOOR2.y+2&&s.x+s.w>FLOOR2.x&&s.x<FLOOR2.x+FLOOR2.w;
+  if(onF2){l2.on2F=true;if(dogOn){dogOn=false;l2.rising=false;l2.dogUsed=true;balloonsAway.push({scene,x:center(),y:s.y-60,t:0,dog:true});sayToast("The balloon dog slips loose and floats off, wagging.")}}
 }
 
 resetL2Extra();
@@ -2166,7 +2171,7 @@ function startLevel3(){
     ["Dab","That's not sand, that's paint! This whole beach was painted so recently it's still dripping."],
     ["Nib","And the colors are running right down into the sea. That can't be good."],
     ["Narrator","Down the shore, someone is waving a claw from a little shell-shaped shack."]
-  ],()=>{chapterCard={t:0,title:"Chapter 3-1",sub:"The Watercolor Coast"};0});
+  ],()=>{chapterCard={t:0,title:"Level 1-1",sub:"The Watercolor Coast"};0});
 }
 function saveL3(x,y){checkpoint=x-s.w/2;checkpointY=y-s.h;checkpointScene=scene;health=maxHealth;burst(x,y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back to this Save Block.")}
 function respawnL3(){health=maxHealth;goScene(checkpointScene,checkpoint+s.w/2,checkpointY??G-s.h);if(l3.boss&&!l3.bossDone){l3.boss=null}}
@@ -2270,7 +2275,7 @@ function lhDoor(){
   if(!l3.inLH){l3.inLH=true;start([
     ["Narrator","Inside, the lighthouse is gray from floor to ceiling, and a long, long way up."],
     ["Reel","The lamp's at the very top. It's a long way up."],
-    ["Dab","And keep your eyes peeled for something green and sparkly."]],()=>{chapterCard={t:0,title:"Chapter 3-2",sub:"The Gray Lighthouse"}})}
+    ["Dab","And keep your eyes peeled for something green and sparkly."]],()=>{chapterCard={t:0,title:"Level 1-2",sub:"The Gray Lighthouse"}})}
 }
 function useShield(){if(shield>0){sayToast("You're already shielded!");return}useOne("Shell Shield");shield=2;invOpen=false;burst(center(),s.y+30,18,["#7cc6f2","#fff","#b98ad8"]);sayToast("The Shell Shield wraps around you in a shimmery bubble. It'll block 2 hits!")}
 
@@ -2642,7 +2647,7 @@ function drawChapterCard(){const c=chapterCard,a=Math.min(1,c.t*3,(3.6-c.t)*2.5)
   g.fillStyle="#fff4d6";g.font="bold 32px "+FONT;g.fillText(c.sub,0,26);g.textAlign="left";g.restore()}
 function drawShieldBubble(){if(shield<=0)return;g.save();g.globalAlpha=.35+Math.sin(time*5)*.1;g.fillStyle="#bfe6ff";g.beginPath();g.ellipse(center(),s.y+36,40,48,0,0,7);g.fill();g.globalAlpha=.9;g.strokeStyle="#7cc6f2";g.lineWidth=3;g.setLineDash(shield===1?[8,8]:[]);g.stroke();g.restore()}
 function objectiveL3(){
-  if(l3.lit)return"Chapter 3 complete! The lighthouse shines again.";
+  if(l3.lit)return"Level 1 complete! The lighthouse shines again.";
   if(l3.bossDone)return has("Green Gem")?"Set the three gems in the lighthouse lamp (Space next to the lamp).":"The lamp needs the Green Gem! It's hidden in the lighthouse — on the left side, above the big landing. (Drop down through the gap on the left of the deck.)";
   if(l3.boss)return"Defeat The Blot! Jab its tentacles with Nib (Q) when they slam down, dodge the ink drops, and stomp its head when it peeks over the railing.";
   if(scene==="lighthouse")return"Climb to the top of the lighthouse — ride the moving platforms!"+(has("Green Gem")?"":" Keep an eye out for the Green Gem; it's somewhere hard to reach.");
