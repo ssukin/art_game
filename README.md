@@ -68,7 +68,7 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 Finishing Level 2 (through the door from the sky) continues into Level 3. The chapter is split into sub-chapters, each with a title card.
 
 **3-1: The Watercolor Coast.** Sarah lands face-first on a beach that's still wet paint, with the colors running into the sea.
-- **Marina**, a hermit crab who runs (and is) the Shell Shack, says the sand and sea are full of treasure. She trades **3 Seashells for a Health Potion**.
+- **Marina**, a hermit crab who runs (and is) the Shell Shack, says the sand and sea are full of treasure. She trades **3 Seashells for her Shell Shield**: use it from Pockets and a bubble blocks the next **2 hits**, then breaks away.
 - With Dab equipped, **Q** reveals buried treasure as pink X marks; stand on one and press Space to dig. You'll find Seashells, coins, and a **Heart Necklace** with a big red heart-shaped gem: the **Red gem**.
 - Past the digging beach are the **Tide Flats**. The tide goes out for about 6 seconds, then rolls in and stays in for a few seconds. Run across while it's out, or wait it out on one of the two tall rocks. Get caught on the flats when the water's up and the tide sweeps you back to the last safe spot (-1 health). There are four rocks along the way, and treasure to dig on the flats, too.
 - After the flats, the old dock out to the shipwreck has faded away. Use Dab (Q) to paint it back, then run along it (watch the gulls overhead) and hop across the rocks to the **shipwreck**. The treasure chest on its deck turns out to be **Reel**, the fishing-pole buddy. He explains the lighthouse lamp is failing and needs three gems: **Red, Green and Blue**.
@@ -77,7 +77,6 @@ Finishing Level 2 (through the door from the sky) continues into Level 3. The ch
 
 **3-2: The Gray Lighthouse.** Every few seconds an ink drip falls from somewhere above (it hurts if it hits Sarah, and about 1 in 10 turns into a Smudge where it lands). A tall vertical climb (extra-long, with a new stretch above the big landing) with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) The only Save Block in Level 3 sits on the last platform before the boss deck; otherwise your checkpoint is the start of the beach, then the lighthouse entrance.
 - The **Green Gem** is hidden in a nook high on the left, reached from the big landing by a quick elevator, a tiny ledge and a fast sideways platform.
-- A chest partway up holds the **Shell Shield**. Use it from Pockets: a bubble that blocks the next **2 hits** and then breaks away.
 - At the top: a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down (a slam that lands on Sarah costs 2 health), dodge falling ink drops (watch their shadows; about 1 in 10 turns into a **Smudge** on the deck) and stomp its head when it rises over the railing (1 damage per stomp). It has a health bar.
 - Set the three gems in the lamp to light the lighthouse and bring the coast's colors back. If the Green Gem is missing, drop down the gap on the left of the deck to go find it.
 
