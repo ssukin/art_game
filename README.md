@@ -61,10 +61,16 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 
 **Little buddies:** Dab (Q finds hidden doodles), Nib (Q jabs) and Reel (fishing). Swap with E or in the Buddy pocket.
 
-**Pockets:** Items (things you use up), **Key Items** (important things you can't get rid of: keys, the Town Map, recipe cards, the Festival Pin), Buddy and Hints.
+**Pockets:** Items (things you use up), **Key Items** (important things you can't get rid of: keys, the Town Map, recipe cards, the Festival Pin), Buddy, **Journal** and Hints.
+
+## XP and leveling up
+
+Defeating creatures earns **XP**. Right now a Smudge and Prickles are each worth 1 XP. The XP bar sits under the health counter. Level 2 needs 3 XP, and each level after that needs 2 more than the last (5, 7, 9…). On a level up the game freezes, confetti falls, and an announcement shows the new level: **+5 max health and health refilled**. Press Space to keep going.
+
+The **Journal** tab in Pockets shows Sarah's level and XP, plus a page for each creature: how many you've defeated, how much XP each is worth, where it lives and how to beat it. Creatures you haven't beaten yet show as gray silhouettes.
 
 ## Admin Cheats Only
 
-Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, and **+20 coins** tops up your wallet. **Restart Level 1** reloads the page.
+Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, **+20 coins** tops up your wallet, **Level up now** triggers a level up, and **Fill & open Journal** fills in every Journal page. **Restart Level 1** reloads the page.
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.
