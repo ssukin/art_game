@@ -75,7 +75,7 @@ Finishing Level 2 (through the door from the sky) continues into Level 3. The ch
 - Fish from the back of the shipwreck. You'll catch between 1 and 5 Sea Perch, then hook the **Blue Gem**. Falling in the sea costs 1 health.
 - With Red and Blue in hand, cross the rocks to the lighthouse.
 
-**3-2: The Gray Lighthouse.** A tall vertical climb with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) The only Save Block in Level 3 sits on the last platform before the boss deck; otherwise your checkpoint is the start of the beach, then the lighthouse entrance.
+**3-2: The Gray Lighthouse.** Every few seconds an ink drip falls from somewhere above (it hurts if it hits Sarah, and about 1 in 10 turns into a Smudge where it lands). A tall vertical climb (extra-long, with a new stretch above the big landing) with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) The only Save Block in Level 3 sits on the last platform before the boss deck; otherwise your checkpoint is the start of the beach, then the lighthouse entrance.
 - The **Green Gem** is hidden in a nook high on the left, reached from the big landing by a quick elevator, a tiny ledge and a fast sideways platform.
 - A chest partway up holds the **Shell Shield**. Use it from Pockets: a bubble that blocks the next **2 hits** and then breaks away.
 - At the top: a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down (a slam that lands on Sarah costs 2 health), dodge falling ink drops (watch their shadows; about 1 in 10 turns into a **Smudge** on the deck) and stomp its head when it rises over the railing (1 damage per stomp). It has a health bar.

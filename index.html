@@ -696,7 +696,7 @@ function update(dt){
   if(!s.wasGround&&s.ground&&s.squash>.95)s.squash=.9;
   if(s.y>H+40){if(scene==="festival"&&center()>HOLE.x-30&&center()<HOLE.x+HOLE.w+30){goScene("under",300,-90);sayToast("Wheeee— down the hole!")}else{s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0}}
   camera=worldW()>W?clamp(s.x-350,worldMin(),worldW()-W):0;
-  const ty=scene==="festival"?clamp(s.y-150,-320,0):scene==="lighthouse"?(l3.boss?-1810:clamp(s.y-300,-1810,0)):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
+  const ty=scene==="festival"?clamp(s.y-150,-320,0):scene==="lighthouse"?(l3.boss?DY-420:clamp(s.y-300,DY-420,0)):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
   updateAction();
 }
 function updateParticles(dt){for(const p of parts){p.vy+=600*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.98;p.rot+=p.vr*dt;p.life-=dt}parts=parts.filter(p=>p.life>0)}
@@ -2114,7 +2114,7 @@ resetL2Extra();
 // ===========================================================================
 // LEVEL 3 — The Watercolor Coast (3-1 beach & shipwreck, 3-2 the Gray Lighthouse)
 // ===========================================================================
-const TIDE={x0:2150,x1:3950},DOCK3={x:4070,w:490,y:G-26},BEACH_W=6040,WATER={x0:4050,x1:5450},LH_DOOR=5740,WRECK={x:4800,w:360,y:G-86},STERN=5130,GEM_SPOT=5230,CHEST_X=5000,DY=-1390;
+const TIDE={x0:2150,x1:3950},DOCK3={x:4070,w:490,y:G-26},BEACH_W=6040,WATER={x0:4050,x1:5450},LH_DOOR=5740,WRECK={x:4800,w:360,y:G-86},STERN=5130,GEM_SPOT=5230,CHEST_X=5000,DY=-1710;
 const BEACH_SOLID=[{x:-50,y:G,w:4100,h:100},{x:5450,y:G,w:700,h:100},{x:2540,y:G-64,w:70,h:22,rock:1,tide:1},{x:2890,y:G-64,w:70,h:22,rock:1,tide:1},{x:3240,y:G-64,w:70,h:22,rock:1,tide:1},{x:3590,y:G-64,w:70,h:22,rock:1,tide:1},{x:DOCK3.x,y:DOCK3.y,w:DOCK3.w,h:14,hidden:1},{x:4645,y:G-22,w:64,h:22,rock:1},{x:4730,y:G-46,w:60,h:22,rock:1},{x:WRECK.x,y:WRECK.y,w:WRECK.w,h:16,deck:1},{x:5280,y:G-40,w:62,h:22,rock:1},{x:5370,y:G-22,w:64,h:22,rock:1}];
 const DIGS=[{x:430,item:"Seashell"},{x:760,coins:4},{x:1060,item:"Seashell"},{x:1330,item:"Heart Necklace"},{x:1620,item:"Seashell"},{x:1900,coins:5},{x:2040,item:"Seashell"},{x:2760,coins:6},{x:3120,item:"Seashell"},{x:3460,coins:6},{x:3800,item:"Seashell"}];
 const BEACH_SAVES=[];
@@ -2122,12 +2122,14 @@ const LH_STATIC=[
   {x:560,y:355,w:150},{x:330,y:275,w:150},{x:700,y:115,w:150},{x:470,y:35,w:150},{x:250,y:-45,w:130},
   {x:270,y:-300,w:150},{x:500,y:-380,w:130},{x:100,y:-460,w:770,landing:1},
   {x:230,y:-700,w:60},{x:100,y:-880,w:100,alcove:1},
-  {x:690,y:-545,w:130},{x:420,y:-705,w:120},{x:620,y:-785,w:130},
-  {x:560,y:-1060,w:140},{x:330,y:-1140,w:140},{x:700,y:-1300,w:150},{x:180,y:DY,w:690,deck:1}];
-const LH_MOVERS=[{x0:420,y0:195,w:110,ax:220,ay:0,per:4.2},{x0:140,y0:-40,w:100,ax:0,ay:-190,per:5},{x0:430,y0:-625,w:100,ax:220,ay:0,per:4.4},
-  {x0:760,y0:-790,w:90,ax:0,ay:-190,per:5},{x0:400,y0:-1220,w:100,ax:220,ay:0,per:4},{x0:120,y0:-470,w:70,ax:0,ay:-150,per:2.8},{x0:120,y0:-790,w:72,ax:180,ay:0,per:3.6}];
-const LH_SAVES=[[775,-1300]];
-const GEM_G={x:150,y:-880},SHIELD_CHEST={x:630,y:-1060},POTION_TOP={x:310,y:DY},LAMP_X=540;
+  {x:560,y:-545,w:130},{x:740,y:-625,w:120},{x:520,y:-705,w:130},
+  {x:690,y:-865,w:130},{x:420,y:-1025,w:120},{x:620,y:-1105,w:130},
+  {x:560,y:-1380,w:140},{x:330,y:-1460,w:140},{x:700,y:-1620,w:150},{x:180,y:DY,w:690,deck:1}];
+const LH_MOVERS=[{x0:420,y0:195,w:110,ax:220,ay:0,per:4.2},{x0:140,y0:-40,w:100,ax:0,ay:-190,per:5},{x0:430,y0:-945,w:100,ax:220,ay:0,per:4.4},
+  {x0:760,y0:-1110,w:90,ax:0,ay:-190,per:5},{x0:400,y0:-1540,w:100,ax:220,ay:0,per:4},{x0:120,y0:-470,w:70,ax:0,ay:-150,per:2.8},{x0:120,y0:-790,w:72,ax:180,ay:0,per:3.6},
+  {x0:380,y0:-785,w:100,ax:220,ay:0,per:4.4}];
+const LH_SAVES=[[775,-1620]];
+const GEM_G={x:150,y:-880},SHIELD_CHEST={x:630,y:-1380},POTION_TOP={x:310,y:DY},LAMP_X=540;
 let l3={},shield=0,checkpointY=null,chapterCard=null;
 function resetL3(){
   l3={t:0,marina:false,marinaTalk:0,traded:false,dig:DIGS.map(()=>0),reel:false,blue:false,fishN:0,gemAt:1+Math.floor(Math.random()*5),lastCatch:"Sea Perch",
@@ -2139,7 +2141,7 @@ function resetL3(){
       {type:"hermit",scene:"beach",x:4910,min:4885,max:4945,base:WRECK.y},{type:"gull",scene:"beach",x:4200,min:4090,max:4420,base:DOCK3.y},{type:"gull",scene:"beach",x:4450,min:4300,max:4580,base:DOCK3.y},
       {type:"hermit",scene:"lighthouse",x:775,min:715,max:835,base:115},
       {type:"smudge",scene:"lighthouse",x:300,min:230,max:380,base:-460},{type:"hermit",scene:"lighthouse",x:700,min:620,max:800,base:-460},
-      {type:"hermit",scene:"lighthouse",x:680,min:640,max:730,base:-785},{type:"smudge",scene:"lighthouse",x:400,min:350,max:450,base:-1140}
+      {type:"hermit",scene:"lighthouse",x:680,min:640,max:730,base:-1105},{type:"smudge",scene:"lighthouse",x:400,min:350,max:450,base:-1460},{type:"hermit",scene:"lighthouse",x:600,min:570,max:680,base:-545}
     ].map((f,i)=>({...f,alive:true,flat:0,t:0,ph:i*.7,dir:i%2?1:-1,speed:f.type==="crab"?80:f.type==="hermit"?40:60,flip:0,mode:"fly",cool:1.5+i*.4,y:f.base-150,carry:0}))};
   shield=0;
 }
@@ -2311,7 +2313,7 @@ function l3Jab(hx){
 }
 
 // ---- boss: The Blot ----
-function spawnInklet(x){l3.foes.push({type:"smudge",scene:"lighthouse",x,min:200,max:850,base:DY,fromInk:true,alive:true,flat:0,t:0,ph:Math.random()*3,dir:Math.random()<.5?-1:1,speed:75,flip:0,mode:"walk",cool:0,y:DY,carry:0});burst(x,DY-14,12,["#b98ad8","#fff",INK]);}
+function spawnInklet(x,base=DY,min=200,max=850){l3.foes.push({type:"smudge",scene:"lighthouse",x,min,max,base,fromInk:true,alive:true,flat:0,t:0,ph:Math.random()*3,dir:Math.random()<.5?-1:1,speed:75,flip:0,mode:"walk",cool:0,y:DY,carry:0});burst(x,DY-14,12,["#b98ad8","#fff",INK]);}
 function startBoss(){
   l3.boss={hp:8,max:8,ph:"intro",t:0,cycle:0,slams:0,tent:null,blobs:[],spawn:0,headUp:0,hurtT:0};
   const go=()=>{l3.boss.ph="tent";l3.boss.t=0;0};
@@ -2390,6 +2392,18 @@ function updateTide(){
     if(onFlat&&tideLevel()>.55&&s.y+s.h>tideY()+6){const sf=l3.tideSafe||{x:TIDE.x0-60,y:G-s.h};burst(center(),tideY(),22,["#7cc6f2","#fff"]);s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
     if(health<=0){respawnL3();sayToast("The tide sweeps Sarah away… she uncrumples back at your last checkpoint.")}else if(real)sayToast("WHOOSH! Swept back by the tide. (-1 health)")}
 }
+function updateDrips(dt){
+  if(!l3.drips)l3.drips=[];
+  if(!l3.boss&&!l3.lit&&s.y+s.h>DY+20){l3.dripCD=(l3.dripCD??4)-dt;if(l3.dripCD<=0){l3.dripCD=3.5+Math.random()*3.5;l3.drips.push({x:clamp(center()+(Math.random()-.5)*520,110,850),y:camY+100,vy:0,form:.7})}}
+  for(const d of l3.drips){if(d.form>0){d.form-=dt;continue}const py=d.y;d.vy+=1000*dt;d.y+=d.vy*dt;
+    if(Math.abs(d.x-center())<18&&d.y>s.y&&d.y-20<s.y+s.h){d.dead=true;burst(d.x,d.y,10,[INK,"#5b2a6e"]);hurt3(d.x,"SPLAT! (-1 health)");continue}
+    for(const p of l3Plats())if(d.x>=p.x&&d.x<=p.x+p.w&&py<=p.y&&d.y>=p.y){d.dead=true;burst(d.x,p.y-4,10,[INK,"#5b2a6e"]);
+      if(!p.mover&&Math.random()<.1)spawnInklet(d.x,p.y,p.x+20,p.x+Math.max(40,p.w-20));break}
+    if(d.y>G+60)d.dead=true}
+  l3.drips=l3.drips.filter(d=>!d.dead);
+}
+function drawDrips(){for(const d of l3.drips||[]){if(d.form>0){const k=1-d.form/.7;cut(()=>{g.beginPath();g.ellipse(d.x,d.y+k*8,5+k*4,4+k*8,0,0,7)},"#3a3352",{edge:3,shadow:false});continue}
+  cut(()=>{g.beginPath();g.moveTo(d.x,d.y-24);g.quadraticCurveTo(d.x+12,d.y-4,d.x,d.y+4);g.quadraticCurveTo(d.x-12,d.y-4,d.x,d.y-24);g.closePath()},"#3a3352",{edge:4})}}
 function updateL3(dt,oldFeet){
   if(l3.dock&&l3.dockT<1)l3.dockT=Math.min(1,(l3.dockT||0)+dt*1.5);
   if(scene==="lighthouse")s.x=clamp(s.x,90,870-s.w);
@@ -2405,6 +2419,7 @@ function updateL3(dt,oldFeet){
       start([["Narrator","Tucked into a dusty nook: a gem, glowing green as a fresh leaf."],["Dab","The GREEN GEM! Whoever hid it up here really didn't want it found."],["Reel","That's all three! Red, Green, Blue. Now up to the lamp!"]],()=>sayToast("Got the Green Gem!"));return}
     if(!l3.potion&&Math.abs(center()-POTION_TOP.x)<26&&onPlat(DY)){l3.potion=true;addItem("Health Potion");burst(POTION_TOP.x,DY-30,14,["#ff6f9c","#fff"]);sayToast("Found a Health Potion!")}
     if(!l3.bossDone&&!l3.boss&&onPlat(DY)&&center()>440){startBoss();return}
+    updateDrips(dt);
     updateBoss(dt,oldFeet);if(dlg.on)return;
   }
   updateFoes3(dt,oldFeet);
@@ -2496,11 +2511,11 @@ function drawBeach(){
 function drawLighthouse(){
   const lit=l3.lit;sky("#8fd3f0","#e9f8f1");
   g.save();g.translate(0,-camY);
-  const top=-1330;
+  const top=DY+60;
   g.fillStyle=lit?"#f3e3c8":"#d6d2dc";g.fillRect(60,top,840,G-top+220);
   g.strokeStyle=lit?"#e2cba6":"#c3bdca";g.lineWidth=2;
   for(let y=G;y>top;y-=30){if(y<camY-40||y>camY+H+40)continue;g.beginPath();g.moveTo(60,y);g.lineTo(900,y);g.stroke();for(let x=60+((y/30)%2?0:40);x<900;x+=80){g.beginPath();g.moveTo(x,y);g.lineTo(x,y-30);g.stroke()}}
-  for(const wy of[150,-250,-650,-1050]){cut(()=>{g.beginPath();g.moveTo(450,wy+60);g.lineTo(450,wy);g.arc(480,wy,30,Math.PI,0);g.lineTo(510,wy+60);g.closePath()},lit?"#7cc6f2":"#aab7c4",{edge:6});g.strokeStyle="#fff";g.lineWidth=3;g.beginPath();g.moveTo(480,wy-30);g.lineTo(480,wy+60);g.moveTo(450,wy+20);g.lineTo(510,wy+20);g.stroke()}
+  for(const wy of[150,-250,-650,-1050,-1450]){cut(()=>{g.beginPath();g.moveTo(450,wy+60);g.lineTo(450,wy);g.arc(480,wy,30,Math.PI,0);g.lineTo(510,wy+60);g.closePath()},lit?"#7cc6f2":"#aab7c4",{edge:6});g.strokeStyle="#fff";g.lineWidth=3;g.beginPath();g.moveTo(480,wy-30);g.lineTo(480,wy+60);g.moveTo(450,wy+20);g.lineTo(510,wy+20);g.stroke()}
   g.fillStyle=lit?"#e5463f":"#8f8aa0";g.fillRect(0,top,90,G-top+220);g.fillRect(870,top,90,G-top+220);
   g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.moveTo(90,top);g.lineTo(90,G+220);g.moveTo(870,top);g.lineTo(870,G+220);g.stroke();
   g.fillStyle="#9b8f84";g.fillRect(60,G,840,220);g.strokeStyle=INK;g.beginPath();g.moveTo(90,G);g.lineTo(870,G);g.stroke();
@@ -2521,7 +2536,7 @@ function drawLighthouse(){
   if(!l3.green){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#a6e39a";circle(GEM_G.x,GEM_G.y-26,22);g.fill();g.restore();drawIcon("Green Gem",GEM_G.x,GEM_G.y-26+Math.sin(time*3)*3,.75)}
   if(!l3.potion){cut(()=>rr(POTION_TOP.x-14,DY-22,28,22,4),"#a8714a",{edge:4});drawIcon("Health Potion",POTION_TOP.x,DY-40+Math.sin(time*3)*2,.6)}
   for(const f of l3.foes)if(f.scene==="lighthouse")drawFoe(f);
-  drawBlotFront();
+  drawBlotFront();drawDrips();
   drawLoot();drawParticles();drawSarah();
   g.restore();
   if(l3.boss&&l3.boss.ph!=="intro"&&l3.boss.ph!=="dead"){const b=l3.boss,bw=300,bx=W/2-bw/2,by=132;cut(()=>rr(bx-10,by-26,bw+20,46,12),"#fffdf6",{edge:5});g.fillStyle=INK;g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("THE BLOT",W/2,by-8);g.textAlign="left";
@@ -2532,7 +2547,7 @@ function blotHead(x,y,sc,angry){g.save();g.translate(x,y);g.scale(sc,sc);
   g.fillStyle="#fff";g.beginPath();g.ellipse(-26,-22,15,19,0,0,7);g.ellipse(26,-22,15,19,0,0,7);g.fill();g.fillStyle=INK;circle(-23,-18,7);g.fill();circle(23,-18,7);g.fill();
   g.strokeStyle="#fff";g.lineWidth=5;g.beginPath();g.moveTo(-46,-50+(angry?6:0));g.lineTo(-12,-38);g.moveTo(46,-50+(angry?6:0));g.lineTo(12,-38);g.stroke();
   g.fillStyle="#b98ad8";for(const [dx,dy] of[[-50,10],[40,0],[-10,-60]]){circle(dx,dy,5);g.fill()}g.restore()}
-function drawBlotBack(){const b=l3.boss;if(l3.bossDone&&!b)return;if(!b&&!(scene==="lighthouse"&&camY<-1500))return;
+function drawBlotBack(){const b=l3.boss;if(l3.bossDone&&!b)return;if(!b&&!(scene==="lighthouse"&&camY<DY-110))return;
   const up=b?b.headUp:0,shake2=b&&b.hurtT>0?Math.sin(time*60)*4:0;if(up<=.05)blotHead(800+shake2,DY-10+Math.sin(time*2)*4,.8,false)}
 function drawBlotFront(){const b=l3.boss;if(!b)return;const shake2=b.hurtT>0?Math.sin(time*60)*5:0;
   if(b.headUp>.05){g.save();if(b.hurtT>0&&Math.floor(time*20)%2)g.globalAlpha=.6;blotHead(800+shake2,DY-40-64*b.headUp+40,.8,true);g.restore()}
@@ -2613,7 +2628,7 @@ function beatsL3(){return[["Meet Marina",l3.marina],["Dig up the Heart Necklace 
 // ---- level 3 cheats ----
 function cheat3(){cheatBase();hasNib=true;l2.nibMet=true;l2.done=true;startLevel3();dlg.on=false;equipped="Nib"}
 function cheatBeach(x,y){dlg.on=false;scene="beach";s.x=x-s.w/2;s.y=(y??G)-s.h;s.vy=0;camY=0;camera=clamp(s.x-350,0,BEACH_W-W);l3.marina=true}
-function cheatLH(x,y){dlg.on=false;goScene("lighthouse",x,y-s.h);camY=clamp(s.y-300,-1830,0);l3.marina=l3.reel=l3.blue=l3.necklace=l3.inLH=true;hasReel=true;checkpointScene="lighthouse";checkpoint=x-s.w/2;checkpointY=y-s.h;
+function cheatLH(x,y){dlg.on=false;goScene("lighthouse",x,y-s.h);camY=clamp(s.y-300,DY-420,0);l3.marina=l3.reel=l3.blue=l3.necklace=l3.inLH=true;hasReel=true;checkpointScene="lighthouse";checkpoint=x-s.w/2;checkpointY=y-s.h;
   if(!has("Heart Necklace"))addItem("Heart Necklace");if(!has("Blue Gem"))addItem("Blue Gem")}
 
 // ---- Admin cheats ----
