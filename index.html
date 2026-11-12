@@ -43,6 +43,15 @@
     <button class="button" data-cheat="nib">L2: after the chase (Nib trail)</button>
     <button class="button" data-cheat="results">L2: contest results</button>
     <button class="button" data-cheat="fight">L2: Smudge fight</button>
+    <button class="button" data-cheat="l3">Start Level 3 (3-1 beach)</button>
+    <button class="button" data-cheat="l3wreck">L3: shipwreck chest (Reel)</button>
+    <button class="button" data-cheat="l3fish">L3: fishing spot (with Reel)</button>
+    <button class="button" data-cheat="l3lh">L3: lighthouse 3-2 (bottom)</button>
+    <button class="button" data-cheat="l3land">L3: lighthouse landing (Green Gem detour)</button>
+    <button class="button" data-cheat="l3top">L3: top of lighthouse (before boss)</button>
+    <button class="button" data-cheat="l3boss">L3: boss fight (The Blot)</button>
+    <button class="button" data-cheat="l3gems">Give all 3 gems</button>
+    <button class="button" data-cheat="shield">Give Shell Shield</button>
     <button class="button" data-cheat="coins">+20 coins</button>
     <button class="button" data-cheat="xp">Level up now</button>
     <button class="button" data-cheat="journal">Fill & open Journal</button>
@@ -67,6 +76,10 @@ let xp=0,plv=1,journal={},xpPops=[],lvlUp=null,confetti=[];
 const XP_FOR=l=>3+(l-1)*2;
 const CREATURES=[
   {name:"Smudge",xp:1,where:"Everywhere the sky tears open",tip:"Jump on its head to flatten it, or jab it with Nib. Touching it from the side costs 1 health.",draw:()=>sprite(0,0,46,36,drawSmudgeBody,{shadow:false})},
+  {name:"Sidecrab",xp:1,where:"Scuttling along the Watercolor Coast",tip:"Stomp it only when its claws are DOWN. Claws up = pinch! Nib's jab always works.",draw:()=>sprite(0,0,54,40,()=>drawCrabBody(false),{shadow:false})},
+  {name:"Gull",xp:2,where:"Circling over the beach",tip:"Swoops down to snatch a coin. Jab or stomp it while it's low to get your coin back.",draw:()=>sprite(0,-10,56,40,()=>drawGullBody(0),{shadow:false})},
+  {name:"Hermit Smudge",xp:2,where:"Hiding in shells on the coast and in the lighthouse",tip:"Too hard to stomp! Flip it onto its back with Nib (Q), then stomp it.",draw:()=>sprite(0,0,50,40,()=>drawHermitBody(false),{shadow:false})},
+  {name:"The Blot",xp:10,where:"Climbs the lighthouse from the sea",tip:"Jab its tentacles when they slam down, dodge ink drops, stomp its head when it peeks up.",draw:()=>{g.save();g.scale(.32,.32);blotHead(0,-40,1,true);g.restore()}},
   {name:"Prickles",xp:1,where:"In front of the judging stage",tip:"Way too tall to jump over, and all spikes — never stomp him! Stand close with Nib and jab twice.",draw:()=>sprite(0,0,72,170,drawSpikeBody,{sx:.42,sy:.42,shadow:false})}
 ];
 function gainXP(name,x,y){
@@ -98,16 +111,15 @@ function drawJournal(px,py,pw,ph){
   g.fillStyle=INK;g.font="bold 20px "+FONT;g.fillText("Level "+plv,nx+20,ny+33);
   const bx=nx+120,bw=nw-280;g.fillStyle="#e8dcc4";rr(bx,ny+18,bw,16,8);g.fill();g.fillStyle="#b98ad8";rr(bx,ny+18,Math.max(10,bw*xp/XP_FOR(plv)),16,8);g.fill();g.strokeStyle=INK;g.lineWidth=2;rr(bx,ny+18,bw,16,8);g.stroke();
   g.fillStyle="#4a4360";g.font="bold 16px "+FONT;g.fillText(xp+" / "+XP_FOR(plv)+" XP",bx+bw+14,ny+32);
-  CREATURES.forEach((c,i)=>{const cw=(nw-20)/2,cx=nx+i*(cw+20),cy=ny+70,ch=220,seen=journal[c.name]>0;
-    cut(()=>rr(cx,cy,cw,ch,18),seen?"#fffdf6":"#efe6d4",{edge:7});
-    g.fillStyle=seen?"#fde9c2":"#ddd2bd";circle(cx+62,cy+80,48);g.fill();
-    g.save();g.translate(cx+62,cy+110);if(!seen){g.filter="brightness(0) opacity(.35)"}c.draw();g.restore();
-    g.fillStyle=INK;g.font="bold 22px "+FONT;g.fillText(seen?c.name:"???",cx+124,cy+40);
-    g.font="15px "+FONT;g.fillStyle="#4a4360";
-    if(seen){g.fillText("Defeated: "+journal[c.name]+"   ·   "+c.xp+" XP each",cx+124,cy+64);
-      wrap(c.where,cw-140,"italic 14px "+FONT).forEach((l,j)=>{g.font="italic 14px "+FONT;g.fillText(l,cx+124,cy+88+j*18)});
-      g.font="15px "+FONT;wrap("Tip: "+c.tip,cw-30,"15px "+FONT).forEach((l,j)=>g.fillText(l,cx+16,cy+150+j*19))}
-    else wrap("Not met yet. Defeat one to fill in this page!",cw-140,"15px "+FONT).forEach((l,j)=>g.fillText(l,cx+124,cy+64+j*19));
+  CREATURES.forEach((c,i)=>{const cols=3,cw=(nw-24)/cols,ch=118,cx=nx+(i%cols)*(cw+12),cy=ny+62+Math.floor(i/cols)*(ch+8),seen=journal[c.name]>0;
+    cut(()=>rr(cx,cy,cw,ch,16),seen?"#fffdf6":"#efe6d4",{edge:6});
+    g.fillStyle=seen?"#fde9c2":"#ddd2bd";circle(cx+40,cy+42,30);g.fill();
+    g.save();g.translate(cx+40,cy+64);g.scale(.72,.72);if(!seen){g.filter="brightness(0) opacity(.35)"}c.draw();g.restore();
+    g.fillStyle=INK;g.font="bold 16px "+FONT;g.fillText(seen?c.name:"???",cx+78,cy+28,cw-84);
+    g.font="12px "+FONT;g.fillStyle="#4a4360";
+    if(seen){g.fillText("Defeated: "+journal[c.name]+" · "+c.xp+" XP",cx+78,cy+46,cw-84);
+      wrap(c.tip,cw-20,"12px "+FONT).slice(0,4).forEach((l,j)=>g.fillText(l,cx+10,cy+82+j*14))}
+    else wrap("Not met yet. Defeat one to fill in this page!",cw-88,"12px "+FONT).forEach((l,j)=>g.fillText(l,cx+78,cy+46+j*15));
   });
 }
 
@@ -192,11 +204,13 @@ function advance(){if(!dlg.on)return;const p=dlg.pages[dlg.page];if(dlg.chars<p[
   if(p[2]){const pick=dlg.choice;dlg.on=false;dlg.choice=0;dlg.after=null;p[3](pick);return}
   if(++dlg.page<dlg.pages.length){dlg.chars=0;announce();return}
   dlg.on=false;const fn=dlg.after;dlg.after=null;if(fn)fn()}
-const speakerColor={"Registrar":"#17a398","Reel":"#3b8fd6","Waffles":"#c98a5a","Bouncer":"#5b2a6e","Bartender":"#7a2f3a","Fairy":"#d0648f","Nib":"#d98e1c","Brie":"#c08a3c","Chef Crumb":"#d0648f","Announcer":"#e5577b","Juniper":"#2fb3a7","Townsfolk":"#7a5c99","Sarah":"#17a398","Mrs. Maple":"#d0648f","Flower":"#e1a21b","Dab":"#3b8fd6","Save Block":"#c98a12","Mr. Biscuits":"#8a6a4d","Sign":"#8a6a4d","Letter":"#8a6a4d"};
+const speakerColor={"Marina":"#e5577b","The Blot":"#5b2a6e","Registrar":"#17a398","Reel":"#3b8fd6","Waffles":"#c98a5a","Bouncer":"#5b2a6e","Bartender":"#7a2f3a","Fairy":"#d0648f","Nib":"#d98e1c","Brie":"#c08a3c","Chef Crumb":"#d0648f","Announcer":"#e5577b","Juniper":"#2fb3a7","Townsfolk":"#7a5c99","Sarah":"#17a398","Mrs. Maple":"#d0648f","Flower":"#e1a21b","Dab":"#3b8fd6","Save Block":"#c98a12","Mr. Biscuits":"#8a6a4d","Sign":"#8a6a4d","Letter":"#8a6a4d"};
 function speakerPos(who){
   if(who==="Sarah")return[center()-camera,s.y-4];
   if(who==="Dab"||(who==="Nib"&&hasNib)||(who==="Reel"&&hasReel))return[dab.x-camera,dab.y-30];
+  if(who==="Reel"&&scene==="beach")return[2560-camera,WRECK.y-60];
   if(who==="Reel")return[1000-camera,G-70];
+  if(who==="The Blot")return[800-camera,DY-150];
   {const sn=SCENE_NPCS[scene];if(sn&&sn[who]!=null)return[sn[who]-camera,who==="Waffles"?G-50:G-92]}
   if(scene==="festival"){
     if(who==="Nib")return[2770-camera,110];
@@ -217,7 +231,7 @@ function drawDialogue(){
   if(!dlg.on)return;const [who,text]=dlg.pages[dlg.page];const shown=text.slice(0,Math.floor(dlg.chars));
   const narr=who==="Narrator"||who==="Letter";const bw=720,bx=(W-bw)/2,by=22;
   const lines=wrap(text,bw-64,"bold 21px "+FONT),bh=40+lines.length*29;
-  const pos=narr?null:speakerPos(who);if(pos&&scene==="festival")pos[1]-=camY;
+  const pos=narr?null:speakerPos(who);if(pos&&(scene==="festival"||scene==="lighthouse"))pos[1]-=camY;
   g.save();
   if(narr){
     cut(()=>rr(bx,by,bw,bh,10),who==="Letter"?"#fffaf0":"#2f2a4a",{edge:8});
@@ -244,6 +258,7 @@ function drawDialogue(){
 // Story: what can Sarah activate right now?
 // ---------------------------------------------------------------------------
 function objective(){
+  if(level===3)return objectiveL3();
   if(level===2)return objectiveL2();
   if(complete)return"Level 1 complete! The festival awaits on the other side of the gate.";
   if(gateKey)return"Head all the way back left to the mysterious gate and unlock it with the Town Gate Key.";
@@ -257,6 +272,8 @@ function objective(){
   return"A gate appeared overnight to the left. Explore the road to the right to find out why.";
 }
 function getInteract(){
+  if(scene==="beach")return beachInteract();
+  if(scene==="lighthouse")return lhInteract();
   if(scene==="festival")return festInteract();
   if(scene==="orchard")return orchardInteract();
   if(scene==="lake")return lakeInteract();
@@ -394,6 +411,7 @@ function grandmaChest(){
 }
 function dabPower(){
   if(!hasDab)return;pulse=1;
+  if(scene==="beach"&&dabBeach())return;
   if(scene==="festival"&&!l2.holeSign&&Math.abs(center()-(-578))<300){l2.holeSign=true;burst(-578,G-84,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming! That poor sign was grayer than a rainy Tuesday."],["Sarah","\"Dig crew entry here\"… with an arrow pointing straight down. Into the hole."],["Dab","So we're supposed to jump IN? I love a sign with commitment."]]);return}
   if(scene==="festival"&&!l2.trail&&Math.abs(center()-2560)<380){
     if(!l2.catFreed){sayToast("Dab: \"I smell a doodle trail up there… but I can't concentrate with that cat yowling. Somebody help him!\"");return}
@@ -418,7 +436,7 @@ function triggerStorm(){
 // ---------------------------------------------------------------------------
 // Pockets (inventory)
 // ---------------------------------------------------------------------------
-const TABS=["Items","Key Items","Buddy","Journal","Hints"];const KEY_ITEMS=["Town Map","Recipe Card","Cheese Recipe","Festival Pin"];
+const TABS=["Items","Key Items","Buddy","Journal","Hints"];const KEY_ITEMS=["Town Map","Recipe Card","Cheese Recipe","Festival Pin","Heart Necklace","Blue Gem","Green Gem"];
 const inv={tab:0,sel:0};
 const INFO={
   "Health Potion":["Tastes like strawberries and courage. Restores all your health.","Use"],
@@ -426,7 +444,13 @@ const INFO={
   "Festival Pin":["Proof you climbed onto a roof. Wearing it gets you into the festival for free. Do not explain how you got it.","Wear"],
   "Town Map":["A map of the whole town, folded sixteen ways. Found under the town, by the bar. (What it does: coming soon!)","Unfold"],
   "Lake Perch":["A Lake Perch. Every fish in this lake is this fish. Nobody knows why. Maybe the chef will want these someday.","Admire"],
-  "Reel":["A fishing-pole little buddy and amateur poet. Stand at the end of the dock and press Space to cast; press Space again when the bobber gets yanked under.","Equip"],
+  "Reel":["A fishing-pole little buddy and amateur poet, found hiding in a shipwreck's treasure chest. At a fishing spot, press Space to cast; press Space again when the bobber gets yanked under.","Equip"],
+  "Heart Necklace":["A glittering necklace with a big heart-shaped gem, red as a cherry. It glows. This is the lighthouse's Red gem!",null],
+  "Blue Gem":["Fished out of the sea beside the shipwreck. Cool and glowing, like a tiny piece of sky. The lighthouse's Blue gem.",null],
+  "Green Gem":["Found hidden high in the lighthouse. Glows green as a fresh leaf. The lighthouse's Green gem.",null],
+  "Seashell":["A pretty seashell dug out of the painted sand. Marina at the Shell Shack trades 3 of them for a Health Potion.","Admire"],
+  "Sea Perch":["A Sea Perch from beside the shipwreck. It looks like a Lake Perch that went to the beach and got a tan.","Admire"],
+  "Shell Shield":["A shimmery shield made from a giant seashell. Use it to wrap yourself in a bubble that blocks the next 2 hits.","Use"],
   "Wooden Ladder":["Folded completely flat. Everything does, around here. Mrs. Maple will want this.",null],
   "Road Chest Key":["Small, brassy and ambitious. Opens the chest by the road.",null],
   "Grandma's Chest Key":["Coughed up by a fountain that's doing water wrong. Smells of mothballs and destiny.",null],
@@ -458,6 +482,9 @@ function useSelected(){
   if(n==="Festival Pin"){pinWorn=!pinWorn;invOpen=false;sayToast(pinWorn?"You pin the Festival Pin to your dress. Fancy! (Pin-wearers get into the festival free.)":"You take off the Festival Pin and pocket it.");return}
   if(n==="Town Map"){sayToast("You unfold the map. And unfold. And unfold. You'll figure out how to read it later.");return}
   if(n==="Lake Perch"){sayToast("The Lake Perch stares at you. You stare back. Nobody wins.");return}
+  if(n==="Sea Perch"){sayToast("The Sea Perch has the confidence of a fish that has seen a shipwreck.");return}
+  if(n==="Seashell"){sayToast("You hold the shell to your ear. It's the ocean. Also faintly, Marina saying \"bring me three.\"");return}
+  if(n==="Shell Shield"){useShield();return}
 }
 const SLOT={cols:4,x0:180,y0:190,dx:96,dy:96,r:38};
 function slotPos(i){return[SLOT.x0+(i%SLOT.cols)*SLOT.dx,SLOT.y0+Math.floor(i/SLOT.cols)*SLOT.dy]}
@@ -470,6 +497,13 @@ function drawIcon(n,x,y,scale=1){
 }
 function iconArt(n){
   g.strokeStyle=INK;g.lineWidth=2.5;
+  if(n==="Sea Perch"){g.filter="hue-rotate(150deg) saturate(1.3)";iconArt("Lake Perch");g.filter="none";return}
+  if(n==="Blue Gem"||n==="Green Gem"){const c=n==="Blue Gem"?["#3b8fd6","#9fd2f7"]:["#4fae5a","#b6ec9f"];g.fillStyle=c[0];g.beginPath();g.moveTo(-14,-8);g.lineTo(-6,-18);g.lineTo(6,-18);g.lineTo(14,-8);g.lineTo(0,20);g.closePath();g.fill();g.stroke();
+    g.fillStyle=c[1];g.beginPath();g.moveTo(-6,-18);g.lineTo(-2,-8);g.lineTo(-14,-8);g.closePath();g.fill();g.beginPath();g.moveTo(-14,-8);g.lineTo(14,-8);g.stroke();g.beginPath();g.moveTo(-2,-8);g.lineTo(0,20);g.moveTo(-6,-18);g.lineTo(-2,-8);g.lineTo(6,-18);g.stroke();return}
+  if(n==="Heart Necklace"){g.strokeStyle="#c9a23a";g.lineWidth=2.5;g.beginPath();g.arc(0,-6,18,Math.PI*1.05,Math.PI*1.95,true);g.stroke();g.fillStyle="#c9a23a";for(let a=.1;a<3.1;a+=.4){circle(Math.cos(a+Math.PI)*-18*-1,-6-Math.sin(a)*-18*-1,0);}
+    g.strokeStyle=INK;g.fillStyle="#e5463f";g.beginPath();g.moveTo(0,22);g.bezierCurveTo(-20,8,-12,-8,0,2);g.bezierCurveTo(12,-8,20,8,0,22);g.closePath();g.fill();g.stroke();g.fillStyle="rgba(255,255,255,.6)";circle(-6,4,3);g.fill();g.fillStyle="#f4c84f";circle(0,-1,3);g.fill();g.stroke();return}
+  if(n==="Seashell"){g.fillStyle="#ffd6e0";g.beginPath();g.moveTo(0,16);g.lineTo(-18,-6);g.quadraticCurveTo(0,-26,18,-6);g.closePath();g.fill();g.stroke();g.lineWidth=1.5;for(const a of[-12,-6,0,6,12]){g.beginPath();g.moveTo(0,16);g.lineTo(a,-14);g.stroke()}g.lineWidth=2.5;g.fillStyle="#ffd6e0";rr(-6,12,12,7,3);g.fill();g.stroke();return}
+  if(n==="Shell Shield"){g.fillStyle="#bfe6ff";g.beginPath();g.moveTo(0,22);g.quadraticCurveTo(-20,10,-18,-14);g.quadraticCurveTo(0,-22,18,-14);g.quadraticCurveTo(20,10,0,22);g.closePath();g.fill();g.stroke();g.lineWidth=1.5;g.strokeStyle="#3b8fd6";for(const a of[-10,0,10]){g.beginPath();g.moveTo(0,18);g.lineTo(a,-14);g.stroke()}g.fillStyle="rgba(255,255,255,.7)";circle(-8,-8,3);g.fill();return}
   if(n==="Health Potion"){g.fillStyle="#c9905b";rr(-5,-22,10,7,2);g.fill();g.stroke();g.fillStyle="#e8f6fb";rr(-7,-16,14,9,2);g.fill();g.stroke();g.fillStyle="#ff6f9c";circle(0,5,15);g.fill();g.stroke();g.fillStyle="#ffb3c9";circle(-5,0,4);g.fill();g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("♥",0,11);g.textAlign="left";return}
   if(n.includes("Key")){
     const col=n.startsWith("Road")?"#e8b93f":n.startsWith("Grandma")?"#b98ad8":n.startsWith("Smudgy")?"#5b5277":"#7fcf6a";
@@ -532,7 +566,7 @@ function drawHints(px,py,pw,ph){
   g.strokeStyle="#f2a1b5";g.beginPath();g.moveTo(nx+60,ny+6);g.lineTo(nx+60,ny+nh-6);g.stroke();
   g.fillStyle="#e5577b";g.font="bold 19px "+FONT;g.fillText("Right now:",nx+74,ny+40);
   g.fillStyle=INK;wrap(objective(),nw-110,"bold 17px "+FONT).forEach((l,i)=>g.fillText(l,nx+74,ny+68+i*28));
-  const beats=level===2?[["Register for the festival",l2.festReg],["Arrive at the festival",l2.intro],["Catch a fish (optional)",l2.fishCaught>0],["Enter the art contest (optional)",l2.clayEntered],["Free Mr. Biscuits",l2.catFreed],["Survive the butter sculptor",l2.chaseDone],["Find Nib",hasNib],["Hear the contest results",l2.results],["Defeat the festival Smudges",l2.fightDone],["Open the door from the sky",l2.doorOpen]]:[["Raid the wardrobe",potionCollected&&roadChestKeyCollected],["Investigate the overnight gate",homeIntroSeen],["Unlock the road chest",firstChestOpen],["Ride the upside-down fountain",fountainKeyCollected],["Fetch Mrs. Maple a ladder",ladderGiven],["Open Grandma's chest",grandChestOpen],["Bring color back to the flower",flowerRestored],["Unlock the town gate",gateOpen]];
+  const beats=level===3?beatsL3():level===2?[["Register for the festival",l2.festReg],["Arrive at the festival",l2.intro],["Enter the art contest (optional)",l2.clayEntered],["Free Mr. Biscuits",l2.catFreed],["Survive the butter sculptor",l2.chaseDone],["Find Nib",hasNib],["Hear the contest results",l2.results],["Defeat the festival Smudges",l2.fightDone],["Open the door from the sky",l2.doorOpen]]:[["Raid the wardrobe",potionCollected&&roadChestKeyCollected],["Investigate the overnight gate",homeIntroSeen],["Unlock the road chest",firstChestOpen],["Ride the upside-down fountain",fountainKeyCollected],["Fetch Mrs. Maple a ladder",ladderGiven],["Open Grandma's chest",grandChestOpen],["Bring color back to the flower",flowerRestored],["Unlock the town gate",gateOpen]];
   const done=beats.filter(b=>b[1]);g.fillStyle="#17a398";g.font="bold 17px "+FONT;g.fillText("Done so far ("+done.length+"/"+beats.length+")"+(level===1&&roofItemCollected?"  ★ Roof secret found!":""),nx+74,ny+156);
   g.font="16px "+FONT;done.slice(-4).forEach((b,i)=>{g.fillStyle="#17a398";g.fillText("✔",nx+78,ny+184+i*28);g.fillStyle=INK;g.fillText(b[0],nx+102,ny+184+i*28)});
   if(!done.length){g.fillStyle="#8d8578";g.fillText("Nothing yet. The day is young.",nx+78,ny+184)}
@@ -547,16 +581,16 @@ function invClick(mx,my){
 // Input
 // ---------------------------------------------------------------------------
 function toggleInv(){if(dlg.on||showEndScreen)return;invOpen=!invOpen;if(invOpen){inv.sel=0}}
-actionBtn.onclick=()=>{actionBtn.blur();if(scene==="lake"&&fish.ph>0){fishSpace();return}if(lvlUp){closeLvl();return}if(dlg.on)advance();else{const it=getInteract();if(it&&!invOpen)it[1]()}};
+actionBtn.onclick=()=>{actionBtn.blur();if((scene==="lake"||scene==="beach")&&fish.ph>0){fishSpace();return}if(lvlUp){closeLvl();return}if(dlg.on)advance();else{const it=getInteract();if(it&&!invOpen)it[1]()}};
 invBtn.onclick=()=>{invBtn.blur();toggleInv()};
 c.addEventListener("click",e=>{if(lvlUp){closeLvl();return}const r=c.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height;
-  if(showEndScreen){if(level===1&&endT>1)startLevel2();return}
+  if(showEndScreen){if(endT>1){if(level===1)startLevel2();else if(level===2)startLevel3()}return}
   if(dlg.on){const hit=dlg.rects.findIndex(([x,y,w,h])=>mx>x&&mx<x+w&&my>y&&my<y+h);if(dlg.rects.length&&hit<0)return;if(hit>=0)dlg.choice=hit;advance();return}if(invOpen)invClick(mx,my)});
 const key=k=>k.length===1?k.toLowerCase():k;
 window.addEventListener("keydown",e=>{
   const k=key(e.key);if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," ","Tab"].includes(k))e.preventDefault();
   if(lvlUp){if((k===" "||k==="Enter")&&!e.repeat)closeLvl();return}
-  if(showEndScreen){if(level===1&&endT>1&&(k===" "||k==="Enter")&&!e.repeat)startLevel2();return}
+  if(showEndScreen){if(endT>1&&(k===" "||k==="Enter")&&!e.repeat){if(level===1)startLevel2();else if(level===2)startLevel3()}return}
   if(dlg.on){const p=dlg.pages[dlg.page];if(p[2]&&dlg.chars>=p[1].length){const n=p[2].length;if(k==="ArrowUp"||k==="w")dlg.choice=(dlg.choice+n-1)%n;if(k==="ArrowDown"||k==="s")dlg.choice=(dlg.choice+1)%n}
     if((k===" "||k==="Enter")&&!e.repeat)advance();return}
   if(k==="i"&&!e.repeat){toggleInv();return}
@@ -571,18 +605,19 @@ window.addEventListener("keydown",e=>{
     else if(k==="ArrowUp"||k==="w")inv.sel=Math.max(0,inv.sel-SLOT.cols);
     else if(k===" "||k==="Enter")useSelected();
     return}
-  if(k===" "&&!e.repeat&&scene==="lake"&&fish.ph>0){fishSpace();return}
+  if(k===" "&&!e.repeat&&(scene==="lake"||scene==="beach")&&fish.ph>0){fishSpace();return}
   if(k===" "&&!e.repeat){const it=getInteract();if(it)it[1]();else sayToast("Nothing to activate here. You activate your imagination instead.");return}
   if((k==="ArrowUp"||k==="w")&&s.ground&&!e.repeat&&!onLadder()){
     if(dogOn){s.vy=-620}else if(balloonOn){s.vy=-834;balloonOn=false;balloonsAway.push({scene,x:center()+8,y:s.y-40,t:0});sayToast("WHOOSH! The balloon yanks you sky-high… then drifts off to a better life.")}else s.vy=-590;s.ground=false}
-  if(k==="q"&&!e.repeat){if(!hasDab)sayToast("You don't have a little buddy yet. You wave at nobody. Nobody waves back.");else if(equipped==="Nib"&&hasNib)nibJab();else if(equipped==="Reel"&&hasReel){if(scene==="lake"&&near(DOCK.x+DOCK.w-40,50)&&fish.ph===0)castLine();else sayToast("Reel: \"No water here. I'm a fishing pole, not a miracle worker.\"")}else dabPower()}
+  if(k==="q"&&!e.repeat){if(!hasDab)sayToast("You don't have a little buddy yet. You wave at nobody. Nobody waves back.");else if(equipped==="Nib"&&hasNib)nibJab();else if(equipped==="Reel"&&hasReel){if(scene==="beach"&&onStern()&&fish.ph===0)castLine(GEM_SPOT-20+Math.random()*50);else if(scene==="lake"&&near(DOCK.x+DOCK.w-40,50)&&fish.ph===0)castLine();else sayToast("Reel: \"No water here. I'm a fishing pole, not a miracle worker.\"")}else dabPower()}
   if(k==="e"&&!e.repeat&&(hasNib||hasReel)){const b=[hasDab&&"Dab",hasNib&&"Nib",hasReel&&"Reel"].filter(Boolean);equipped=b[(b.indexOf(equipped)+1)%b.length];sayToast(equipped+" equipped! "+buddyBlurb(equipped))}
-  if(k==="r"&&!e.repeat&&l2.chase!==1){scene=checkpointScene;s.x=checkpoint;s.y=G-s.h;s.vy=0;health=maxHealth;camera=clamp(s.x-350,0,worldW()-W);sayToast("Whoosh! Back at the Save Block.")}
+  if(k==="r"&&!e.repeat&&level===3){respawnL3();sayToast("Whoosh! Back at the Save Block.")}
+  else if(k==="r"&&!e.repeat&&l2.chase!==1){scene=checkpointScene;s.x=checkpoint;s.y=G-s.h;s.vy=0;health=maxHealth;camera=clamp(s.x-350,0,worldW()-W);sayToast("Whoosh! Back at the Save Block.")}
   keys.add(k);
 });
 window.addEventListener("keyup",e=>keys.delete(key(e.key)));window.addEventListener("blur",()=>keys.clear());
-const buddyBlurb=n=>n==="Dab"?"Q sniffs out hidden doodles.":n==="Nib"?"Q jabs enemies.":"Fish from the end of the lake dock with Space or Q.";
-const worldW=()=>scene==="outside"?WORLD:scene==="festival"?FEST_W:scene==="orchard"?ORCH_W:scene==="lake"?LAKE_W:scene==="under"?UNDER_W:W;
+const buddyBlurb=n=>n==="Dab"?"Q sniffs out hidden doodles and buried treasure.":n==="Nib"?"Q jabs enemies.":"Stand at a fishing spot and press Space or Q to cast.";
+const worldW=()=>scene==="beach"?BEACH_W:scene==="lighthouse"?W:scene==="outside"?WORLD:scene==="festival"?FEST_W:scene==="orchard"?ORCH_W:scene==="lake"?LAKE_W:scene==="under"?UNDER_W:W;
 const onLadder=()=>scene==="resident"&&ladderGiven&&Math.abs(center()-478)<34;
 
 // ---------------------------------------------------------------------------
@@ -597,6 +632,7 @@ function update(dt){
   if(stormDone&&!flowerRestored)grayT=Math.min(1,grayT+dt*.6);
   if(flowerRestored&&restoreR<1600)restoreR+=dt*700;
   if(showEndScreen)endT+=dt;
+  if(chapterCard&&!dlg.on){chapterCard.t+=dt;if(chapterCard.t>3.6)chapterCard=null}
   if(complete&&gateAnim<1)gateAnim=Math.min(1,gateAnim+dt*.8);
   if(dlg.on){dlg.chars=Math.min(dlg.pages[dlg.page][1].length,dlg.chars+dt*55)}
   updateParticles(dt);
@@ -607,23 +643,24 @@ function update(dt){
   if(level===2&&l2.results){if(!l2.curtain&&dlg.on&&dlg.pages[dlg.page]&&/^The cloth/.test(dlg.pages[dlg.page][1]))l2.curtain=.001;
     if(l2.curtain>0)l2.curtain=Math.min(1,l2.curtain+dt/1.8);if(l2.finale)l2.curtain=1}
   if(dlg.on||invOpen||complete){updateAction();return}
-  if(scene==="lake"&&fish.ph>0){updateFishing(dt);updateAction();return}
+  if((scene==="lake"||scene==="beach")&&fish.ph>0){updateFishing(dt);updateAction();return}
   let dir=(keys.has("ArrowRight")||keys.has("d")?1:0)-(keys.has("ArrowLeft")||keys.has("a")?1:0);
   s.duck=(keys.has("s")||keys.has("ArrowDown"))&&s.ground&&!onLadder();if(s.duck)dir=0;
   const oldX=s.x;s.x+=dir*245*dt;s.x=clamp(s.x,worldMin(),worldW()-s.w);
   if(scene==="festival")for(const b of CRATES){if(s.x+s.w>b.x&&s.x<b.x+b.w&&s.y+s.h>b.y+6&&s.y<b.y+b.h){if(oldX+s.w<=b.x+1)s.x=b.x-s.w;else if(oldX>=b.x+b.w-1)s.x=b.x+b.w}}if(dir)s.face=dir;s.walk=dir&&s.ground?s.walk+dt*14:0;
   s.inv=Math.max(0,s.inv-dt);
-  const oldFeet=s.y+s.h;s.vy+=1450*(dogOn?.42:1)*dt;s.y+=s.vy*dt;s.wasGround=s.ground;s.ground=false;
-  const ps=scene==="festival"?[{x:FEST_MIN-100,y:G,w:HOLE.x-FEST_MIN+100,h:100},{x:HOLE.x+HOLE.w,y:G,w:99999,h:100}]:scene==="lake"?[{x:-50,y:G,w:930,h:100},{x:DOCK.x,y:G,w:DOCK.w,h:100}]:[{x:-50,y:G,w:99999,h:100}];
+  if(level===3)l3Pre(dt);
+  const oldFeet=s.y+s.h;s.vy+=1450*(dogOn?.42:1)*dt;s.y+=s.vy*dt;s.wasGround=s.ground;s.ground=false;s.plat=null;
+  const ps=scene==="beach"||scene==="lighthouse"?[...l3Plats()]:scene==="festival"?[{x:FEST_MIN-100,y:G,w:HOLE.x-FEST_MIN+100,h:100},{x:HOLE.x+HOLE.w,y:G,w:99999,h:100}]:scene==="lake"?[{x:-50,y:G,w:930,h:100},{x:DOCK.x,y:G,w:DOCK.w,h:100}]:[{x:-50,y:G,w:99999,h:100}];
   if(scene==="bedroom")ps.push({x:105,y:346,w:280,h:18,bed:true});
   if(scene==="resident"&&ladderGiven)ps.push({x:400,y:280,w:540,h:22});
   if(scene==="outside")ps.push(...platforms);
   if(scene==="under")ps.push({...TRAMP_U,tramp:-1150});
   if(scene==="festival"){ps.push(...CRATES,LIB_ROOF,...CLOUDS,...BARS,FLOOR2);if(l2.tramp)ps.push({...TRAMP_F,tramp:-900});if(l2.trail)ps.push(...TRAIL)}
-  for(const p of ps){if(s.vy>=0&&s.x+s.w>p.x&&s.x<p.x+p.w&&oldFeet<=p.y+1&&s.y+s.h>=p.y){
+  for(const p of ps){if(s.vy>=0&&s.x+s.w>p.x&&s.x<p.x+p.w&&oldFeet<=(p.mover?Math.max(p.y,p.py)+2:p.y+1)&&s.y+s.h>=p.y){
     if(p.tramp){s.y=p.y-s.h;s.vy=p.tramp;s.squash=.7;burst(center(),p.y,6,["#3bb6c4","#fff"]);continue}
     if(p.bed&&s.vy>420){s.y=p.y-s.h;s.vy=-Math.min(760,s.vy*1.08);s.squash=.7;if(!bedBounced){bedBounced=true;sayToast("BOING! Your bed is 40% mattress, 60% trampoline.")}continue}
-    s.y=p.y-s.h;if(s.vy>300)s.squash=.82;s.vy=0;s.ground=true}}
+    s.y=p.y-s.h;if(s.vy>300)s.squash=.82;s.vy=0;s.ground=true;s.plat=p}}
   if(scene==="bedroom"&&closetOpen){
     if(!potionCollected&&s.x+s.w>620&&s.x<648&&s.y+s.h>382&&s.y<414){potionCollected=true;addItem("Health Potion");burst(635,395,10);sayToast("Got a Health Potion! Tastes like strawberries and courage.")}
     if(!roadChestKeyCollected&&s.x+s.w>653&&s.x<682&&s.y+s.h>382&&s.y<414){roadChestKeyCollected=true;addItem("Road Chest Key");burst(667,395,10);sayToast("Got the Road Chest Key! It's small, but it has big plans.")}
@@ -650,12 +687,13 @@ function update(dt){
   if(scene==="orchard"){updateOrchard();if(dlg.on){updateAction();return}}
   if(scene==="lake"){updateLake();if(dlg.on){updateAction();return}}
   if(scene==="under"){updateUnder();if(dlg.on){updateAction();return}}
+  if(scene==="beach"||scene==="lighthouse"){updateL3(dt,oldFeet);if(dlg.on){updateAction();return}}
   for(const l of loot){if(l.got||l.scene!==scene)continue;l.wait=Math.max(0,(l.wait||0)-dt);l.vy+=1450*dt;l.x+=l.vx*dt;l.y+=l.vy*dt;if(l.y>G-14){l.y=G-14;l.vy=-l.vy*.35;if(Math.abs(l.vy)<60)l.vy=0;l.vx*=.85}
     if(l.wait<=0&&Math.abs(center()-l.x)<28&&l.y>s.y-10&&l.y<s.y+s.h+10){l.got=true;burst(l.x,l.y,6,["#f4c84f","#fff"]);if(l.type==="coin")coins++;else{addItem(l.name);sayToast(l.name==="Turnip"?"Got a Turnip! Why was it locked up? You're afraid to ask.":"Got "+l.name+"!")}}}
   if(!s.wasGround&&s.ground&&s.squash>.95)s.squash=.9;
   if(s.y>H+40){if(scene==="festival"&&center()>HOLE.x-30&&center()<HOLE.x+HOLE.w+30){goScene("under",300,-90);sayToast("Wheeee— down the hole!")}else{s.x=checkpoint;s.y=G-s.h;s.vy=0}}
   camera=worldW()>W?clamp(s.x-350,worldMin(),worldW()-W):0;
-  const ty=scene==="festival"?clamp(s.y-150,-320,0):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
+  const ty=scene==="festival"?clamp(s.y-150,-320,0):scene==="lighthouse"?(l3.boss?-1810:clamp(s.y-300,-1810,0)):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
   updateAction();
 }
 function updateParticles(dt){for(const p of parts){p.vy+=600*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.98;p.rot+=p.vr*dt;p.life-=dt}parts=parts.filter(p=>p.life>0)}
@@ -762,12 +800,13 @@ function drawSarah(){
   for(const b of balloonsAway){if(b.scene!==scene)continue;if(b.dog){drawBalloonDog(b.x+Math.sin(b.t*3)*10,b.y,.75);continue}cut(()=>{g.beginPath();g.ellipse(b.x+Math.sin(b.t*3)*10,b.y,15,19,0,0,7)},"#7cc6f2",{edge:5,shadow:false})}
   if(hasNib&&equipped==="Nib"){if(jabT>0){const ext=Math.sin((1-jabT/.32)*Math.PI);sprite(center()+s.face*(32+ext*42),s.y+40,24,58,drawNibBody,{rot:-s.face*Math.PI/2,sx:.9,sy:.9});g.save();g.globalAlpha=ext*.8;g.strokeStyle="#fff";g.lineWidth=3;for(const dy of[-8,0,8]){g.beginPath();g.moveTo(center()+s.face*(40+ext*30),s.y+40+dy);g.lineTo(center()+s.face*(20+ext*20),s.y+40+dy);g.stroke()}g.restore()}
     else sprite(dab.x,dab.y+28,24,58,drawNibBody,{rot:Math.sin(time*2.6)*.15,sx:.85,sy:.85})}
-  else if(hasReel&&equipped==="Reel"){if(scene==="lake"&&fish.ph>0)sprite(center()+18,s.y+52,30,62,drawReelBody,{rot:.75,sx:.9,sy:.9});else sprite(dab.x,dab.y+30,30,62,drawReelBody,{rot:Math.sin(time*2.6)*.15,sx:.8,sy:.8})}
+  else if(hasReel&&equipped==="Reel"){if((scene==="lake"||scene==="beach")&&fish.ph>0)sprite(center()+18,s.y+52,30,62,drawReelBody,{rot:.75,sx:.9,sy:.9});else sprite(dab.x,dab.y+30,30,62,drawReelBody,{rot:Math.sin(time*2.6)*.15,sx:.8,sy:.8})}
   else if(hasDab)sprite(dab.x,dab.y+28,30,56,drawDabBody,{rot:Math.sin(time*2.6)*.18-.15*s.face,sx:.85*(s.face>0?1:-1),sy:.85});
+  drawShieldBubble();
   // "!" bubble when something can be activated
   if(!dlg.on&&!invOpen&&getInteract()?.[2]){const bx=center(),by=s.y-30+Math.sin(time*7)*3;cut(()=>{g.beginPath();g.ellipse(bx,by,14,16,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 20px "+FONT;g.textAlign="center";g.fillText("!",bx,by+7);g.textAlign="left"}
 }
-function groundUnder(){if(scene==="bedroom"&&s.x+s.w>105&&s.x<385&&s.y+s.h<=350)return 346;if(scene==="resident"&&ladderGiven&&s.x+s.w>400&&s.y+s.h<=284)return 280;if(scene==="outside")for(const p of platforms)if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;if(scene==="festival"){for(const p of CRATES.concat(l2.trail?TRAIL:[],[LIB_ROOF],CLOUDS,BARS,[FLOOR2]))if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y}return G}
+function groundUnder(){if(scene==="beach"||scene==="lighthouse")return l3GroundUnder();if(scene==="bedroom"&&s.x+s.w>105&&s.x<385&&s.y+s.h<=350)return 346;if(scene==="resident"&&ladderGiven&&s.x+s.w>400&&s.y+s.h<=284)return 280;if(scene==="outside")for(const p of platforms)if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;if(scene==="festival"){for(const p of CRATES.concat(l2.trail?TRAIL:[],[LIB_ROOF],CLOUDS,BARS,[FLOOR2]))if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y}return G}
 function drawFlowers(){for(const f of flowers){if(f.x<camera-80||f.x>camera+W+80)continue;const gray=f.kind==="gray"&&stormDone&&!flowerRestored;groundShadow(f.x,G+2,18);
   sprite(f.x,G+4,56,86,()=>drawFlowerBody(gray,gray,f.kind==="gray"&&flowerRestored),{rot:Math.sin(time*2+f.x)*.04+Math.sin(time*18)*f.wig*.12,sy:1-f.wig*.06})}}
 
@@ -982,11 +1021,11 @@ function drawEndScreen(){
   const k=Math.min(1,endT*2),sc=.6+.4*(1-Math.pow(1-k,3));g.save();g.translate(W/2,H/2);g.scale(sc,sc);g.rotate(-.02);
   cut(()=>rr(-350,-125,700,250,30),"#fff3d6",{edge:12});
   for(let i=0;i<14;i++){g.fillStyle=["#e5577b","#f4c84f","#17a398","#7cc6f2"][i%4];g.beginPath();g.moveTo(-320+i*48,-125);g.lineTo(-296+i*48,-125);g.lineTo(-308+i*48,-100);g.fill()}
-  g.fillStyle=INK;g.textAlign="center";g.font="bold 36px "+FONT;g.fillText(level===1?"Level 1 complete!":"Level 2 complete!",0,-10);
+  g.fillStyle=INK;g.textAlign="center";g.font="bold 36px "+FONT;g.fillText(level===1?"Level 1 complete!":level===2?"Level 2 complete!":"Chapter 3 complete!",0,-10);
   g.fillStyle="#17a398";g.font="bold 26px "+FONT;
-  if(level===1){if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText("Press Space (or click) to continue to Level 2 →",0,40);g.globalAlpha=1}}
-  else g.fillText("Level 3 coming soon!",0,40);
-  g.fillStyle="#7a7088";g.font="italic 16px "+FONT;g.fillText("Coins collected: "+coins+(level===1?(roofItemCollected?"  ·  Roof secret: found!":"  ·  Roof secret: still up there…"):(l2.clayEntered?"  ·  \""+l2.entry+"\": tried, and rewarded":"")),0,86);
+  if(level<3){if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText("Press Space (or click) to continue to Level "+(level+1)+" →",0,40);g.globalAlpha=1}}
+  else g.fillText("The lighthouse shines again! To be continued…",0,40);
+  g.fillStyle="#7a7088";g.font="italic 16px "+FONT;g.fillText("Coins collected: "+coins+"  ·  Sarah is Lv "+plv+(level===1?(roofItemCollected?"  ·  Roof secret: found!":"  ·  Roof secret: still up there…"):(l2.clayEntered?"  ·  \""+l2.entry+"\": tried, and rewarded":"")),0,86);
   g.restore();g.textAlign="left";
   if(Math.random()<.3)parts.push({scene,x:camera+Math.random()*W,y:-10,vx:(Math.random()-.5)*60,vy:60,life:3,rot:0,vr:(Math.random()-.5)*8,color:["#e5577b","#f4c84f","#17a398","#7cc6f2"][Math.floor(Math.random()*4)]});
   g.save();g.translate(-camera,0);drawParticles();g.restore();
@@ -1296,7 +1335,7 @@ function hitSpike(){
 function defeatSpike(){l2.spikeDown=true;gainXP("Prickles",SPIKE_X,G-190);burst(SPIKE_X,G-30,30,["#7a5c99","#fff","#f4c84f","#e5577b"]);for(let i=0;i<3;i++)spill(SPIKE_X,G-50,"coin",null,(i-1)*90);
   start([["Nib","Got him! Pointy beats spiky. Every time."],["Announcer","The stage is clear!"+(l2.catFreed?" Everybody to the stage — Mr. Biscuits, take your seat!":" Now we just need our judge…")]],()=>{l2.pendRes=l2.catFreed&&l2.chaseDone;if(l2.pendRes)sayToast("Everyone heads over to the stage…")})}
 function nibJab(){
-  if(jabT>0)return;jabT=.32;if(scene==="festival"&&!l2.spikeDown&&Math.abs(SPIKE_X-(center()+s.face*55))<60&&onFloor()){jabT=.32;hitSpike();return}
+  if(jabT>0)return;jabT=.32;if(level===3&&l3Jab(center()+s.face*55))return;if(scene==="festival"&&!l2.spikeDown&&Math.abs(SPIKE_X-(center()+s.face*55))<60&&onFloor()){jabT=.32;hitSpike();return}
   const hx=center()+s.face*55,list=scene==="festival"?fsm.concat(l2.foe?[l2.foe]:[]):scene==="outside"?smudges:[];let hit=0;
   for(const m of list){if(!m.alive)continue;const base=m.base??G;if(Math.abs(m.x-hx)<44&&s.y+s.h>base-80&&s.y<base){m.alive=false;hit++;gainXP("Smudge",m.x,base-70);if(m.key)dropDoorKey(m);burst(m.x,G-20,14,[INK,"#5b5277","#fff"]);spill(m.x,G-40,"coin",null,s.face*80)}}
   if(hit&&!l2.nibCheer){l2.nibCheer=true;sayToast("JAB! Nib pokes the Smudge into confetti — and a coin pops out!")}
@@ -1654,7 +1693,7 @@ function drawFestival(){
   g.restore();g.restore();
 }
 function objectiveL2(){
-  if(l2.done)return"Level 2 complete! Level 3 is coming soon.";
+  if(l2.done)return"Level 2 complete! On to Level 3.";
   if(scene==="orchard"&&!l2.festReg)return"Walk through the orchard to the Registration table. Entry is 5 coins — or wear your Festival Pin to get in free. (Short on coins? Try the tree by the lake. Missed the pin? It's still on Mrs. Maple's roof, back home.)";
   if(l2.mapleDone)return(has("Smudgy Key")?"":"Pick up the Smudgy Key a Smudge dropped. ")+(l2.on2F?"Unlock the door on the second floor.":dogOn?"With the balloon dog tied on, jump up to the bars on the right of the stage, then climb to the second floor and unlock the door.":"Climb the jump bars on the right of the stage to the second floor and unlock the door."+(l2.tramp?" (Use Mrs. Maple’s trampoline!)":""));
   if(l2.fightDone)return"The Smudges are gone! Someone familiar is hurrying over…";
@@ -1727,7 +1766,7 @@ function drawFossil(){
   g.fillStyle=B;g.strokeStyle=INK;g.lineWidth=1.5;rr(2930,G-30,30,7,3);g.fill();g.stroke();circle(2930,G-27,5);g.fill();g.stroke();
   g.save();g.globalAlpha=.4+Math.sin(time*2)*.2;g.fillStyle="#fff6c2";star(2915,G-160,5,2);g.fill();g.restore();
 }
-const SCENE_NPCS={orchard:{"Registrar":1250},lake:{"Waffles":530},under:{"Bouncer":770,"Bartender":570}};
+const SCENE_NPCS={beach:{"Marina":330},orchard:{"Registrar":1250},lake:{"Waffles":530},under:{"Bouncer":770,"Bartender":570}};
 let pinWorn=false,hasReel=false,dogOn=false;
 const fish={ph:0,t:0,bx:1360,need:0,n:0,next:0,dip:0,wait:0};
 function resetL2Extra(){Object.assign(l2,{lakeFrom:"orchard",lakeCoins:[0,0,0,0,0],holeSign:false,festReg:false,orchCoins:[0,0,0,0,0],orchMsg:false,mapTaken:false,underIntro:false,dogUsed:false,tramp:false,on2F:false,dogGone:false,wafflesTalk:0,bouncerTalk:0,barTalk:0,reelMet:false,fishCaught:0});fish.ph=0}
@@ -1758,7 +1797,7 @@ function festRegistrar(){
     ["Sarah","I left it at home. On my bed. Drying. Next to my dignity."],
     ["Registrar","Happens every year. The Clay Corner — the very first booth past the plaza — lets you whip something up. Bring it back here and I'll enter it."],
     ["Registrar","Totally optional, of course. Judging starts when our judge, Mr. Biscuits, shows up. He's… late. Someone heard yowling near the playground."]];
-  const done=lines=>{l2.festReg=true;l2.registered=true;burst(1250,G-90,18);start(lines.concat(contest,reelLines()),()=>{reelGot();sayToast("Registered! Head on through to the festival →")})};
+  const done=lines=>{l2.festReg=true;l2.registered=true;burst(1250,G-90,18);start(lines.concat(contest),()=>sayToast("Registered! Head on through to the festival →"))};
   const pay=()=>{if(coins<5){start([["Registrar","You've got "+coins+" coin"+(coins===1?"":"s")+". It's 5 to get in — or wear an official Festival Pin and walk right in! Psst: folks say there's a tree by the lake with coins in it. The lake path is just back that way."]],()=>sayToast("Not enough coins (you have "+coins+", need 5)."));return}coins-=5;done([["Registrar","Five coins — received! Here's your wristband. Welcome to the Town Art Festival!"]])};
   const bargain=()=>{l2.bargained=true;start([
     ["Sarah","Is there… any wiggle room on that price?"],
@@ -1771,7 +1810,7 @@ function festRegistrar(){
         ["Registrar",["Red","Blue","Green"][k]+"? Ohh, so close. That's an RGB answer."],
         ["Registrar","I know, I know — we're all on a screen, so RGB makes sense. But I'm a printer at heart. CMYK! Cyan, magenta, yellow, key. Screens just aren't my type."],
         ["Registrar","So… still 5 coins. Or a Festival Pin. Rules are rules, even for funny people."]
-      ].concat(reelLines()),reelGot)}]])};
+      ])}]])};
   const opts=has("Festival Pin")?["Pay 5 coins","I'll put my pin on"]:["Pay 5 coins"];if(!l2.bargained)opts.push("Try bargaining");if(!has("Festival Pin"))opts.push("Not right now");
   const pick=i=>{const o=opts[i];if(o==="Pay 5 coins")pay();else if(o==="Try bargaining")bargain();else if(o==="I'll put my pin on"){pinWorn=true;sayToast("Sarah pins the Festival Pin to her dress. Fancy!");start([["Sarah","One second… *pins the Festival Pin on* …ta-da!"]],festRegistrar)}else start([["Registrar","No problem! The festival will be here. So will I. Forever, probably."]])};
   if(pinWorn){l2.bargained=true;start([["Registrar","Welcome to the festival! Registration is 5 coi— oh! Is that an official Festival Pin you're wearing?"],["Registrar","Pin-wearers get in FREE! Put your coins away. Welcome, welcome!"],
@@ -1872,7 +1911,8 @@ function lakeInteract(){
   if(near(250,24))return["Read the sign",()=>start([["Sign","EGGS: ONLY FOR FRIENDS OF THE DOG. (The dog decides who his friends are. The dog is very picky.)"]])];
   if(near(395,50))return["Peek into the coop",()=>sayToast("Bawk. Three chickens eye you suspiciously. A very serious dog stands between you and the eggs.")];
   if(near(530,30))return T("Talk to the dog",waffles);
-  if(near(DOCK.x+DOCK.w-40,50))return[hasReel?"Cast your line":"Fish (you need a fishing pole)",()=>{if(!hasReel){sayToast("You'd need a fishing pole. The Registrar at the orchard table had a very chatty one…");return}castLine()}];
+  if(near(DOCK.x+60,40))return["Read the sign",()=>start([["Sign","FISHING AREA. Bring your own pole. (The fish bring their own fish.)"]])];
+  if(near(DOCK.x+DOCK.w-40,50))return[hasReel?"Cast your line":"Fish (you need a fishing pole)",()=>{if(!hasReel){sayToast("You'd need a fishing pole. Nobody around here seems to have one to spare.");return}castLine()}];
   return null;
 }
 function waffles(){
@@ -1895,9 +1935,10 @@ function meetReel(){
     ["Reel","Stand at the end of the dock and press Space to cast. Watch the bobber. When it gets yanked under — press Space again, fast! You've got two seconds. No pressure. Lots of pressure."]
   ],()=>{hasReel=true;equipped="Reel";burst(1000,G-30,16,["#7cc6f2","#fff","#f4c84f"]);sayToast("Reel joined you! Stand at the end of the dock and press Space to fish.")});
 }
-function castLine(){equipped="Reel";s.face=1;fish.ph=1;fish.t=0;fish.bx=1330+Math.random()*80}
+function castLine(bx){equipped="Reel";s.face=1;fish.ph=1;fish.t=0;fish.bx=bx??1330+Math.random()*80}
 function rodTip(){return[center()+36,s.y+4]}
 function fishSpace(){
+  if(fish.ph===4&&scene==="beach"){fish.ph=5;fish.t=0;fishCatchBeach();return}
   if(fish.ph===4){fish.ph=5;fish.t=0;addItem("Lake Perch");l2.fishCaught++;burst(fish.bx,G+14,18,["#7cc6f2","#fff","#f4c84f"]);
     sayToast(l2.fishCaught===1?"You caught a Lake Perch! Reel: \"Our first fish! I'm going to cry. Do fishing poles cry?\"":"You caught a Lake Perch! (That's "+count("Lake Perch")+" now.)");return}
   if(fish.ph===1)return;
@@ -1926,6 +1967,7 @@ function drawLake(){
   // dock
   for(let x=DOCK.x+20;x<DOCK.x+DOCK.w;x+=70)cut(()=>rr(x-5,G,10,70,2),"#8d5a36",{edge:4,shadow:false});
   cut(()=>rr(DOCK.x,G-6,DOCK.w,14,3),"#c58a52",{edge:6});g.strokeStyle="#8d5a36";g.lineWidth=1.5;for(let x=DOCK.x+20;x<DOCK.x+DOCK.w;x+=20){g.beginPath();g.moveTo(x,G-5);g.lineTo(x,G+7);g.stroke()}
+  cut(()=>rr(DOCK.x+56,G-74,8,70,2),"#a8714a");cut(()=>rr(DOCK.x+16,G-112,88,42,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("FISHING",DOCK.x+60,G-94);g.fillText("AREA",DOCK.x+60,G-79);g.textAlign="left";
   // exit door
   cut(()=>rr(30,G-140,80,140,10),"#7cc488",{edge:8});cut(()=>rr(42,G-128,56,128,6),"#c58a52",{edge:0,line:2,shadow:false});g.fillStyle="#f4c84f";circle(88,G-64,4);g.fill();doorLabel(70,G-172,l2.lakeFrom==="orchard"?"← ORCHARD":"← FESTIVAL");
   // coop + sign
@@ -1940,16 +1982,7 @@ function drawLake(){
   groundShadow(530,G+2,22);sprite(530,G+2,58,48,drawDogBody,{sx:center()<530?-1:1});
   // Reel waiting on the dock
   drawLoot();drawParticles();drawSarah();
-  // fishing line + bobber
-  if(fish.ph>0&&fish.ph<5){const [tx,ty]=rodTip();let bx=fish.bx,by=wy+Math.sin(time*3)*2+fish.dip*10;
-    if(fish.ph===1){const k=Math.min(1,fish.t/.6);bx=tx+(fish.bx-tx)*k;by=ty+(wy-ty)*k-Math.sin(k*Math.PI)*90}
-    if(fish.ph===4)by=wy+12;
-    g.strokeStyle="rgba(255,255,255,.9)";g.lineWidth=1.5;g.beginPath();g.moveTo(tx,ty);g.quadraticCurveTo((tx+bx)/2,Math.min(ty,by)-20,bx,by);g.stroke();
-    if(fish.ph>=3&&fish.dip>0){g.strokeStyle="#fff";g.lineWidth=2;g.beginPath();g.ellipse(bx,wy+4,14+(.3-fish.dip)*40,4,0,0,7);g.stroke()}
-    if(fish.ph===4){g.strokeStyle="#fff";g.lineWidth=3;for(let r=10;r<40;r+=12){g.beginPath();g.ellipse(bx,wy+4,r+Math.sin(time*20)*3,r*.3,0,0,7);g.stroke()}}
-    else{cut(()=>{g.beginPath();g.arc(bx,by,7,0,7)},"#e5463f",{edge:3,shadow:false});g.fillStyle="#fff";g.fillRect(bx-7,by,14,4)}
-    if(fish.ph===4){cut(()=>{g.beginPath();g.ellipse(center(),s.y-34,16,18,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 24px "+FONT;g.textAlign="center";g.fillText("!",center(),s.y-25);g.textAlign="left"}}
-  if(fish.ph===5){const k=fish.t/1.1;drawIcon("Lake Perch",center()+10,s.y-40-k*20,1)}
+  drawFishing(wy,"Lake Perch");
   g.restore();
 }
 function drawSpikeBody(){
@@ -2061,6 +2094,489 @@ function updateFinaleClimb(){
 }
 
 resetL2Extra();
+
+// ===========================================================================
+// LEVEL 3 — The Watercolor Coast (3-1 beach & shipwreck, 3-2 the Gray Lighthouse)
+// ===========================================================================
+const BEACH_W=3600,WATER={x0:2150,x1:3010},LH_DOOR=3300,WRECK={x:2360,w:360,y:G-86},STERN=2690,GEM_SPOT=2790,DY=-1390;
+const BEACH_SOLID=[{x:-50,y:G,w:2200,h:100},{x:3010,y:G,w:700,h:100},{x:2205,y:G-22,w:64,h:22,rock:1},{x:2290,y:G-46,w:60,h:22,rock:1},{x:WRECK.x,y:WRECK.y,w:WRECK.w,h:16,deck:1},{x:2840,y:G-40,w:62,h:22,rock:1},{x:2930,y:G-22,w:64,h:22,rock:1}];
+const DIGS=[{x:430,item:"Seashell"},{x:760,coins:4},{x:1060,item:"Seashell"},{x:1330,item:"Heart Necklace"},{x:1620,item:"Seashell"},{x:1900,coins:5},{x:2040,item:"Seashell"}];
+const BEACH_SAVES=[170,2090,3160];
+const LH_STATIC=[
+  {x:560,y:355,w:150},{x:330,y:275,w:150},{x:700,y:115,w:150},{x:470,y:35,w:150},{x:250,y:-45,w:130},
+  {x:270,y:-300,w:150},{x:500,y:-380,w:130},{x:100,y:-460,w:770,landing:1},
+  {x:230,y:-700,w:60},{x:100,y:-880,w:100,alcove:1},
+  {x:690,y:-545,w:130},{x:420,y:-705,w:120},{x:620,y:-785,w:130},
+  {x:560,y:-1060,w:140},{x:330,y:-1140,w:140},{x:700,y:-1300,w:150},{x:180,y:DY,w:690,deck:1}];
+const LH_MOVERS=[{x0:420,y0:195,w:110,ax:220,ay:0,per:4.2},{x0:140,y0:-40,w:100,ax:0,ay:-190,per:5},{x0:430,y0:-625,w:100,ax:220,ay:0,per:4.4},
+  {x0:760,y0:-790,w:90,ax:0,ay:-190,per:5},{x0:400,y0:-1220,w:100,ax:220,ay:0,per:4},{x0:120,y0:-470,w:70,ax:0,ay:-150,per:2.8},{x0:120,y0:-790,w:72,ax:180,ay:0,per:3.6}];
+const LH_SAVES=[[300,G],[480,-460],[230,DY]];
+const GEM_G={x:150,y:-880},SHIELD_CHEST={x:630,y:-1060},POTION_TOP={x:310,y:DY},LAMP_X=540;
+let l3={},shield=0,checkpointY=null,chapterCard=null;
+function resetL3(){
+  l3={t:0,marina:false,marinaTalk:0,traded:false,dig:DIGS.map(()=>0),reel:false,blue:false,fishN:0,gemAt:1+Math.floor(Math.random()*5),lastCatch:"Sea Perch",
+    inLH:false,green:false,shieldChest:false,potion:false,boss:null,bossDone:false,lit:false,litT:0,safe:{x:150,y:G-s.h},tinkTip:false,crabTip:false,necklace:false,
+    movers:LH_MOVERS.map(m=>({...m,x:m.x0,y:m.y0,px:m.x0,py:m.y0,h:14,mover:1})),
+    foes:[
+      {type:"crab",scene:"beach",x:700,min:560,max:900,base:G},{type:"crab",scene:"beach",x:1250,min:1120,max:1420,base:G},{type:"crab",scene:"beach",x:1800,min:1680,max:1980,base:G},
+      {type:"gull",scene:"beach",x:1000,min:820,max:1200,base:G},{type:"gull",scene:"beach",x:1700,min:1500,max:1950,base:G},
+      {type:"hermit",scene:"beach",x:2470,min:2445,max:2505,base:WRECK.y},
+      {type:"hermit",scene:"lighthouse",x:775,min:715,max:835,base:115},
+      {type:"smudge",scene:"lighthouse",x:300,min:230,max:380,base:-460},{type:"hermit",scene:"lighthouse",x:700,min:620,max:800,base:-460},
+      {type:"hermit",scene:"lighthouse",x:680,min:640,max:730,base:-785},{type:"smudge",scene:"lighthouse",x:400,min:350,max:450,base:-1140}
+    ].map((f,i)=>({...f,alive:true,flat:0,t:0,ph:i*.7,dir:i%2?1:-1,speed:f.type==="crab"?80:f.type==="hermit"?40:60,flip:0,mode:"fly",cool:1.5+i*.4,y:f.base-150,carry:0}))};
+  shield=0;
+}
+resetL3();
+const CRE_NAME={smudge:"Smudge",crab:"Sidecrab",hermit:"Hermit Smudge",gull:"Gull"};
+function startLevel3(){
+  level=3;resetL3();dogOn=false;balloonOn=false;showEndScreen=false;complete=false;invOpen=false;parts=[];loot=[];hasDab=true;health=maxHealth;
+  goScene("beach",90);s.face=1;s.flip=1;checkpointScene="beach";checkpoint=170-s.w/2;checkpointY=G-s.h;if(hasNib)equipped="Nib";
+  start([
+    ["Narrator","Sarah steps through the door from the sky. For a moment there's nothing but inky dark and the smell of fresh paint…"],
+    ["Narrator","…then FWUMP. She lands face-first in warm, wet sand."],
+    ["Sarah","Pfft! Sand! Wet sand! Why is the sand wet AND teal?"],
+    ["Dab","That's not sand, that's paint! This whole beach was painted so recently it's still dripping."],
+    ["Nib","And the colors are running right down into the sea. That can't be good."],
+    ["Narrator","Down the shore, someone is waving a claw from a little shell-shaped shack."]
+  ],()=>{chapterCard={t:0,title:"Chapter 3-1",sub:"The Watercolor Coast"};sayToast("Walk right and say hi to the hermit crab at the shell shack.")});
+}
+function saveL3(x,y){checkpoint=x-s.w/2;checkpointY=y-s.h;checkpointScene=scene;health=maxHealth;burst(x,y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back to this Save Block.")}
+function respawnL3(){health=maxHealth;goScene(checkpointScene,checkpoint+s.w/2,checkpointY??G-s.h);if(l3.boss&&!l3.bossDone){l3.boss=null}}
+function hurtHP(){if(shield>0){shield--;burst(center(),s.y+30,16,["#7cc6f2","#fff","#b98ad8"]);sayToast(shield===0?"CRACK! The Shell Shield breaks away. It did its best!":"The Shell Shield blocks the hit! (1 more hit left)");return false}health--;return true}
+function hurt3(fromX,msg){if(s.inv>0)return;s.inv=1.3;s.vy=-320;s.x+=center()<fromX?-46:46;shake=.3;const real=hurtHP();
+  if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples at the Save Block. Paper is resilient like that.");return}if(real&&msg)sayToast(msg)}
+function l3Plats(){if(scene==="beach")return BEACH_SOLID;return[{x:-50,y:G,w:1100,h:100},...LH_STATIC,...l3.movers]}
+function onPlat(y){return s.ground&&Math.abs(s.y+s.h-y)<4}
+const onStern=()=>scene==="beach"&&near(STERN,44)&&onPlat(WRECK.y);
+function l3Pre(dt){
+  l3.t+=dt;
+  for(const m of l3.movers){m.px=m.x;m.py=m.y;const k=(1-Math.cos(l3.t*Math.PI*2/m.per))/2;m.x=m.x0+m.ax*k;m.y=m.y0+m.ay*k}
+  if(scene==="lighthouse"&&s.ground&&s.plat&&s.plat.mover){s.x+=s.plat.x-s.plat.px;s.y=s.plat.y-s.h}
+}
+function l3GroundUnder(){let best=null;for(const p of l3Plats())if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4&&(best===null||p.y<best))best=p.y;return best??G+300}
+
+// ---- interactions ----
+function beachInteract(){
+  if(fish.ph>0)return null;const T=(l,f)=>[l,f,true];
+  if(near(330,40)&&onFloor())return T("Talk to Marina",marina);
+  for(const x of BEACH_SAVES)if(near(x,30)&&onFloor())return["Save at the Save Block",()=>saveL3(x,G)];
+  for(let i=0;i<DIGS.length;i++)if(l3.dig[i]===1&&near(DIGS[i].x,40)&&onFloor())return["Dig here",()=>dig(i)];
+  if(!l3.reel&&near(2560,46)&&onPlat(WRECK.y))return["Open the treasure chest",openReelChest];
+  if(onStern())return[hasReel?"Cast your line":"Look at the water",()=>{if(!hasReel){sayToast("Deep blue water… and something glinting way down below. You'd need a fishing pole.");return}castLine(GEM_SPOT-20+Math.random()*50)}];
+  if(near(LH_DOOR,40)&&onFloor())return["Enter the lighthouse",lhDoor];
+  if(near(2110,22)&&onFloor())return["Read the sign",()=>start([["Sign","SHIPWRECK AHEAD → Hop the rocks. Mind the water. The water does not mind you."]])];
+  return null;
+}
+function lhInteract(){
+  if(near(150,40)&&onPlat(G))return["Back to the beach",()=>{goScene("beach",LH_DOOR);sayToast("Back out on the beach.")}];
+  for(const [x,y] of LH_SAVES)if(near(x,30)&&onPlat(y))return["Save at the Save Block",()=>saveL3(x,y)];
+  if(!l3.shieldChest&&near(SHIELD_CHEST.x,44)&&onPlat(SHIELD_CHEST.y))return["Open the chest",shieldChest];
+  if(l3.bossDone&&!l3.lit&&near(LAMP_X,70)&&onPlat(DY))return T3("Set the gems in the lamp",lamp);
+  return null;
+}
+const T3=(l,f)=>[l,f,true];
+function marina(){
+  const n=l3.marinaTalk++;
+  if(!l3.marina){l3.marina=true;start([
+    ["Marina","Ahoy, landlubber! Name's Marina. I run this shell shack. Well — I AM the shell shack. The shack is my shell."],
+    ["Sarah","Hi! I'm Sarah. Sorry about the… face-first landing."],
+    ["Marina","Happens all the time since the sky ripped. Folks drop in, colors drip out. Big mess."],
+    ["Marina","But a mess brings treasure! The waves have been washing all sorts of things into the sand. And the sea's full of goodies too — there's a shipwreck right offshore."],
+    ["Dab","Treasure buried in the sand? That's my specialty! Equip me (E) and press Q — I'll sniff out anything hiding down there."],
+    ["Marina","And if you dig up any seashells, bring me 3. I'll trade you something nice. A crab's gotta decorate."],
+    ["Marina","Oh — and watch out for the Sidecrabs. When their claws are up, DON'T jump on them. Trust me. They're my cousins. They're the worst."]
+  ],()=>sayToast("Equip Dab (E) and press Q to sniff out buried treasure!"));return}
+  if(count("Seashell")>=3&&!l3.traded){start([["Marina","Ooh, is that a pocketful of shells I hear? Three seashells for a Health Potion — deal?",["Trade 3 shells","Not yet"],k=>{
+    if(k===0){useOne("Seashell");useOne("Seashell");useOne("Seashell");l3.traded=true;addItem("Health Potion");burst(330,G-70,14);start([["Marina","Pleasure doing business! My shell's going to look FABULOUS."]],()=>sayToast("Traded 3 seashells for a Health Potion!"))}
+    else start([["Marina","No rush. Shells keep. Mostly."]])}]]);return}
+  const l=l3.lit?["You did it! The coast is all colors again. My shell has never looked so pink.","Come back any time, Sarah. Bring shells. Always bring shells."]
+    :hasReel?["The lighthouse has been flickering for days. If it goes dark, the whole coast goes gray. No pressure, kid.","Lighthouse is on the point — hop across the rocks past the shipwreck."]
+    :has("Heart Necklace")?["Ooh, that heart necklace! Fancy. Very fancy. A little dramatic. I love it.","Have you checked the shipwreck yet? Something on that deck keeps rattling."]
+    :["Shells, coins, lost junk — the sand's full of it. Let that paintbrush sniff around!","Hop across the rocks to reach the shipwreck. Fall in and you'll be one soggy piece of paper."];
+  start([["Marina",l[n%l.length]]]);
+}
+function dabBeach(){
+  const hit=DIGS.map((d,i)=>i).filter(i=>l3.dig[i]===0&&Math.abs(DIGS[i].x-center())<320);
+  if(!hit.length)return false;hit.forEach(i=>{l3.dig[i]=1;burst(DIGS[i].x,G-10,12,["#3bb6c4","#fff","#f4c84f"])});
+  sayToast(hit.length>1?"Dab sniffed out "+hit.length+" buried treasures! Stand on an X and press Space to dig.":"Dab sniffed out something buried! Stand on the X and press Space to dig.");return true;
+}
+function dig(i){
+  const d=DIGS[i];l3.dig[i]=2;burst(d.x,G-8,16,["#f1d39b","#e0b877","#fff"]);
+  if(d.coins){coins+=d.coins;sayToast("You dig up "+d.coins+" coins! Pirates are terrible at hiding money.");return}
+  addItem(d.item);
+  if(d.item==="Heart Necklace"){l3.necklace=true;start([
+    ["Narrator","Under the sand: a glittering necklace with a big heart-shaped gem, red as a cherry."],
+    ["Sarah","Whoa. This looks like it belongs to someone very fancy, on a very big boat."],
+    ["Dab","That gem is glowing. Like… REALLY glowing. Hold onto that one."]],()=>sayToast("Got the Heart Necklace! (It's in Key Items.)"));return}
+  sayToast("You dig up a Seashell! ("+count("Seashell")+" so far. Marina wants 3.)");
+}
+function openReelChest(){
+  l3.reel=true;burst(2560,WRECK.y-30,24,["#7cc6f2","#fff","#f4c84f"]);
+  const red=has("Heart Necklace")?["Reel","Wait — that heart necklace in your pocket! That gem is glowing red. That's the Red gem!"]:["Reel","The Red gem washed up on this beach somewhere. Look for something buried — your paintbrush can sniff it out!"];
+  start([
+    ["Narrator","Sarah lifts the lid of the seaweedy treasure chest. It's heavier than it looks. It's also… humming?"],
+    ["Narrator","FWOOMP! Something springs out of the chest!"],
+    ["Reel","TA-DAAA! Oh. Not pirates. Phew. Hi! Hello! I'm Reel!"],
+    ["Sarah","A fishing pole… in a treasure chest?"],
+    ["Reel","I got flung off a fishing boat when the sky ripped, and I've been hiding in here ever since. The crabs are mean. The gulls are meaner."],
+    ["Dab","Another little buddy! The more the merrier!"],
+    ["Reel","Listen — the lighthouse on the point is failing. Its lamp runs on three magic gems: Red, Green and Blue. RGB!"],
+    ["Nib","Not CMYK? Somewhere, a festival Registrar just felt a chill."],
+    ["Reel","If the lamp goes out, the colors keep running into the sea until the whole coast is gray."],
+    red,
+    ["Reel","The Blue gem sank right next to this wreck. Stand at the back of the ship, equip me and press Space to cast. We'll fish it out!"],
+    ["Reel","And the Green gem is somewhere up inside the lighthouse. Somebody hid it really well."]
+  ],()=>{hasReel=true;equipped="Reel";sayToast("Reel joined you! Stand at the back of the shipwreck and press Space to fish.")});
+}
+function lhDoor(){
+  if(!hasReel){sayToast("The lighthouse door is stuck tight. Maybe someone around here knows what's going on…");return}
+  if(!has("Heart Necklace")||!has("Blue Gem")){start([["Reel","Not yet! The lamp needs all three gems. Let's get the Red and Blue ones here on the beach first."+(has("Heart Necklace")?" The Blue one's still in the sea by the wreck.":has("Blue Gem")?" The Red one's buried in the sand somewhere.":"")]]);return}
+  goScene("lighthouse",230);checkpointScene="lighthouse";checkpoint=300-s.w/2;checkpointY=G-s.h;
+  if(!l3.inLH){l3.inLH=true;start([
+    ["Narrator","Inside, the lighthouse is gray from floor to ceiling, and a long, long way up."],
+    ["Reel","The lamp's at the very top. Ride the moving platforms!"],
+    ["Dab","And keep your eyes peeled for something green and sparkly."]],()=>{chapterCard={t:0,title:"Chapter 3-2",sub:"The Gray Lighthouse"}})}
+}
+function shieldChest(){l3.shieldChest=true;addItem("Shell Shield");burst(SHIELD_CHEST.x,SHIELD_CHEST.y-40,20,["#7cc6f2","#fff","#f4c84f"]);
+  start([["Narrator","Inside the chest: a shimmery shield made from a giant seashell."],["Nib","Ooh! Use it from your Pockets and it'll block two hits before it breaks. Save it for something big."]],()=>sayToast("Got the Shell Shield! Use it from Pockets (I) — it blocks 2 hits."))}
+function useShield(){if(shield>0){sayToast("You're already shielded!");return}useOne("Shell Shield");shield=2;invOpen=false;burst(center(),s.y+30,18,["#7cc6f2","#fff","#b98ad8"]);sayToast("The Shell Shield wraps around you in a shimmery bubble. It'll block 2 hits!")}
+
+// ---- fishing at the shipwreck ----
+function fishCatchBeach(){
+  if(!l3.blue&&l3.fishN>=l3.gemAt){l3.blue=true;l3.lastCatch="Blue Gem";addItem("Blue Gem");burst(fish.bx,G+10,26,["#3b8fd6","#7cc6f2","#fff"]);
+    start([["Narrator","Something heavy is on the line… and it's glowing blue!"],["Reel","THE BLUE GEM! Fishing pole of the year, right here. Right here!"],["Dab",has("Heart Necklace")?"That's Red and Blue! Now to the lighthouse — it's past the rocks on the right.":"That's Blue! Now we still need the Red one. Something buried on the beach, maybe?"]],()=>sayToast("Got the Blue Gem!"));return}
+  l3.fishN++;l3.lastCatch="Sea Perch";addItem("Sea Perch");burst(fish.bx,G+14,18,["#7cc6f2","#fff","#f4c84f"]);
+  const l=["You caught a Sea Perch! Reel: \"Not blue. But very handsome.\"","Another Sea Perch! Reel: \"The gem's down there. I can feel it in my reel.\"","A Sea Perch! Reel: \"Keep going! Third time's the… fourth time's the… keep going!\"","Sea Perch again! Reel: \"So close. I can smell it. Gems don't smell. But still.\""];
+  sayToast(l3.blue?"You caught a Sea Perch! (That's "+count("Sea Perch")+" now.)":l[Math.min(l3.fishN-1,3)]);
+}
+
+// ---- creatures ----
+const clawsUp=f=>((f.t+f.ph)%2.8)<1.3;
+function killFoe(f){f.alive=false;burst(f.x,(f.type==="gull"?f.y:f.base-20),14,[INK,"#5b5277","#fff","#e5577b"]);const got=1+(f.carry||0);coins+=got;
+  gainXP(CRE_NAME[f.type],f.x,(f.type==="gull"?f.y:f.base)-50);if(f.carry)sayToast("You got your coin back! (+"+got+" coins)")}
+function updateFoes3(dt,oldFeet){
+  for(const f of l3.foes){if(f.scene!==scene)continue;
+    if(!f.alive){f.flat=Math.min(1,f.flat+dt*3);continue}
+    f.t+=dt;
+    if(f.type==="gull"){updateGull(f,dt,oldFeet);continue}
+    if(f.flip>0)f.flip-=dt;else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}}
+    const top=f.base-32;
+    if(s.x+s.w>f.x-22&&s.x<f.x+22&&s.y+s.h>top&&s.y<f.base){
+      const stomp=s.vy>0&&oldFeet<=top+14;
+      if(stomp){
+        if(f.type==="crab"&&clawsUp(f)){hurt3(f.x,"PINCH! Never stomp a Sidecrab while its claws are up! (-1 health)")}
+        else if(f.type==="hermit"&&!(f.flip>0)){s.vy=-430;burst(f.x,top,6,["#fff","#c9d6d4"]);if(!l3.tinkTip){l3.tinkTip=true;sayToast("TINK! Its shell is too hard to stomp. Flip it over with Nib (Q) first!")}}
+        else{killFoe(f);s.vy=-430}
+      }else if(!(f.type==="hermit"&&f.flip>0))hurt3(f.x,f.type==="crab"?"Pinched by a Sidecrab! (-1 health)":"Ouch! (-1 health)");
+    }
+  }
+}
+function updateGull(f,dt,oldFeet){
+  const hy=f.base-150;
+  if(f.mode==="swoop"){f.st+=dt;const k=f.st/1.4;f.x+=f.sdir*170*dt;f.y=hy+(f.base-30-hy)*Math.sin(Math.min(1,k)*Math.PI);if(k>=1){f.mode="fly";f.cool=2.6+Math.random()*1.4;f.stole=false}}
+  else{f.x+=f.dir*90*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}f.y=hy+Math.sin(f.t*2)*10;f.cool-=dt;
+    if(f.cool<=0&&Math.abs(center()-f.x)<240&&Math.abs(s.y+s.h-f.base)<60){f.mode="swoop";f.st=0;f.sdir=Math.sign(center()-f.x)||1;f.dir=f.sdir}}
+  if(s.x+s.w>f.x-24&&s.x<f.x+24&&s.y+s.h>f.y-20&&s.y<f.y+8){
+    if(s.vy>0&&oldFeet<=f.y-8){killFoe(f);s.vy=-430;return}
+    if(f.mode==="swoop"&&!f.stole){f.stole=true;if(coins>0){coins--;f.carry=(f.carry||0)+1;sayToast("SQUAWK! A Gull snatched a coin! Jab or stomp it to get it back.")}else hurt3(f.x,"SQUAWK! Pecked by a Gull! (-1 health)")}
+  }
+}
+function l3Jab(hx){
+  if(l3.boss&&jabBoss(hx))return true;
+  let hit=false;
+  for(const f of l3.foes){if(f.scene!==scene||!f.alive)continue;const fy=f.type==="gull"?f.y+10:f.base;
+    if(Math.abs(f.x-hx)<46&&s.y+s.h>fy-90&&s.y<fy+10){hit=true;
+      if(f.type==="hermit"&&!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#c9d6d4","#b98ad8"]);sayToast("Nib flips the Hermit Smudge onto its back! Quick — stomp it!")}
+      else if(!(f.type==="hermit"))killFoe(f)}}
+  return hit;
+}
+
+// ---- boss: The Blot ----
+function startBoss(){
+  l3.boss={hp:8,max:8,ph:"intro",t:0,cycle:0,slams:0,tent:null,blobs:[],spawn:0,headUp:0,hurtT:0};
+  const go=()=>{l3.boss.ph="tent";l3.boss.t=0;sayToast("Defeat The Blot! Jab tentacles (Q), dodge ink, stomp its head.")};
+  if(l3.bossSeen){start([["The Blot","BLOOOORP! (It's back, and it looks annoyed.)"]],go);return}
+  l3.bossSeen=true;
+  start([
+    ["Narrator","The lamp room at the top of the lighthouse. The great lamp is cold and gray."],
+    ["Narrator","Then the whole tower shudders. Something huge is climbing up out of the sea…"],
+    ["The Blot","BLOOOORP."],
+    ["Reel","That's The Blot! It's been slurping the colors out of the whole coast!"],
+    ["Nib","When its tentacles slam down, I'll jab 'em! Stand close and press Q."],
+    ["Dab","Dodge the ink drops — watch for their shadows! And when it peeks over the railing, stomp its big squishy head!"]
+  ],()=>{l3.boss.ph="tent";l3.boss.t=0;sayToast("Defeat The Blot! Jab tentacles (Q), dodge ink, stomp its head.")});
+}
+function jabBoss(hx){const b=l3.boss;if(!b||b.ph==="intro"||b.ph==="dead")return false;
+  if(b.tent&&b.tent.st==="stuck"&&hx>b.tent.x-60){b.tent.st="back";b.tent.t=0;damageBoss(1,b.tent.x,DY-20);return true}
+  if(b.ph==="head"&&b.headUp>.8&&Math.abs(hx-800)<70&&s.y+s.h>DY-120){damageBoss(1,800,DY-80);b.t=Math.max(b.t,2.6);return true}
+  return false}
+function damageBoss(n,x,y){const b=l3.boss;b.hp=Math.max(0,b.hp-n);b.hurtT=.5;shake=.4;burst(x,y,20,[INK,"#5b2a6e","#fff","#b98ad8"]);if(b.hp<=0)defeatBoss()}
+function defeatBoss(){const b=l3.boss;b.ph="dead";b.tent=null;b.blobs=[];l3.bossDone=true;flash=.6;gainXP("The Blot",800,DY-140);
+  start([
+    ["Narrator","The Blot lets out a long, gurgly wail. It shrinks… and shrinks… until it's a tiny ink squid the size of a teacup."],
+    ["The Blot","…bloop."],
+    ["Reel","Aww. It's kind of cute now."],
+    ["Dab","Ink monsters are always grumpy when they're big. It's the pressure."],
+    ["Narrator","The tiny squid plops back into the sea with a sulky little splash. The lamp room is clear!"]
+  ],()=>{l3.boss=null;sayToast(has("Green Gem")?"Set the three gems in the lamp! (Space next to the lamp.)":"Set the gems in the lamp! (Space next to it.) …You'll need the Green Gem, too.")});
+}
+function updateBoss(dt,oldFeet){
+  const b=l3.boss;if(!b||b.ph==="intro"||b.ph==="dead")return;
+  b.t+=dt;b.hurtT=Math.max(0,b.hurtT-dt);s.x=clamp(s.x,190,870-s.w);
+  const onDeck=s.y+s.h>DY-30&&s.y+s.h<=DY+4;
+  if(b.ph==="tent"){
+    if(!b.tent){if(b.t>.6)b.tent={x:clamp(center(),230,780),st:"warn",t:0}}
+    else{const T=b.tent;T.t+=dt;
+      if(T.st==="warn"&&T.t>1.1){T.st="slam";T.t=0;shake=.3;if(Math.abs(center()-T.x)<46&&onDeck)hurt3(T.x,"WHAM! The tentacle got you! (-1 health)")}
+      else if(T.st==="slam"&&T.t>.15){T.st="stuck";T.t=0}
+      else if(T.st==="stuck"&&T.t>2.2){T.st="back";T.t=0}
+      else if(T.st==="back"&&T.t>.5){b.tent=null;b.slams++;b.t=0;if(b.slams>=2+(b.cycle>0?1:0)){b.slams=0;b.ph="rain";b.t=0;b.spawn=0}}}
+  }else if(b.ph==="rain"){
+    b.spawn-=dt;if(b.t<4.4&&b.spawn<=0){b.spawn=.5;const x=(b.blobs.length%2)?clamp(center()+(Math.random()-.5)*60,210,850):210+Math.random()*640;b.blobs.push({x,t:0})}
+    for(const o of b.blobs){o.t+=dt;if(!o.hit&&o.t>=.9){o.hit=true;burst(o.x,DY-6,10,[INK,"#5b2a6e"]);if(Math.abs(center()-o.x)<32&&onDeck)hurt3(o.x,"SPLAT! Ink drop! (-1 health)")}}
+    b.blobs=b.blobs.filter(o=>o.t<1.4);if(b.t>5.6&&!b.blobs.length){b.ph="head";b.t=0;b.headUp=0}
+  }else if(b.ph==="head"){
+    b.headUp=b.t<.7?b.t/.7:b.t<3.6?1:Math.max(0,1-(b.t-3.6)/.6);
+    if(b.headUp>.8){const top=DY-104;if(s.x+s.w>752&&s.x<848&&s.y+s.h>top&&s.y<DY){
+      if(s.vy>0&&oldFeet<=top+16){s.vy=-560;damageBoss(2,800,top);if(b.ph==="head")b.t=Math.max(b.t,3.6)}
+      else hurt3(800,"The Blot bumps you away! Stomp its head from ABOVE. (-1 health)")}}
+    if(b.t>4.2){b.ph="tent";b.t=0;b.cycle++;b.headUp=0}
+  }
+}
+
+// ---- lamp + ending ----
+function lamp(){
+  const need=["Heart Necklace","Blue Gem","Green Gem"].filter(n=>!has(n));
+  if(need.length){start([["Narrator","Sarah sets the gems she has into the lamp. "+(need.includes("Green Gem")?"The green socket stays dark and empty.":"Something's still missing.")],
+    ["Reel",need.includes("Green Gem")?"The Green gem! It's still somewhere in this lighthouse. I saw a green glint on the left side, about halfway down — up above the big landing.":"We're still missing a gem!"]]);return}
+  removeItem("Heart Necklace");removeItem("Blue Gem");removeItem("Green Gem");
+  start([
+    ["Narrator","Sarah sets the three gems into the lamp, one by one. Red. Green. Blue."],
+    ["Narrator","The lamp hums… flickers… and then BLAZES with pure white light!"],
+    ["Reel","Red plus green plus blue makes WHITE! Light is SO weird!"],
+    ["Dab","Paint all mixed together makes mud. Light all mixed together makes sunshine. I'm not jealous. I'm a little jealous."],
+    ["Narrator","The beam sweeps out across the sea. Everywhere it touches, the runny colors snap back into place: the sand, the waves, the shipwreck, the sky."],
+    ["Sarah","The Watercolor Coast looks like a painting again. A finished one."]
+  ],()=>{l3.lit=true;flash=1;burst(LAMP_X,DY-110,40,["#e5463f","#5fb35a","#3b8fd6","#fff","#f4c84f"]);setTimeout(()=>{complete=true;showEndScreen=true;endT=0},1600)});
+}
+
+// ---- main per-frame update ----
+function updateL3(dt,oldFeet){
+  if(scene==="lighthouse")s.x=clamp(s.x,90,870-s.w);
+  if(s.ground&&s.plat&&!s.plat.mover)l3.safe={x:s.x,y:s.y};
+  if(scene==="beach"){
+    if(s.y+s.h>G+34){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=l3.safe.x;s.y=l3.safe.y;s.vy=0;shake=.3;const real=hurtHP();
+      if(health<=0){respawnL3();sayToast("SPLASH! Sarah crumples… soggily… then uncrumples at the Save Block.")}else if(real)sayToast("SPLASH! Sarah fishes herself out of the sea. (-1 health) Paper and water: not friends.")}
+    if(s.x<=0&&(keys.has("a")||keys.has("ArrowLeft"))&&!l3.edgeTip){l3.edgeTip=true;sayToast("Nothing back that way but wet paint and the inky dark. Onward →")}
+  }
+  if(scene==="lighthouse"){
+    if(!l3.green&&Math.abs(center()-GEM_G.x)<30&&s.y+s.h>GEM_G.y-60&&s.y<GEM_G.y){l3.green=true;addItem("Green Gem");burst(GEM_G.x,GEM_G.y-30,26,["#5fb35a","#a6e39a","#fff"]);
+      start([["Narrator","Tucked into a dusty nook: a gem, glowing green as a fresh leaf."],["Dab","The GREEN GEM! Whoever hid it up here really didn't want it found."],["Reel","That's all three! Red, Green, Blue. Now up to the lamp!"]],()=>sayToast("Got the Green Gem!"));return}
+    if(!l3.potion&&Math.abs(center()-POTION_TOP.x)<26&&onPlat(DY)){l3.potion=true;addItem("Health Potion");burst(POTION_TOP.x,DY-30,14,["#ff6f9c","#fff"]);sayToast("Found a Health Potion! Use it from Pockets (I) if things get rough.")}
+    if(!l3.bossDone&&!l3.boss&&onPlat(DY)&&center()>440){startBoss();return}
+    updateBoss(dt,oldFeet);if(dlg.on)return;
+  }
+  updateFoes3(dt,oldFeet);
+}
+
+// ---- drawing ----
+const WC_BLOBS=[[100,120,70,"#e5577b"],[380,80,90,"#f4c84f"],[700,150,80,"#7cc6f2"],[1000,90,100,"#b98ad8"],[1250,160,70,"#5fb35a"]];
+function drawSand(x0,x1){const a=Math.max(x0,camera-20),b=Math.min(x1,camera+W+20);if(b<=a)return;
+  g.fillStyle=l3.lit?"#f3d79f":"#e9d8b8";g.fillRect(a,G,b-a,H-G);
+  g.fillStyle=l3.lit?"#e6c27f":"#d9c6a3";for(let x=Math.floor(a/50)*50;x<b;x+=50){if(x<a)continue;g.fillRect(x+10,G+40+(x/50%3)*20,14,4);g.fillRect(x+30,G+80,10,4)}
+  g.fillStyle="#fff";g.beginPath();g.moveTo(a,G+6);for(let x=a;x<=b;x+=24)g.lineTo(x,G-3+Math.sin(x*.05)*2);g.lineTo(b,G+6);g.fill();
+  g.strokeStyle=INK;g.lineWidth=2;g.beginPath();for(let x=a;x<=b;x+=24)g.lineTo(x,G+Math.sin(x*.05)*2);g.stroke()}
+function drawWater(x0,x1){const gr=g.createLinearGradient(0,G,0,H);gr.addColorStop(0,l3.lit?"#5fb7e8":"#8eb6cf");gr.addColorStop(1,l3.lit?"#2f7fc8":"#6a8aa6");g.fillStyle=gr;g.fillRect(x0,G+4,x1-x0,H-G);
+  g.strokeStyle="rgba(255,255,255,.85)";g.lineWidth=2;for(let i=0;i<14;i++){const x=x0+20+i*62+Math.sin(time+i)*10;if(x>x1-30)break;g.beginPath();g.moveTo(x,G+20+i%3*22);g.quadraticCurveTo(x+12,G+14+i%3*22,x+24,G+20+i%3*22);g.stroke()}
+  g.strokeStyle=INK;g.lineWidth=2;g.beginPath();for(let x=x0;x<=x1;x+=16)g.lineTo(x,G+4+Math.sin(x*.08+time*2)*2.5);g.stroke()}
+function drawRock(p){cut(()=>{g.beginPath();g.moveTo(p.x-4,G+30);g.lineTo(p.x,p.y+6);g.quadraticCurveTo(p.x+p.w/2,p.y-6,p.x+p.w,p.y+6);g.lineTo(p.x+p.w+4,G+30);g.closePath()},"#8f8aa0",{edge:6});g.fillStyle="rgba(255,255,255,.25)";g.fillRect(p.x+10,p.y+4,p.w-20,4)}
+function drawWreck(){
+  const x=WRECK.x,y=WRECK.y;
+  cut(()=>{g.beginPath();g.moveTo(x-20,y+4);g.lineTo(x+WRECK.w+30,y-14);g.lineTo(x+WRECK.w-10,G+60);g.lineTo(x+20,G+60);g.closePath()},"#8d5a36",{edge:8});
+  g.strokeStyle="#6b4126";g.lineWidth=2;for(let i=1;i<5;i++){g.beginPath();g.moveTo(x-10+i*4,y+i*22);g.lineTo(x+WRECK.w+20-i*8,y-10+i*22);g.stroke()}
+  g.fillStyle="#2f2a4a";circle(x+90,y+50,10);g.fill();circle(x+170,y+46,10);g.fill();circle(x+250,y+42,10);g.fill();
+  cut(()=>rr(x,y,WRECK.w,14,3),"#c58a52",{edge:5});
+  cut(()=>rr(x+116,y-170,12,170,3),"#a8714a",{edge:5});cut(()=>{g.beginPath();g.moveTo(x+128,y-160);g.quadraticCurveTo(x+190,y-120,x+128,y-60);g.lineTo(x+150,y-90);g.lineTo(x+132,y-110);g.closePath()},l3.lit?"#fffdf6":"#e2ded6",{edge:5});
+  cut(()=>rr(x+112,y-176,20,8,3),"#a8714a",{edge:4,shadow:false});
+  drawChest(2531,y-38,l3.reel,"#b9693c");if(!l3.reel){g.fillStyle="#5fb35a";for(let i=0;i<3;i++){g.beginPath();g.ellipse(2540+i*18,y-28+Math.sin(time*2+i)*2,4,10,.5,0,7);g.fill()}}
+  if(!l3.blue&&hasReel){g.save();g.globalAlpha=.4+Math.sin(time*4)*.3;g.fillStyle="#7cc6f2";star(GEM_SPOT,G+40,8,3);g.fill();g.restore()}
+}
+function drawShack(){
+  cut(()=>rr(200,G-150,250,150,10),l3.lit?"#ffd6e0":"#e8dde2",{edge:8});
+  cut(()=>{g.beginPath();g.moveTo(186,G-140);g.quadraticCurveTo(325,G-230,464,G-140);g.closePath()},l3.lit?"#2fb3a7":"#a9b9b6",{edge:7});
+  g.save();g.translate(325,G-175);g.strokeStyle=INK;g.lineWidth=2;g.fillStyle="#fff3d6";g.beginPath();for(let a=0;a<12;a+=.3){const r=4+a*1.6;g.lineTo(Math.cos(a)*r,Math.sin(a)*r*.8)}g.stroke();g.restore();
+  cut(()=>rr(230,G-120,190,26,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 15px "+FONT;g.textAlign="center";g.fillText("MARINA'S SHELL SHACK",325,G-102);g.textAlign="left";
+  cut(()=>rr(244,G-74,160,74,6),"#c58a52",{edge:5});g.fillStyle="#fff3d6";for(const sx of[262,300,338,376]){circle(sx,G-50,6);g.fill();g.stroke()}
+}
+function drawLighthouseOutside(){
+  const x=LH_DOOR,lit=l3.lit;
+  cut(()=>{g.beginPath();g.moveTo(x-110,G);g.quadraticCurveTo(x,G-50,x+110,G);g.closePath()},"#8f8aa0",{edge:6});
+  cut(()=>{g.beginPath();g.moveTo(x-78,G-10);g.lineTo(x-52,40);g.lineTo(x+52,40);g.lineTo(x+78,G-10);g.closePath()},lit?"#fffdf6":"#dedbe4",{edge:9});
+  g.save();g.beginPath();g.moveTo(x-78,G-10);g.lineTo(x-52,40);g.lineTo(x+52,40);g.lineTo(x+78,G-10);g.closePath();g.clip();g.fillStyle=lit?"#e5463f":"#a6a1b0";for(let y=60;y<G;y+=110)g.fillRect(x-100,y,200,50);g.restore();
+  g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.moveTo(x-78,G-10);g.lineTo(x-52,40);g.lineTo(x+52,40);g.lineTo(x+78,G-10);g.stroke();
+  cut(()=>rr(x-66,30,132,14,4),"#5b5277",{edge:5});cut(()=>rr(x-40,-40,80,70,8),lit?"#fff6a8":"#c6c3cf",{edge:6});
+  cut(()=>{g.beginPath();g.moveTo(x-48,-40);g.quadraticCurveTo(x,-90,x+48,-40);g.closePath()},lit?"#e5463f":"#8f8aa0",{edge:6});
+  if(lit){g.save();g.globalAlpha=.25+Math.sin(time*2)*.1;g.fillStyle="#fffbe0";g.beginPath();const a=Math.sin(time*.8)*.5;g.moveTo(x,-5);g.lineTo(x-700,-140+a*200);g.lineTo(x-700,60+a*200);g.closePath();g.fill();g.restore()}
+  cut(()=>rr(x-26,G-80,52,70,22),"#8d5a36",{edge:6});g.fillStyle="#f4c84f";circle(x+14,G-44,3);g.fill();doorLabel(x,G-116,"LIGHTHOUSE");
+}
+function drawDigMarks(){DIGS.forEach((d,i)=>{if(l3.dig[i]===1){g.save();g.strokeStyle="#e5577b";g.lineWidth=5;g.lineCap="round";g.beginPath();g.moveTo(d.x-12,G-6);g.lineTo(d.x+12,G+10);g.moveTo(d.x+12,G-6);g.lineTo(d.x-12,G+10);g.stroke();
+  g.globalAlpha=.5+Math.sin(time*5+i)*.4;g.fillStyle="#fff6a8";star(d.x+16,G-20,6,2.4);g.fill();g.restore()}
+  else if(l3.dig[i]===2){g.fillStyle="rgba(140,100,50,.35)";g.beginPath();g.ellipse(d.x,G+6,22,6,0,0,7);g.fill()}})}
+function drawFoe(f){
+  if(!f.alive){if(f.flat<1){const y=f.type==="gull"?f.y+18:f.base+2;sprite(f.x,y,50,40,f.type==="crab"?()=>drawCrabBody(false):f.type==="gull"?()=>drawGullBody(0):f.type==="hermit"?()=>drawHermitBody(false):drawSmudgeBody,{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat})}return}
+  if(f.type==="gull"){const flap=Math.sin(f.t*(f.mode==="swoop"?6:12));sprite(f.x,f.y+18,56,40,()=>drawGullBody(flap),{sx:f.dir>0?-1:1});
+    if(f.mode==="swoop"&&f.st<.35){g.fillStyle="#e5577b";g.font="bold 22px "+FONT;g.textAlign="center";g.fillText("!",f.x,f.y-26);g.textAlign="left"}
+    if(f.carry)drawCoin(f.x,f.y+22,6);return}
+  groundShadow(f.x,f.base+2,18);
+  if(f.type==="crab")sprite(f.x,f.base+2,54,40,()=>drawCrabBody(clawsUp(f)),{sx:1,sy:1+Math.sin(f.t*12)*.03});
+  else if(f.type==="hermit")sprite(f.x,f.base+2,50,40,()=>drawHermitBody(f.flip>0),{sx:f.dir>0?-1:1});
+  else sprite(f.x,f.base+2,46,36,drawSmudgeBody,{sx:f.dir>0?-1:1,sy:1+Math.sin(f.t*10)*.06});
+}
+function drawBeach(){
+  const lit=l3.lit;sky(lit?"#8fd3f0":"#b9c7e6",lit?"#fde8d0":"#e8e2f2");
+  g.save();g.translate(820,90);g.rotate(time*.15);g.fillStyle=lit?"#ffe48f":"#e8e2c8";for(let i=0;i<12;i++){g.rotate(Math.PI/6);g.beginPath();g.moveTo(-8,-40);g.lineTo(0,-58);g.lineTo(8,-40);g.fill()}g.restore();
+  cut(()=>{g.beginPath();g.arc(820,90,36,0,7)},lit?"#ffd65c":"#e3dcc0",{edge:8});
+  g.save();for(const [x,y,r,c] of WC_BLOBS){const px=((x-camera*.12)%1500+1500)%1500-200;g.globalAlpha=lit?.22:.12;g.fillStyle=c;circle(px,y,r);g.fill();circle(px+r*.6,y+r*.3,r*.6);g.fill()}g.restore();
+  const hz=300;const sg=g.createLinearGradient(0,hz,0,G);sg.addColorStop(0,lit?"#4fa3dc":"#9fb4c8");sg.addColorStop(1,lit?"#9fd8ee":"#c8d3dc");g.fillStyle=sg;g.fillRect(0,hz,W,G-hz+10);
+  g.strokeStyle="#fff";g.lineWidth=3;g.beginPath();g.moveTo(0,hz);g.lineTo(W,hz);g.stroke();
+  if(!lit){g.save();for(let i=0;i<9;i++){const x=((i*170-camera*.3)%1530+1530)%1530-60,y=hz+18+(i%3)*30;const c=["#e5577b","#f4c84f","#5fb35a","#b98ad8"][i%4];g.globalAlpha=.3;g.fillStyle=c;g.beginPath();g.ellipse(x+Math.sin(time*.6+i)*14,y,70+i%2*30,7,0,0,7);g.fill();g.beginPath();g.ellipse(x+40+Math.sin(time*.6+i)*14,y+8,40,5,0,0,7);g.fill()}g.restore()}
+  g.save();g.translate(-camera,0);
+  drawWater(WATER.x0,WATER.x1);drawSand(-50,WATER.x0);drawSand(WATER.x1,BEACH_W+60);
+  for(const p of BEACH_SOLID)if(p.rock)drawRock(p);
+  drawShack();drawWreck();drawLighthouseOutside();
+  cut(()=>rr(2106,G-70,8,70,2),"#a8714a");cut(()=>rr(2070,G-104,80,40,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 12px "+FONT;g.textAlign="center";g.fillText("SHIPWRECK",2110,G-88);g.fillText("AHEAD →",2110,G-74);g.textAlign="left";
+  for(const x of BEACH_SAVES){sprite(x,G-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,G+2,20)}
+  drawDigMarks();
+  groundShadow(330,G+2,26);sprite(330,G+2,74,66,drawMarinaBody,{sx:center()<330?-1:1});
+  for(const f of l3.foes)if(f.scene==="beach")drawFoe(f);
+  drawLoot();drawParticles();drawSarah();
+  if(fish.ph>0)drawFishing(G+6,l3.lastCatch);
+  g.restore();
+}
+function drawLighthouse(){
+  const lit=l3.lit;sky("#8fd3f0","#e9f8f1");
+  g.save();g.translate(0,-camY);
+  const top=-1330;
+  g.fillStyle=lit?"#f3e3c8":"#d6d2dc";g.fillRect(60,top,840,G-top+220);
+  g.strokeStyle=lit?"#e2cba6":"#c3bdca";g.lineWidth=2;
+  for(let y=G;y>top;y-=30){if(y<camY-40||y>camY+H+40)continue;g.beginPath();g.moveTo(60,y);g.lineTo(900,y);g.stroke();for(let x=60+((y/30)%2?0:40);x<900;x+=80){g.beginPath();g.moveTo(x,y);g.lineTo(x,y-30);g.stroke()}}
+  for(const wy of[150,-250,-650,-1050]){cut(()=>{g.beginPath();g.moveTo(450,wy+60);g.lineTo(450,wy);g.arc(480,wy,30,Math.PI,0);g.lineTo(510,wy+60);g.closePath()},lit?"#7cc6f2":"#aab7c4",{edge:6});g.strokeStyle="#fff";g.lineWidth=3;g.beginPath();g.moveTo(480,wy-30);g.lineTo(480,wy+60);g.moveTo(450,wy+20);g.lineTo(510,wy+20);g.stroke()}
+  g.fillStyle=lit?"#e5463f":"#8f8aa0";g.fillRect(0,top,90,G-top+220);g.fillRect(870,top,90,G-top+220);
+  g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.moveTo(90,top);g.lineTo(90,G+220);g.moveTo(870,top);g.lineTo(870,G+220);g.stroke();
+  g.fillStyle="#9b8f84";g.fillRect(60,G,840,220);g.strokeStyle=INK;g.beginPath();g.moveTo(90,G);g.lineTo(870,G);g.stroke();
+  cut(()=>rr(112,G-120,76,120,30),"#8d5a36",{edge:6});g.fillStyle="#f4c84f";circle(172,G-60,3.5);g.fill();doorLabel(150,G-152,"← BEACH");
+  // top gallery
+  cut(()=>{g.beginPath();g.moveTo(LAMP_X-80,DY);g.lineTo(LAMP_X-70,DY-150);g.lineTo(LAMP_X+70,DY-150);g.lineTo(LAMP_X+80,DY);g.closePath()},lit?"rgba(255,251,200,.9)":"rgba(200,205,215,.85)",{edge:6});
+  cut(()=>{g.beginPath();g.moveTo(LAMP_X-90,DY-150);g.quadraticCurveTo(LAMP_X,DY-230,LAMP_X+90,DY-150);g.closePath()},lit?"#e5463f":"#8f8aa0",{edge:7});
+  cut(()=>{g.beginPath();g.arc(LAMP_X,DY-80,34,0,7)},lit?"#fffbe0":"#b8b4c2",{edge:5});
+  ["#e5463f","#5fb35a","#3b8fd6"].forEach((c,i)=>{g.fillStyle=lit?c:"#8f8aa0";circle(LAMP_X-24+i*24,DY-34,7);g.fill();g.strokeStyle=INK;g.lineWidth=1.5;g.stroke()});
+  if(lit){g.save();g.globalAlpha=.3;g.fillStyle="#fffbe0";const a=Math.sin(time*.8)*.5;g.beginPath();g.moveTo(LAMP_X,DY-80);g.lineTo(LAMP_X+900,DY-260+a*200);g.lineTo(LAMP_X+900,DY+60+a*200);g.closePath();g.fill();g.beginPath();g.moveTo(LAMP_X,DY-80);g.lineTo(LAMP_X-900,DY-260-a*200);g.lineTo(LAMP_X-900,DY+60-a*200);g.closePath();g.fill();g.restore()}
+  drawBlotBack();
+  g.strokeStyle=INK;g.lineWidth=3;g.beginPath();g.moveTo(180,DY-46);g.lineTo(870,DY-46);g.stroke();for(let x=190;x<870;x+=40){g.beginPath();g.moveTo(x,DY-46);g.lineTo(x,DY);g.stroke()}
+  // platforms
+  for(const p of LH_STATIC){cut(()=>rr(p.x,p.y,p.w,14,4),p.deck?"#c58a52":p.landing?"#b98a5a":"#d9a86a",{edge:5});if(!p.deck&&!p.landing){cut(()=>{g.beginPath();g.moveTo(p.x+p.w/2-8,p.y+14);g.lineTo(p.x+p.w/2,p.y+34);g.lineTo(p.x+p.w/2+8,p.y+14);g.closePath()},"#a8714a",{edge:3,shadow:false})}}
+  for(const m of l3.movers){cut(()=>rr(m.x,m.y,m.w,14,6),"#7cc6f2",{edge:5,ink:"#2a6c99"});g.fillStyle="#fff";g.font="bold 11px "+FONT;g.textAlign="center";g.fillText(m.ax?"◀ ▶":"▲▼",m.x+m.w/2,m.y+11);g.textAlign="left"}
+  for(const [x,y] of LH_SAVES){sprite(x,y-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,y+2,20)}
+  drawChest(SHIELD_CHEST.x-29,SHIELD_CHEST.y-38,l3.shieldChest,"#3b8fd6");
+  if(!l3.green){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#a6e39a";circle(GEM_G.x,GEM_G.y-26,22);g.fill();g.restore();drawIcon("Green Gem",GEM_G.x,GEM_G.y-26+Math.sin(time*3)*3,.75)}
+  if(!l3.potion){cut(()=>rr(POTION_TOP.x-14,DY-22,28,22,4),"#a8714a",{edge:4});drawIcon("Health Potion",POTION_TOP.x,DY-40+Math.sin(time*3)*2,.6)}
+  for(const f of l3.foes)if(f.scene==="lighthouse")drawFoe(f);
+  drawBlotFront();
+  drawLoot();drawParticles();drawSarah();
+  g.restore();
+  if(l3.boss&&l3.boss.ph!=="intro"&&l3.boss.ph!=="dead"){const b=l3.boss,bw=300,bx=W/2-bw/2,by=132;cut(()=>rr(bx-10,by-26,bw+20,46,12),"#fffdf6",{edge:5});g.fillStyle=INK;g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("THE BLOT",W/2,by-8);g.textAlign="left";
+    g.fillStyle="#3a3352";rr(bx,by,bw,12,6);g.fill();g.fillStyle="#b98ad8";rr(bx,by,bw*b.hp/b.max,12,6);g.fill();g.strokeStyle=INK;g.lineWidth=1.5;rr(bx,by,bw,12,6);g.stroke()}
+}
+function blotHead(x,y,sc,angry){g.save();g.translate(x,y);g.scale(sc,sc);
+  cut(()=>{g.beginPath();g.moveTo(-70,40);g.quadraticCurveTo(-80,-60,0,-80);g.quadraticCurveTo(80,-60,70,40);g.closePath()},"#3a3352",{edge:8});
+  g.fillStyle="#fff";g.beginPath();g.ellipse(-26,-22,15,19,0,0,7);g.ellipse(26,-22,15,19,0,0,7);g.fill();g.fillStyle=INK;circle(-23,-18,7);g.fill();circle(23,-18,7);g.fill();
+  g.strokeStyle="#fff";g.lineWidth=5;g.beginPath();g.moveTo(-46,-50+(angry?6:0));g.lineTo(-12,-38);g.moveTo(46,-50+(angry?6:0));g.lineTo(12,-38);g.stroke();
+  g.fillStyle="#b98ad8";for(const [dx,dy] of[[-50,10],[40,0],[-10,-60]]){circle(dx,dy,5);g.fill()}g.restore()}
+function drawBlotBack(){const b=l3.boss;if(l3.bossDone&&!b)return;if(!b&&!(scene==="lighthouse"&&camY<-1500))return;
+  const up=b?b.headUp:0,shake2=b&&b.hurtT>0?Math.sin(time*60)*4:0;if(up<=.05)blotHead(800+shake2,DY-10+Math.sin(time*2)*4,.8,false)}
+function drawBlotFront(){const b=l3.boss;if(!b)return;const shake2=b.hurtT>0?Math.sin(time*60)*5:0;
+  if(b.headUp>.05){g.save();if(b.hurtT>0&&Math.floor(time*20)%2)g.globalAlpha=.6;blotHead(800+shake2,DY-40-64*b.headUp+40,.8,true);g.restore()}
+  const T=b.tent;if(T){let tipY=DY-8,tipX=T.x;if(T.st==="warn"){tipY=DY-200+Math.sin(T.t*14)*8}else if(T.st==="back"){tipY=DY-8-T.t*300}
+    if(T.st==="warn"){g.save();g.globalAlpha=.25+T.t*.4;g.fillStyle=INK;g.beginPath();g.ellipse(T.x,DY+2,30+T.t*14,7,0,0,7);g.fill();g.restore()}
+    g.save();g.lineCap="round";const path=()=>{g.beginPath();g.moveTo(900,DY+40);g.bezierCurveTo(880,DY-140,tipX+120,tipY-(T.st==="stuck"?20:120),tipX,tipY)};
+    path();g.strokeStyle="#fff";g.lineWidth=36;g.stroke();path();g.strokeStyle=INK;g.lineWidth=30;g.stroke();path();g.strokeStyle=b.hurtT>0?"#b98ad8":"#5b2a6e";g.lineWidth=25;g.stroke();
+    g.fillStyle="#d8b4e8";for(let k=.55;k<1;k+=.1){const t=k,mt=1-t;const bx=mt*mt*mt*900+3*mt*mt*t*880+3*mt*t*t*(tipX+120)+t*t*t*tipX,by=mt*mt*mt*(DY+40)+3*mt*mt*t*(DY-140)+3*mt*t*t*(tipY-(T.st==="stuck"?20:120))+t*t*t*tipY;circle(bx,by+6,4);g.fill()}
+    g.restore();if(T.st==="stuck"&&Math.floor(time*4)%2){g.fillStyle="#e5577b";g.font="bold 14px "+FONT;g.textAlign="center";g.fillText("JAB IT!",T.x,DY-40);g.textAlign="left"}}
+  for(const o of b.blobs){if(o.t<.9){g.save();g.globalAlpha=.2+o.t*.4;g.fillStyle=INK;g.beginPath();g.ellipse(o.x,DY+2,22,6,0,0,7);g.fill();g.restore();
+      const yy=DY-420+Math.max(0,(o.t-.55)/.35)*412;if(o.t>.55){cut(()=>{g.beginPath();g.moveTo(o.x,yy-26);g.quadraticCurveTo(o.x+14,yy-4,o.x,yy+4);g.quadraticCurveTo(o.x-14,yy-4,o.x,yy-26);g.closePath()},"#3a3352",{edge:4})}}
+    else{g.save();g.globalAlpha=1-(o.t-.9)/.5;g.fillStyle="#3a3352";g.beginPath();g.ellipse(o.x,DY-2,26,6,0,0,7);g.fill();g.restore()}}
+}
+// ---- creature + character art ----
+function drawCrabBody(up){
+  g.strokeStyle=INK;g.lineWidth=2;g.fillStyle="#e5634a";
+  for(const sx of[8,14,40,46]){g.beginPath();g.moveTo(sx<27?16:38,26);g.lineTo(sx,38);g.stroke()}
+  for(const [cx,dir] of[[6,-1],[48,1]]){const cy=up?4:24;g.beginPath();g.moveTo(cx-dir*-6,22);g.lineTo(cx,cy+6);g.stroke();g.beginPath();g.ellipse(cx,cy,7,8,dir*.4,0,7);g.fill();g.stroke();g.fillStyle="#fff3d6";g.beginPath();g.moveTo(cx,cy-2);g.lineTo(cx+dir*6,cy-8);g.lineTo(cx+dir*2,cy);g.fill();g.fillStyle="#e5634a"}
+  g.beginPath();g.ellipse(27,24,18,12,0,0,7);g.fill();g.stroke();
+  g.beginPath();g.moveTo(21,14);g.lineTo(20,4);g.moveTo(33,14);g.lineTo(34,4);g.stroke();g.fillStyle="#fff";circle(20,4,4);g.fill();g.stroke();circle(34,4,4);g.fill();g.stroke();g.fillStyle=INK;circle(20,4,1.8);g.fill();circle(34,4,1.8);g.fill();
+  g.beginPath();g.arc(27,26,4,.2,2.9);g.stroke();
+}
+function drawGullBody(flap){
+  g.strokeStyle=INK;g.lineWidth=2;
+  g.fillStyle="#c9ccd6";g.beginPath();g.moveTo(26,18);g.quadraticCurveTo(12,4-flap*14,0,10-flap*16);g.quadraticCurveTo(12,18,26,22);g.fill();g.stroke();
+  g.fillStyle="#fffdf6";g.beginPath();g.ellipse(26,22,16,9,0,0,7);g.fill();g.stroke();
+  g.fillStyle="#fffdf6";circle(40,16,7);g.fill();g.stroke();g.fillStyle="#f4c84f";g.beginPath();g.moveTo(46,14);g.lineTo(56,18);g.lineTo(46,20);g.closePath();g.fill();g.stroke();
+  g.fillStyle=INK;circle(41,14,1.8);g.fill();g.lineWidth=2.5;g.beginPath();g.moveTo(37,9);g.lineTo(44,12);g.stroke();
+  g.fillStyle="#c9ccd6";g.lineWidth=2;g.beginPath();g.moveTo(26,20);g.quadraticCurveTo(40,6-flap*12,50,4-flap*14);g.quadraticCurveTo(40,18,28,24);g.fill();g.stroke();
+  g.fillStyle="#3a3352";g.beginPath();g.moveTo(10,22);g.lineTo(2,18);g.lineTo(4,26);g.closePath();g.fill();g.stroke();
+}
+function drawHermitBody(flipped){
+  g.strokeStyle=INK;g.lineWidth=2;
+  if(flipped){g.save();g.translate(25,22);g.rotate(Math.PI);g.translate(-25,-22)}
+  g.fillStyle="#3a3352";g.beginPath();g.ellipse(14,28,12,10,0,0,7);g.fill();g.stroke();
+  g.fillStyle="#fff";circle(10,25,3.5);g.fill();circle(18,25,3.5);g.fill();g.fillStyle=INK;circle(10,26,1.6);g.fill();circle(18,26,1.6);g.fill();
+  g.fillStyle="#f3d9c4";g.beginPath();g.moveTo(14,34);g.quadraticCurveTo(14,4,32,4);g.quadraticCurveTo(50,6,48,28);g.quadraticCurveTo(44,38,22,36);g.closePath();g.fill();g.stroke();
+  g.strokeStyle="#c98a5a";g.lineWidth=2;g.beginPath();for(let a=0;a<9;a+=.3){const r=2+a*1.5;g.lineTo(33+Math.cos(a)*r,20+Math.sin(a)*r*.9)}g.stroke();
+  if(flipped){g.strokeStyle=INK;g.lineWidth=2;for(let i=0;i<4;i++){const w=Math.sin(time*20+i)*4;g.beginPath();g.moveTo(10+i*7,38);g.lineTo(8+i*7+w,46);g.stroke()}g.restore()}
+}
+function drawMarinaBody(){
+  g.strokeStyle=INK;g.lineWidth=2;
+  g.fillStyle="#ffb3c9";g.beginPath();g.moveTo(16,62);g.quadraticCurveTo(10,10,44,8);g.quadraticCurveTo(74,10,70,48);g.quadraticCurveTo(66,64,30,62);g.closePath();g.fill();g.stroke();
+  g.strokeStyle="#e5577b";g.lineWidth=2.5;g.beginPath();for(let a=0;a<11;a+=.3){const r=2+a*2;g.lineTo(46+Math.cos(a)*r,34+Math.sin(a)*r*.9)}g.stroke();
+  g.strokeStyle=INK;g.lineWidth=2;g.fillStyle="#f08a3c";g.beginPath();g.ellipse(16,50,14,12,0,0,7);g.fill();g.stroke();
+  g.beginPath();g.moveTo(10,40);g.lineTo(8,24);g.moveTo(20,40);g.lineTo(22,24);g.stroke();g.fillStyle="#fff";circle(8,22,5);g.fill();g.stroke();circle(22,22,5);g.fill();g.stroke();g.fillStyle=INK;circle(9,23,2.2);g.fill();circle(23,23,2.2);g.fill();
+  g.fillStyle="#2fb3a7";g.beginPath();g.moveTo(2,18);g.lineTo(28,16);g.lineTo(26,10);g.lineTo(4,12);g.closePath();g.fill();g.stroke();
+  g.fillStyle="#f08a3c";g.beginPath();g.ellipse(4,56,6,5,0,0,7);g.fill();g.stroke();g.save();g.translate(30,44);g.rotate(-.5+Math.sin(time*5)*.4);g.beginPath();g.ellipse(0,-8,6,9,0,0,7);g.fill();g.stroke();g.restore();
+  g.beginPath();g.arc(16,52,3,.2,2.9);g.stroke();
+}
+// ---- fishing line (shared by the lake and the shipwreck) ----
+function drawFishing(wy,caught){
+  if(fish.ph>0&&fish.ph<5){const [tx,ty]=rodTip();let bx=fish.bx,by=wy+Math.sin(time*3)*2+fish.dip*10;
+    if(fish.ph===1){const k=Math.min(1,fish.t/.6);bx=tx+(fish.bx-tx)*k;by=ty+(wy-ty)*k-Math.sin(k*Math.PI)*90}
+    if(fish.ph===4)by=wy+12;
+    g.strokeStyle="rgba(255,255,255,.9)";g.lineWidth=1.5;g.beginPath();g.moveTo(tx,ty);g.quadraticCurveTo((tx+bx)/2,Math.min(ty,by)-20,bx,by);g.stroke();
+    if(fish.ph>=3&&fish.dip>0){g.strokeStyle="#fff";g.lineWidth=2;g.beginPath();g.ellipse(bx,wy+4,14+(.3-fish.dip)*40,4,0,0,7);g.stroke()}
+    if(fish.ph===4){g.strokeStyle="#fff";g.lineWidth=3;for(let r=10;r<40;r+=12){g.beginPath();g.ellipse(bx,wy+4,r+Math.sin(time*20)*3,r*.3,0,0,7);g.stroke()}}
+    else{cut(()=>{g.beginPath();g.arc(bx,by,7,0,7)},"#e5463f",{edge:3,shadow:false});g.fillStyle="#fff";g.fillRect(bx-7,by,14,4)}
+    if(fish.ph===4){cut(()=>{g.beginPath();g.ellipse(center(),s.y-34,16,18,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 24px "+FONT;g.textAlign="center";g.fillText("!",center(),s.y-25);g.textAlign="left"}}
+  if(fish.ph===5){const k=fish.t/1.1;drawIcon(caught,center()+10,s.y-40-k*20,1)}
+}
+function drawChapterCard(){const c=chapterCard,a=Math.min(1,c.t*3,(3.6-c.t)*2.5);g.save();g.globalAlpha=Math.max(0,a);
+  g.translate(W/2,H/2-60);cut(()=>rr(-240,-50,480,100,24),"#2f2a4a",{edge:9});g.fillStyle="#f4c84f";g.font="bold 18px "+FONT;g.textAlign="center";g.fillText(c.title,0,-14);
+  g.fillStyle="#fff4d6";g.font="bold 32px "+FONT;g.fillText(c.sub,0,26);g.textAlign="left";g.restore()}
+function drawShieldBubble(){if(shield<=0)return;g.save();g.globalAlpha=.35+Math.sin(time*5)*.1;g.fillStyle="#bfe6ff";g.beginPath();g.ellipse(center(),s.y+36,40,48,0,0,7);g.fill();g.globalAlpha=.9;g.strokeStyle="#7cc6f2";g.lineWidth=3;g.setLineDash(shield===1?[8,8]:[]);g.stroke();g.restore()}
+function objectiveL3(){
+  if(l3.lit)return"Chapter 3 complete! The lighthouse shines again.";
+  if(l3.bossDone)return has("Green Gem")?"Set the three gems in the lighthouse lamp (Space next to the lamp).":"The lamp needs the Green Gem! It's hidden in the lighthouse — on the left side, above the big landing. (Drop down through the gap on the left of the deck.)";
+  if(l3.boss)return"Defeat The Blot! Jab its tentacles with Nib (Q) when they slam down, dodge the ink drops, and stomp its head when it peeks over the railing.";
+  if(scene==="lighthouse")return"Climb to the top of the lighthouse — ride the moving platforms!"+(has("Green Gem")?"":" Keep an eye out for the Green Gem; it's somewhere hard to reach.");
+  if(has("Heart Necklace")&&has("Blue Gem"))return"You have the Red and Blue gems! Hop across the rocks past the shipwreck to the lighthouse.";
+  if(hasReel)return(has("Blue Gem")?"":"Fish the Blue Gem out of the sea: stand at the back of the shipwreck with Reel and press Space. ")+(has("Heart Necklace")?"":"Find the Red gem — use Dab (Q) to sniff out treasure buried in the sand.");
+  if(l3.marina)return"Equip Dab (E) and press Q to sniff out buried treasure, then dig with Space. Check out the shipwreck offshore — hop across the rocks.";
+  return"Say hi to the hermit crab waving from the shell shack.";
+}
+function beatsL3(){return[["Meet Marina",l3.marina],["Dig up the Heart Necklace (Red gem)",l3.necklace],["Open the shipwreck's treasure chest",l3.reel],["Fish up the Blue Gem",l3.blue],["Enter the lighthouse",l3.inLH],["Find the Green Gem",l3.green],["Defeat The Blot",l3.bossDone],["Light the lighthouse",l3.lit]]}
+// ---- level 3 cheats ----
+function cheat3(){cheatBase();hasNib=true;l2.nibMet=true;l2.done=true;startLevel3();dlg.on=false;equipped="Nib"}
+function cheatBeach(x,y){dlg.on=false;scene="beach";s.x=x-s.w/2;s.y=(y??G)-s.h;s.vy=0;camY=0;camera=clamp(s.x-350,0,BEACH_W-W);l3.marina=true}
+function cheatLH(x,y){dlg.on=false;goScene("lighthouse",x,y-s.h);camY=clamp(s.y-300,-1830,0);l3.marina=l3.reel=l3.blue=l3.necklace=l3.inLH=true;hasReel=true;checkpointScene="lighthouse";checkpoint=x-s.w/2;checkpointY=y-s.h;
+  if(!has("Heart Necklace"))addItem("Heart Necklace");if(!has("Blue Gem"))addItem("Blue Gem")}
+
 // ---- Admin cheats ----
 function cheatBase(){items=[];for(const k in counts)delete counts[k];addItem("Turnip");addItem("Festival Pin");hasDab=true;hasNib=false;hasReel=false;pinWorn=false;dogOn=false;balloonOn=false;
   potionCollected=roadChestKeyCollected=homeIntroSeen=firstChestOpen=fountainKeyCollected=ladderGiven=grandChestOpen=flowerRestored=gateOpen=true;
@@ -2074,6 +2590,15 @@ const CHEATS={
   results:()=>{CHEATS.nib();l2.spikeDown=true;hasNib=true;l2.nibMet=true;l2.trail=true;equipped="Nib";cheatTele(2915);l2.walk=l2.catWalk=1},
   fight:()=>{CHEATS.results();l2.results=true;cheatTele(3010);startFinale()},
   coins:()=>{coins+=20;sayToast("+20 coins (cheater!)")},
+  l3:()=>cheat3(),
+  l3wreck:()=>{cheat3();cheatBeach(2610,WRECK.y)},
+  l3fish:()=>{cheat3();cheatBeach(STERN,WRECK.y);l3.reel=true;hasReel=true;equipped="Reel"},
+  l3lh:()=>{cheat3();cheatLH(300,G)},
+  l3land:()=>{cheat3();cheatLH(480,-460)},
+  l3top:()=>{cheat3();cheatLH(230,DY)},
+  l3boss:()=>{cheat3();cheatLH(500,DY);l3.potion=true;startBoss();dlg.on=false;l3.boss.ph="tent";l3.boss.t=0},
+  l3gems:()=>{for(const n of["Heart Necklace","Blue Gem","Green Gem"])if(!has(n))addItem(n);l3.necklace=l3.blue=l3.green=true;sayToast("All three gems added (cheater!)")},
+  shield:()=>{addItem("Shell Shield");sayToast("Shell Shield added. Use it from Pockets.")},
   xp:()=>{xp=XP_FOR(plv)-1;journal.Smudge=Math.max(journal.Smudge||0,1);gainXP("Smudge",center(),s.y-20)},
   journal:()=>{journal.Smudge=journal.Smudge||3;journal.Prickles=journal.Prickles||1;invOpen=true;inv.tab=3;inv.sel=0},
   reload:()=>location.reload()
@@ -2086,11 +2611,11 @@ document.querySelectorAll("[data-cheat]").forEach(b=>b.addEventListener("click",
 let last=0;
 function frame(t){const dt=Math.min((t-(last||t))/1000,.033);last=t;update(dt);
   g.save();if(shake>0)g.translate((Math.random()-.5)*14*shake,(Math.random()-.5)*10*shake);
-  if(scene==="bedroom")drawBedroom();else if(scene==="resident")drawResident();else if(scene==="festival")drawFestival();else if(scene==="orchard")drawOrchard();else if(scene==="lake")drawLake();else if(scene==="under")drawUnder();else drawOutside();
+  if(scene==="bedroom")drawBedroom();else if(scene==="resident")drawResident();else if(scene==="festival")drawFestival();else if(scene==="orchard")drawOrchard();else if(scene==="lake")drawLake();else if(scene==="under")drawUnder();else if(scene==="beach")drawBeach();else if(scene==="lighthouse")drawLighthouse();else drawOutside();
   g.restore();
   g.save();g.fillStyle=grain;g.fillRect(0,0,W,H);g.restore();
   if(flash>0){g.fillStyle=`rgba(255,255,255,${Math.min(.95,flash)})`;g.fillRect(0,0,W,H)}
-  drawHud();if(invOpen)drawInventory();drawDialogue();if(lvlUp)drawLevelUp();if(showEndScreen)drawEndScreen();
+  drawHud();if(chapterCard)drawChapterCard();if(invOpen)drawInventory();drawDialogue();if(lvlUp)drawLevelUp();if(showEndScreen)drawEndScreen();
   requestAnimationFrame(frame)}
 
 start([
@@ -2102,7 +2627,7 @@ start([
   ["Narrator","(So many things.)"]
 ],()=>sayToast("Walk to the wardrobe and press Space to open it."));
 requestAnimationFrame(frame);
-window.__game={get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},gainXP:(n)=>gainXP(n,center(),s.y)};
+window.__game={get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},get l3(){return l3},endL2:()=>{level=2;l2.done=true;complete=true;showEndScreen=true;endT=2},get LH(){return LH_STATIC},get shield(){return shield},get camY(){return camY},gainXP:(n)=>gainXP(n,center(),s.y)};
 })();
 </script>
 </body>

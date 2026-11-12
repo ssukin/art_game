@@ -40,7 +40,7 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 
 ## Level 2 — The Festival Fiasco
 
-**The orchard.** Level 2 starts in the town orchard: a sign that says "The Orchard" and four apple trees (apples out of reach for now). A path in the orchard leads to the lake, where a lakeside tree has 5 coins in its branches, so you can earn the entry fee before registering. Walk left out of the orchard to go back to the (cleared) Level 1 road. If you skipped the Festival Pin on Mrs. Maple's roof, it's still there. At the end is the **Registration table**. Entry costs 5 coins, or it's free if you're *wearing* your Festival Pin (Pockets → Key Items → Festival Pin → Wear). The Registrar notices whether you're wearing it. You can also **Try bargaining**: guess her favorite color. Cyan gets you in free (she's a CMYK girl, even on a screen). Any other color earns the same joke, and you still pay. Bargaining works once. Either way, she hands Sarah **Reel**, the fishing-pole little buddy. If you walk in wearing the pin, she still gives you the color quiz for fun and makes the CMYK joke. She also gives you Reel when you register, if you haven't got him yet. Then she tells Sarah about the art contest. The same Registrar takes your contest entry later.
+**The orchard.** Level 2 starts in the town orchard: a sign that says "The Orchard" and four apple trees (apples out of reach for now). A path in the orchard leads to the lake, where a lakeside tree has 5 coins in its branches, so you can earn the entry fee before registering. Walk left out of the orchard to go back to the (cleared) Level 1 road. If you skipped the Festival Pin on Mrs. Maple's roof, it's still there. At the end is the **Registration table**. Entry costs 5 coins, or it's free if you're *wearing* your Festival Pin (Pockets → Key Items → Festival Pin → Wear). The Registrar notices whether you're wearing it. You can also **Try bargaining**: guess her favorite color. Cyan gets you in free (she's a CMYK girl, even on a screen). Any other color earns the same joke, and you still pay. Bargaining works once. If you walk in wearing the pin, she still gives you the color quiz for fun and makes the CMYK joke. Then she tells Sarah about the art contest. The same Registrar takes your contest entry later.
 
 **The main story:**
 1. **Arrive.** Townsfolk recognize Dab from the old stories and wonder whether Sarah is the legendary adventurer. Mr. Umber teaches the hiding trick (hold Down/S by a crate).
@@ -53,7 +53,7 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 8. **Finale.** The sky cracks. Smudges drain the painting, and a door falls onto the **second floor** balcony above the stage. One Smudge drops the Smudgy Key. Mrs. Maple says Sarah must save the town, then ties the **balloon dog** sculpture to her so she can float up to the jump bars on the right of the stage. Fall off and Mrs. Maple puts down a trampoline. Climb to the second floor and unlock the door: "Level 3 coming soon!"
 
 **Around town (optional):**
-- **The lake** (door in the orchard): chicken coop, a sign ("Eggs: friends of the dog only") and Waffles the dog, who won't let you in but would love dog food. With **Reel** (from the Registrar) equipped, go to the end of the dock and press Space to cast, watch the bobber nibble 1–4 times, and when it's yanked under you have 2 seconds to press Space. Lake Perch stack in one slot. Falling off the dock costs 1 health and puts Sarah back on the dock.
+- **The lake** (door in the orchard): chicken coop, a sign ("Eggs: friends of the dog only") and Waffles the dog, who won't let you in but would love dog food. A **Fishing Area** sign stands on the dock, but nobody has a pole to spare yet — Sarah finds Reel in Level 3. (With Reel, press Space at the end of the dock to cast; when the bobber is yanked under you have 2 seconds to press Space.) Falling off the dock costs 1 health and puts Sarah back on the dock.
 - **The hole** near the entrance. Its sign is faded gray until Dab (Q) restores it: "Dig crew entry here." Jump over the hole, or fall in to reach **Undertown**, a full underground floor with a bar (pick up the **Town Map**), the Grimy Grotto club (a bouncer won't let you in), a closed Potter's Studio, Lost & Found, Arcade, a crooked-roofed Alchemy shop with a bubbling cauldron, a sewer tunnel, and a dinosaur skeleton stuck in the dirt (dig skills coming someday). A trampoline bounces you back up.
 - **Chef Crumb** cooks from recipe cards: a glowing card near the Clay Corner (Turnip + Butter Pat → Health Potion) and the Cheese recipe (2 Butter Pats → Cheese Wedge, +3 health).
 - **Balloons and the sky:** Inka sells balloons for 5 coins (next jump twice as high). The Library roof chest has a Turnip, the Cheese recipe and 15 coins. From the roof, four coin clouds lead to a one-time fairy (+5 max health and a full heal). After she leaves, a Smudge guards the top cloud.
@@ -63,14 +63,33 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 
 **Pockets:** Items (things you use up), **Key Items** (important things you can't get rid of: keys, the Town Map, recipe cards, the Festival Pin), Buddy, **Journal** and Hints.
 
+## Level 3 — The Watercolor Coast
+
+Finishing Level 2 (through the door from the sky) continues into Level 3. The chapter is split into sub-chapters, each with a title card.
+
+**3-1: The Watercolor Coast.** Sarah lands face-first on a beach that's still wet paint, with the colors running into the sea.
+- **Marina**, a hermit crab who runs (and is) the Shell Shack, says the sand and sea are full of treasure. She trades **3 Seashells for a Health Potion**.
+- With Dab equipped, **Q** reveals buried treasure as pink X marks; stand on one and press Space to dig. You'll find Seashells, coins, and a **Heart Necklace** with a big red heart-shaped gem: the **Red gem**.
+- Hop across the rocks to the **shipwreck**. The treasure chest on its deck turns out to be **Reel**, the fishing-pole buddy. He explains the lighthouse lamp is failing and needs three gems: **Red, Green and Blue**.
+- Fish from the back of the shipwreck. You'll catch between 1 and 5 Sea Perch, then hook the **Blue Gem**. Falling in the sea costs 1 health.
+- With Red and Blue in hand, cross the rocks to the lighthouse.
+
+**3-2: The Gray Lighthouse.** A tall vertical climb with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) and Save Blocks at the bottom, the big landing and the top.
+- The **Green Gem** is hidden in a nook high on the left, reached from the big landing by a quick elevator, a tiny ledge and a fast sideways platform.
+- A chest partway up holds the **Shell Shield**. Use it from Pockets: a bubble that blocks the next **2 hits** and then breaks away.
+- At the top: a Save Block and a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down, dodge falling ink drops (watch their shadows) and stomp its head when it peeks over the railing. It has a health bar.
+- Set the three gems in the lamp to light the lighthouse and bring the coast's colors back. If the Green Gem is missing, drop down the gap on the left of the deck to go find it.
+
+**New creatures:** Sidecrabs (stomp only when their claws are down), Gulls (swoop to steal a coin; hit them while they're low to get it back), Hermit Smudges (too hard to stomp until Nib flips them over).
+
 ## XP and leveling up
 
-Defeating creatures earns **XP**. Right now a Smudge and Prickles are each worth 1 XP. The XP bar sits under the health counter. Level 2 needs 3 XP, and each level after that needs 2 more than the last (5, 7, 9…). On a level up the game freezes, confetti falls, and an announcement shows the new level: **+5 max health and health refilled**. Press Space to keep going.
+Defeating creatures earns **XP**. A Smudge, Prickles and a Sidecrab are worth 1 XP each, a Gull or a Hermit Smudge 2 XP, and The Blot 10 XP. The XP bar sits under the health counter. Level 2 needs 3 XP, and each level after that needs 2 more than the last (5, 7, 9…). On a level up the game freezes, confetti falls, and an announcement shows the new level: **+5 max health and health refilled**. Press Space to keep going.
 
 The **Journal** tab in Pockets shows Sarah's level and XP, plus a page for each creature: how many you've defeated, how much XP each is worth, where it lives and how to beat it. Creatures you haven't beaten yet show as gray silhouettes.
 
 ## Admin Cheats Only
 
-Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, **+20 coins** tops up your wallet, **Level up now** triggers a level up, and **Fill & open Journal** fills in every Journal page. **Restart Level 1** reloads the page.
+Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, Level 3 buttons jump to the beach, the shipwreck chest, the fishing spot, the bottom of the lighthouse, the big landing (for the Green Gem detour), the top of the lighthouse and the boss fight, plus **Give all 3 gems** and **Give Shell Shield**. **+20 coins** tops up your wallet, **Level up now** triggers a level up, and **Fill & open Journal** fills in every Journal page. **Restart Level 1** reloads the page.
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.
