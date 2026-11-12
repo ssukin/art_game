@@ -2385,8 +2385,7 @@ function updateTide(){
   const onFlat=center()>TIDE.x0&&center()<TIDE.x1;
   if(s.ground&&s.plat){if(center()<=TIDE.x0)l3.tideSafe={x:TIDE.x0-60,y:G-s.h};else if(center()>=TIDE.x1)l3.tideSafe={x:TIDE.x1+30,y:G-s.h};else if(s.plat.tide)l3.tideSafe={x:s.plat.x+s.plat.w/2-s.w/2,y:s.plat.y-s.h}}
   
-  const p=l3.t%11;if(onFlat&&p>4.6&&p<6&&!l3.warned){l3.warned=true;sayToast("Here comes the tide…")}if(p<4.6)l3.warned=false;
-  if(onFlat&&tideLevel()>.55&&s.y+s.h>tideY()+6){const sf=l3.tideSafe||{x:TIDE.x0-60,y:G-s.h};burst(center(),tideY(),22,["#7cc6f2","#fff"]);s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
+    if(onFlat&&tideLevel()>.55&&s.y+s.h>tideY()+6){const sf=l3.tideSafe||{x:TIDE.x0-60,y:G-s.h};burst(center(),tideY(),22,["#7cc6f2","#fff"]);s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
     if(health<=0){respawnL3();sayToast("The tide sweeps Sarah away… she uncrumples back at your last checkpoint.")}else if(real)sayToast("WHOOSH! Swept back by the tide. (-1 health)")}
 }
 function updateL3(dt,oldFeet){
