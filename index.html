@@ -2307,7 +2307,7 @@ function l3Jab(hx){
   let hit=false;
   for(const f of l3.foes){if(f.scene!==scene||!f.alive)continue;const fy=f.type==="gull"?f.y+10:f.base;
     if(Math.abs(f.x-hx)<46&&s.y+s.h>fy-90&&s.y<fy+10){hit=true;
-      if(f.type==="hermit"&&!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#c9d6d4","#b98ad8"]);sayToast("Flipped!")}
+      if(f.type==="hermit"&&!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#c9d6d4","#b98ad8"])}
       else killFoe(f)}}
   return hit;
 }
