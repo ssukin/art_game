@@ -50,7 +50,7 @@ Bring Dab to the gray flower to restore its color. It gives Sarah the **Town Gat
 5. **Find Nib.** Dab's Q by the art-supply stand reveals a doodle staircase up to Nib the pencil (Q jabs).
 6. **Prickles.** A tall, spiky creature blocks the stage. You can't jump over him or on him, and touching him hurts. The waiting crowd points you to something sparkling by the Weather Station (Nib). The crowd (and Mr. Biscuits, once freed) waits on this side of him. Prickles has a health bar and takes two Nib jabs. Then everyone walks to the stage, the cat hops onto the judge's seat, and the results begin; the cloth falls away before the painting is revealed.
 7. **Results.** Juniper's painting looks a lot like Sarah and Dab. The prophecy!
-8. **Finale.** The sky cracks. Smudges drain the painting, and a door falls onto the **second floor** balcony above the stage. One Smudge drops the Smudgy Key. Mrs. Maple hurries over towing the **balloon dog** sculpture on a string, says Sarah must save the town, then moves the string over to Sarah's backpack so she can float up to the jump bars on the right of the stage. Fall off and Mrs. Maple puts down a trampoline. Climb to the second floor and unlock the door: "Level 3 coming soon!"
+8. **Finale.** (A Save Block on the second floor sits right before the sky door.) The sky cracks. Smudges drain the painting, and a door falls onto the **second floor** balcony above the stage. One Smudge drops the Smudgy Key. Mrs. Maple hurries over towing the **balloon dog** sculpture on a string, says Sarah must save the town, then moves the string over to Sarah's backpack so she can float up to the jump bars on the right of the stage. Fall off and Mrs. Maple puts down a trampoline. Climb to the second floor and unlock the door: "Level 3 coming soon!"
 
 **Around town (optional):**
 - **The lake** (door in the orchard): chicken coop, a sign ("Eggs: friends of the dog only") and Waffles the dog, who won't let you in but would love dog food. A **Fishing Area** sign stands on the dock, but nobody has a pole to spare yet — Sarah finds Reel in Level 3. (With Reel, press Space at the end of the dock to cast; when the bobber is yanked under you have 2 seconds to press Space.) Falling off the dock costs 1 health and puts Sarah back on the dock.
@@ -74,10 +74,10 @@ Finishing Level 2 (through the door from the sky) continues into Level 3. The ch
 - Fish from the back of the shipwreck. You'll catch between 1 and 5 Sea Perch, then hook the **Blue Gem**. Falling in the sea costs 1 health.
 - With Red and Blue in hand, cross the rocks to the lighthouse.
 
-**3-2: The Gray Lighthouse.** A tall vertical climb with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) and Save Blocks at the bottom, the big landing and the top.
+**3-2: The Gray Lighthouse.** A tall vertical climb with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) There are no Save Blocks in Level 3: your checkpoint is the start of the beach, then the lighthouse entrance, then the top deck.
 - The **Green Gem** is hidden in a nook high on the left, reached from the big landing by a quick elevator, a tiny ledge and a fast sideways platform.
 - A chest partway up holds the **Shell Shield**. Use it from Pockets: a bubble that blocks the next **2 hits** and then breaks away.
-- At the top: a Save Block and a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down, dodge falling ink drops (watch their shadows) and stomp its head when it peeks over the railing. It has a health bar.
+- At the top: a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down, dodge falling ink drops (watch their shadows) and stomp its head when it peeks over the railing. It has a health bar.
 - Set the three gems in the lamp to light the lighthouse and bring the coast's colors back. If the Green Gem is missing, drop down the gap on the left of the deck to go find it.
 
 **New creatures:** Sidecrabs (stomp only when their claws are down), Gulls (swoop to steal a coin; hit them while they're low to get it back), Hermit Smudges (too hard to stomp until Nib flips them over).
