@@ -73,13 +73,14 @@ const keys=new Set();
 const s={x:120,y:G-68,w:42,h:68,vy:0,ground:true,face:1,flip:1,squash:1,walk:0,inv:0,wasGround:true};
 let maxHealth=10,camY=0;
 let xp=0,plv=1,journal={},xpPops=[],lvlUp=null,confetti=[];
-const XP_FOR=l=>3+(l-1)*2;
+const XP_FOR=l=>5*(3+(l-1)*2);
 const CREATURES=[
   {name:"Smudge",xp:1,where:"Everywhere the sky tears open",tip:"Jump on its head to flatten it, or jab it with Nib. Touching it from the side costs 1 health.",draw:()=>sprite(0,0,46,36,drawSmudgeBody,{shadow:false})},
   {name:"Sidecrab",xp:1,where:"Scuttling along the Watercolor Coast",tip:"Stomp it only when its claws are DOWN. Claws up = pinch! Nib's jab always works.",draw:()=>sprite(0,0,54,40,()=>drawCrabBody(false),{shadow:false})},
   {name:"Gull",xp:2,where:"Circling over the beach",tip:"Swoops down to snatch a coin. Jab or stomp it while it's low to get your coin back.",draw:()=>sprite(0,-10,56,40,()=>drawGullBody(0),{shadow:false})},
-  {name:"Hermit Smudge",xp:2,where:"Hiding in shells on the coast and in the lighthouse",tip:"Too hard to stomp! Flip it onto its back with Nib (Q), then stomp it.",draw:()=>sprite(0,0,50,40,()=>drawHermitBody(false),{shadow:false})},
-  {name:"The Blot",xp:10,where:"Climbs the lighthouse from the sea",tip:"Jab its tentacles when they slam down, dodge ink drops, stomp its head when it peeks up.",draw:()=>{g.save();g.scale(.32,.32);blotHead(0,-40,1,true);g.restore()}},
+  {name:"Hermit Smudge",xp:2,where:"Hiding in shells on the coast and in the lighthouse",tip:"Too hard to stomp! Flip it onto its back with Nib (Q), then stomp it or jab it again.",draw:()=>sprite(0,0,50,40,()=>drawHermitBody(false),{shadow:false})},
+  {name:"Inklet",xp:1,where:"Sprouts from The Blot's ink drops",tip:"A tiny ink squid on little legs. Stomp it or jab it before it bumps into you.",draw:()=>{g.save();g.translate(0,-14);blotHead(0,0,.3,true);g.restore()}},
+  {name:"The Blot",xp:10,where:"Climbs the lighthouse from the sea",tip:"Jab its tentacles when they slam down (a slam hurts 2!), dodge ink drops, stomp its head when it rises up.",draw:()=>{g.save();g.scale(.32,.32);blotHead(0,-40,1,true);g.restore()}},
   {name:"Prickles",xp:1,where:"In front of the judging stage",tip:"Way too tall to jump over, and all spikes — never stomp him! Stand close with Nib and jab twice.",draw:()=>sprite(0,0,72,170,drawSpikeBody,{sx:.42,sy:.42,shadow:false})}
 ];
 function gainXP(name,x,y){
@@ -111,15 +112,15 @@ function drawJournal(px,py,pw,ph){
   g.fillStyle=INK;g.font="bold 20px "+FONT;g.fillText("Level "+plv,nx+20,ny+33);
   const bx=nx+120,bw=nw-280;g.fillStyle="#e8dcc4";rr(bx,ny+18,bw,16,8);g.fill();g.fillStyle="#b98ad8";rr(bx,ny+18,Math.max(10,bw*xp/XP_FOR(plv)),16,8);g.fill();g.strokeStyle=INK;g.lineWidth=2;rr(bx,ny+18,bw,16,8);g.stroke();
   g.fillStyle="#4a4360";g.font="bold 16px "+FONT;g.fillText(xp+" / "+XP_FOR(plv)+" XP",bx+bw+14,ny+32);
-  CREATURES.forEach((c,i)=>{const cols=3,cw=(nw-24)/cols,ch=118,cx=nx+(i%cols)*(cw+12),cy=ny+62+Math.floor(i/cols)*(ch+8),seen=journal[c.name]>0;
+  CREATURES.forEach((c,i)=>{const cols=4,cw=(nw-36)/cols,ch=118,cx=nx+(i%cols)*(cw+12),cy=ny+62+Math.floor(i/cols)*(ch+8),seen=journal[c.name]>0;
     cut(()=>rr(cx,cy,cw,ch,16),seen?"#fffdf6":"#efe6d4",{edge:6});
-    g.fillStyle=seen?"#fde9c2":"#ddd2bd";circle(cx+40,cy+42,30);g.fill();
-    g.save();g.translate(cx+40,cy+64);g.scale(.72,.72);if(!seen){g.filter="brightness(0) opacity(.35)"}c.draw();g.restore();
-    g.fillStyle=INK;g.font="bold 16px "+FONT;g.fillText(seen?c.name:"???",cx+78,cy+28,cw-84);
-    g.font="12px "+FONT;g.fillStyle="#4a4360";
-    if(seen){g.fillText("Defeated: "+journal[c.name]+" · "+c.xp+" XP",cx+78,cy+46,cw-84);
-      wrap(c.tip,cw-20,"12px "+FONT).slice(0,4).forEach((l,j)=>g.fillText(l,cx+10,cy+82+j*14))}
-    else wrap("Not met yet. Defeat one to fill in this page!",cw-88,"12px "+FONT).forEach((l,j)=>g.fillText(l,cx+78,cy+46+j*15));
+    g.fillStyle=seen?"#fde9c2":"#ddd2bd";circle(cx+30,cy+32,22);g.fill();
+    g.save();g.translate(cx+30,cy+48);g.scale(.52,.52);if(!seen){g.filter="brightness(0) opacity(.35)"}c.draw();g.restore();
+    g.fillStyle=INK;g.font="bold 14px "+FONT;g.fillText(seen?c.name:"???",cx+60,cy+26,cw-66);
+    g.font="11px "+FONT;g.fillStyle="#4a4360";
+    if(seen){g.fillText(journal[c.name]+" beaten · "+c.xp+" XP",cx+60,cy+43,cw-66);
+      wrap(c.tip,cw-18,"11px "+FONT).slice(0,4).forEach((l,j)=>g.fillText(l,cx+9,cy+70+j*13))}
+    else wrap("Not met yet. Defeat one to fill in this page!",cw-18,"11px "+FONT).forEach((l,j)=>g.fillText(l,cx+9,cy+70+j*13));
   });
 }
 
@@ -2124,7 +2125,7 @@ const LH_STATIC=[
   {x:560,y:-1060,w:140},{x:330,y:-1140,w:140},{x:700,y:-1300,w:150},{x:180,y:DY,w:690,deck:1}];
 const LH_MOVERS=[{x0:420,y0:195,w:110,ax:220,ay:0,per:4.2},{x0:140,y0:-40,w:100,ax:0,ay:-190,per:5},{x0:430,y0:-625,w:100,ax:220,ay:0,per:4.4},
   {x0:760,y0:-790,w:90,ax:0,ay:-190,per:5},{x0:400,y0:-1220,w:100,ax:220,ay:0,per:4},{x0:120,y0:-470,w:70,ax:0,ay:-150,per:2.8},{x0:120,y0:-790,w:72,ax:180,ay:0,per:3.6}];
-const LH_SAVES=[];
+const LH_SAVES=[[775,-1300]];
 const GEM_G={x:150,y:-880},SHIELD_CHEST={x:630,y:-1060},POTION_TOP={x:310,y:DY},LAMP_X=540;
 let l3={},shield=0,checkpointY=null,chapterCard=null;
 function resetL3(){
@@ -2142,7 +2143,7 @@ function resetL3(){
   shield=0;
 }
 resetL3();
-const CRE_NAME={smudge:"Smudge",crab:"Sidecrab",hermit:"Hermit Smudge",gull:"Gull"};
+const CRE_NAME={smudge:"Smudge",crab:"Sidecrab",hermit:"Hermit Smudge",gull:"Gull",inklet:"Inklet"};
 function startLevel3(){
   level=3;resetL3();dogOn=false;balloonOn=false;showEndScreen=false;complete=false;invOpen=false;parts=[];loot=[];hasDab=true;health=maxHealth;
   goScene("beach",90);s.face=1;s.flip=1;checkpointScene="beach";checkpoint=170-s.w/2;checkpointY=G-s.h;if(hasNib)equipped="Nib";
@@ -2157,8 +2158,8 @@ function startLevel3(){
 }
 function saveL3(x,y){checkpoint=x-s.w/2;checkpointY=y-s.h;checkpointScene=scene;health=maxHealth;burst(x,y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back to this Save Block.")}
 function respawnL3(){health=maxHealth;goScene(checkpointScene,checkpoint+s.w/2,checkpointY??G-s.h);if(l3.boss&&!l3.bossDone){l3.boss=null}}
-function hurtHP(){if(shield>0){shield--;burst(center(),s.y+30,16,["#7cc6f2","#fff","#b98ad8"]);sayToast(shield===0?"CRACK! The Shell Shield breaks away. It did its best!":"The Shell Shield blocks the hit! (1 more hit left)");return false}health--;return true}
-function hurt3(fromX,msg){if(s.inv>0)return;s.inv=1.3;s.vy=-320;s.x+=center()<fromX?-46:46;shake=.3;const real=hurtHP();
+function hurtHP(n=1){if(shield>0){shield--;burst(center(),s.y+30,16,["#7cc6f2","#fff","#b98ad8"]);sayToast(shield===0?"CRACK! The Shell Shield breaks away. It did its best!":"The Shell Shield blocks the hit! (1 more hit left)");return false}health=Math.max(0,health-n);return true}
+function hurt3(fromX,msg,n=1){if(s.inv>0)return;s.inv=1.3;s.vy=-320;s.x+=center()<fromX?-46:46;shake=.3;const real=hurtHP(n);
   if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint. Paper is resilient like that.");return}if(real&&msg)sayToast(msg)}
 function l3Plats(){if(scene==="beach")return BEACH_SOLID;return[{x:-50,y:G,w:1100,h:100},...LH_STATIC,...l3.movers]}
 function onPlat(y){return s.ground&&Math.abs(s.y+s.h-y)<4}
@@ -2301,12 +2302,13 @@ function l3Jab(hx){
   let hit=false;
   for(const f of l3.foes){if(f.scene!==scene||!f.alive)continue;const fy=f.type==="gull"?f.y+10:f.base;
     if(Math.abs(f.x-hx)<46&&s.y+s.h>fy-90&&s.y<fy+10){hit=true;
-      if(f.type==="hermit"&&!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#c9d6d4","#b98ad8"]);sayToast("Nib flips the Hermit Smudge onto its back! Quick — stomp it!")}
-      else if(!(f.type==="hermit"))killFoe(f)}}
+      if(f.type==="hermit"&&!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#c9d6d4","#b98ad8"]);sayToast("Nib flips the Hermit Smudge onto its back! Quick — stomp it or jab it again!")}
+      else killFoe(f)}}
   return hit;
 }
 
 // ---- boss: The Blot ----
+function spawnInklet(x){l3.foes.push({type:"inklet",scene:"lighthouse",x,min:200,max:850,base:DY,alive:true,flat:0,t:0,ph:Math.random()*3,dir:Math.random()<.5?-1:1,speed:75,flip:0,mode:"walk",cool:0,y:DY,carry:0});burst(x,DY-14,12,["#b98ad8","#fff",INK]);if(!l3.inkletTip){l3.inkletTip=true;sayToast("One of the ink drops sprouted legs! It's an Inklet — stomp it or jab it.")}}
 function startBoss(){
   l3.boss={hp:8,max:8,ph:"intro",t:0,cycle:0,slams:0,tent:null,blobs:[],spawn:0,headUp:0,hurtT:0};
   const go=()=>{l3.boss.ph="tent";l3.boss.t=0;sayToast("Defeat The Blot! Jab tentacles (Q), dodge ink, stomp its head.")};
@@ -2326,7 +2328,7 @@ function jabBoss(hx){const b=l3.boss;if(!b||b.ph==="intro"||b.ph==="dead")return
   if(b.ph==="head"&&b.headUp>.8&&Math.abs(hx-800)<70&&s.y+s.h>DY-120){damageBoss(1,800,DY-80);b.t=Math.max(b.t,2.6);return true}
   return false}
 function damageBoss(n,x,y){const b=l3.boss;b.hp=Math.max(0,b.hp-n);b.hurtT=.5;shake=.4;burst(x,y,20,[INK,"#5b2a6e","#fff","#b98ad8"]);if(b.hp<=0)defeatBoss()}
-function defeatBoss(){const b=l3.boss;b.ph="dead";b.tent=null;b.blobs=[];l3.bossDone=true;flash=.6;gainXP("The Blot",800,DY-140);
+function defeatBoss(){for(const f of l3.foes)if(f.type==="inklet"&&f.alive){f.alive=false;burst(f.x,DY-16,10,[INK,"#5b2a6e","#fff"])}const b=l3.boss;b.ph="dead";b.tent=null;b.blobs=[];l3.bossDone=true;flash=.6;gainXP("The Blot",800,DY-140);
   start([
     ["Narrator","The Blot lets out a long, gurgly wail. It shrinks… and shrinks… until it's a tiny ink squid the size of a teacup."],
     ["The Blot","…bloop."],
@@ -2342,18 +2344,18 @@ function updateBoss(dt,oldFeet){
   if(b.ph==="tent"){
     if(!b.tent){if(b.t>.6)b.tent={x:clamp(center(),230,780),st:"warn",t:0}}
     else{const T=b.tent;T.t+=dt;
-      if(T.st==="warn"&&T.t>1.1){T.st="slam";T.t=0;shake=.3;if(Math.abs(center()-T.x)<46&&onDeck)hurt3(T.x,"WHAM! The tentacle got you! (-1 health)")}
+      if(T.st==="warn"&&T.t>1.1){T.st="slam";T.t=0;shake=.3;if(Math.abs(center()-T.x)<46&&onDeck)hurt3(T.x,"WHAM! The tentacle got you! (-2 health)",2)}
       else if(T.st==="slam"&&T.t>.15){T.st="stuck";T.t=0}
       else if(T.st==="stuck"&&T.t>2.2){T.st="back";T.t=0}
       else if(T.st==="back"&&T.t>.5){b.tent=null;b.slams++;b.t=0;if(b.slams>=2+(b.cycle>0?1:0)){b.slams=0;b.ph="rain";b.t=0;b.spawn=0}}}
   }else if(b.ph==="rain"){
     b.spawn-=dt;if(b.t<4.4&&b.spawn<=0){b.spawn=.5;const x=(b.blobs.length%2)?clamp(center()+(Math.random()-.5)*60,210,850):210+Math.random()*640;b.blobs.push({x,t:0})}
-    for(const o of b.blobs){o.t+=dt;if(!o.hit&&o.t>=.9){o.hit=true;burst(o.x,DY-6,10,[INK,"#5b2a6e"]);if(Math.abs(center()-o.x)<32&&onDeck)hurt3(o.x,"SPLAT! Ink drop! (-1 health)")}}
+    for(const o of b.blobs){o.t+=dt;if(!o.hit&&o.t>=.9){o.hit=true;burst(o.x,DY-6,10,[INK,"#5b2a6e"]);if(Math.random()<.1)spawnInklet(o.x);if(Math.abs(center()-o.x)<32&&onDeck)hurt3(o.x,"SPLAT! Ink drop! (-1 health)")}}
     b.blobs=b.blobs.filter(o=>o.t<1.4);if(b.t>5.6&&!b.blobs.length){b.ph="head";b.t=0;b.headUp=0}
   }else if(b.ph==="head"){
     b.headUp=b.t<.7?b.t/.7:b.t<3.6?1:Math.max(0,1-(b.t-3.6)/.6);
     if(b.headUp>.8){const top=DY-104;if(s.x+s.w>752&&s.x<848&&s.y+s.h>top&&s.y<DY){
-      if(s.vy>0&&oldFeet<=top+16){s.vy=-560;damageBoss(2,800,top);if(b.ph==="head")b.t=Math.max(b.t,3.6)}
+      if(s.vy>0&&oldFeet<=top+16){s.vy=-560;damageBoss(1,800,top);if(b.ph==="head")b.t=Math.max(b.t,3.6)}
       else hurt3(800,"The Blot bumps you away! Stomp its head from ABOVE. (-1 health)")}}
     if(b.t>4.2){b.ph="tent";b.t=0;b.cycle++;b.headUp=0}
   }
@@ -2388,7 +2390,6 @@ function updateL3(dt,oldFeet){
     if(!l3.green&&Math.abs(center()-GEM_G.x)<30&&s.y+s.h>GEM_G.y-60&&s.y<GEM_G.y){l3.green=true;addItem("Green Gem");burst(GEM_G.x,GEM_G.y-30,26,["#5fb35a","#a6e39a","#fff"]);
       start([["Narrator","Tucked into a dusty nook: a gem, glowing green as a fresh leaf."],["Dab","The GREEN GEM! Whoever hid it up here really didn't want it found."],["Reel","That's all three! Red, Green, Blue. Now up to the lamp!"]],()=>sayToast("Got the Green Gem!"));return}
     if(!l3.potion&&Math.abs(center()-POTION_TOP.x)<26&&onPlat(DY)){l3.potion=true;addItem("Health Potion");burst(POTION_TOP.x,DY-30,14,["#ff6f9c","#fff"]);sayToast("Found a Health Potion! Use it from Pockets (I) if things get rough.")}
-    if(onPlat(DY)&&checkpointY!==DY-s.h){checkpoint=230-s.w/2;checkpointY=DY-s.h;checkpointScene="lighthouse"}
     if(!l3.bossDone&&!l3.boss&&onPlat(DY)&&center()>440){startBoss();return}
     updateBoss(dt,oldFeet);if(dlg.on)return;
   }
@@ -2446,6 +2447,7 @@ function drawFoe(f){
   groundShadow(f.x,f.base+2,18);
   if(f.type==="crab")sprite(f.x,f.base+2,54,40,()=>drawCrabBody(clawsUp(f)),{sx:1,sy:1+Math.sin(f.t*12)*.03});
   else if(f.type==="hermit")sprite(f.x,f.base+2,50,40,()=>drawHermitBody(f.flip>0),{sx:f.dir>0?-1:1});
+  else if(f.type==="inklet"){g.save();g.translate(f.x,f.base-14+Math.abs(Math.sin(f.t*10))*-3);g.scale(f.dir>0?-1:1,1);blotHead(0,-4,.3,true);g.strokeStyle=INK;g.lineWidth=2;for(let i=0;i<3;i++){g.beginPath();g.moveTo(-8+i*8,8);g.lineTo(-8+i*8+Math.sin(f.t*16+i)*4,15);g.stroke()}g.restore()}
   else sprite(f.x,f.base+2,46,36,drawSmudgeBody,{sx:f.dir>0?-1:1,sy:1+Math.sin(f.t*10)*.06});
 }
 function drawBeach(){
@@ -2615,7 +2617,7 @@ const CHEATS={
   l3gems:()=>{for(const n of["Heart Necklace","Blue Gem","Green Gem"])if(!has(n))addItem(n);l3.necklace=l3.blue=l3.green=true;sayToast("All three gems added (cheater!)")},
   shield:()=>{addItem("Shell Shield");sayToast("Shell Shield added. Use it from Pockets.")},
   xp:()=>{xp=XP_FOR(plv)-1;journal.Smudge=Math.max(journal.Smudge||0,1);gainXP("Smudge",center(),s.y-20)},
-  journal:()=>{journal.Smudge=journal.Smudge||3;journal.Prickles=journal.Prickles||1;invOpen=true;inv.tab=3;inv.sel=0},
+  journal:()=>{for(const c of CREATURES)journal[c.name]=journal[c.name]||1;invOpen=true;inv.tab=3;inv.sel=0},
   reload:()=>location.reload()
 };
 document.querySelectorAll("[data-cheat]").forEach(b=>b.addEventListener("click",()=>{CHEATS[b.dataset.cheat]();b.blur();c.focus()}));
@@ -2642,7 +2644,7 @@ start([
   ["Narrator","(So many things.)"]
 ],()=>sayToast("Walk to the wardrobe and press Space to open it."));
 requestAnimationFrame(frame);
-window.__game={get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},get l3(){return l3},endL2:()=>{level=2;l2.done=true;complete=true;showEndScreen=true;endT=2},get LH(){return LH_STATIC},get shield(){return shield},get camY(){return camY},gainXP:(n)=>gainXP(n,center(),s.y)};
+window.__game={get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},get l3(){return l3},endL2:()=>{level=2;l2.done=true;complete=true;showEndScreen=true;endT=2},get LH(){return LH_STATIC},spawnInklet:x=>spawnInklet(x),get shield(){return shield},get camY(){return camY},gainXP:(n)=>gainXP(n,center(),s.y)};
 })();
 </script>
 </body>
