@@ -640,6 +640,7 @@ function update(dt){
   s.flip+=(s.face-s.flip)*Math.min(1,dt*16);s.squash+=(1-s.squash)*Math.min(1,dt*12);
   // Dab follows behind Sarah
   const bx=center()-s.face*34,by=s.y+22+Math.sin(time*3)*4;dab.x+=(bx-dab.x)*Math.min(1,dt*6);dab.y+=(by-dab.y)*Math.min(1,dt*6);
+  if(level===2&&l2.maple!=null&&!dogOn){const pg=dlg.on&&dlg.pages[dlg.page];if(l2.dogXfer>0||(pg&&/^Mrs\. Maple unties/.test(pg[1])))l2.dogXfer=Math.min(1,(l2.dogXfer||0)+dt/1.3)}
   if(level===2&&l2.results){if(!l2.curtain&&dlg.on&&dlg.pages[dlg.page]&&/^The cloth/.test(dlg.pages[dlg.page][1]))l2.curtain=.001;
     if(l2.curtain>0)l2.curtain=Math.min(1,l2.curtain+dt/1.8);if(l2.finale)l2.curtain=1}
   if(dlg.on||invOpen||complete){updateAction();return}
@@ -1252,6 +1253,8 @@ function runResults(){
   const p=[
     ["Announcer","Ladies, gentlemen and talking art supplies! Our judge, Mr. Biscuits, has reached a decision!"],
     ["Mr. Biscuits","Mrrp."],
+    ["Announcer","This year's finalists: the giant balloon dog from the sculpture garden — it wouldn't fit on the stage, so we pinned up a photo — and a mystery painting under that cloth!"],
+    ["Mr. Biscuits","Mrrrrp. (He gives the photo a long, suspicious look. Balloons make him nervous.)"],
     ["Announcer","And the winner of this year's Art Contest is… Juniper, for her painting \"The Legend Returns\"!"],
     ["Narrator","The cloth slides away. The painting shows a young artist splashing color across a gray world… and beside her floats a little living paintbrush."],
     ["Juniper","I painted it from the old stories — the legendary adventurer who brings color back. I've never actually met her. I just… imagined."],
@@ -1305,14 +1308,15 @@ function skyDoor(){
 }
 function mapleFinale(){
   start([
+    ["Narrator","Mrs. Maple comes hurrying across the plaza, towing the giant balloon dog from the sculpture garden on a string. It bobs along behind her like the world's happiest cloud."],
     ["Mrs. Maple","Sarah, dear! I saw the whole thing from the kettle-corn line."],
     ["Mrs. Maple","The painting. The paintbrush. The pencil. The sky ripping open like cheap wrapping paper. I'm old, dear, but I'm not blind."],
     ["Mrs. Maple","Sarah. You must save the town."],
     ["Sarah","…Can I at least finish my lemonade first?"],
     ["Mrs. Maple","Of course, dear. Finish your lemonade. Then save the town. I'll pack you a sandwich."],
     ["Mrs. Maple","Oh, and dear? That door that fell out of the sky? I suspect it's meant for you. It's way up on the second floor, though, and Gus still hasn't fixed that elevator."],
-    ["Mrs. Maple","Hold still. I have an idea."],
-    ["Narrator","Mrs. Maple marches to the sculpture garden, unties the giant balloon dog, marches back and ties it firmly to Sarah's backpack."],
+    ["Mrs. Maple","Hold still. I brought a friend. He's been very patient about it."],
+    ["Narrator","Mrs. Maple unties the balloon dog's string from her wrist and ties it firmly to Sarah's backpack."],
     ["Mrs. Maple","There! Float up to those jump bars by the stage, dear. Mind the dog — he's a good boy, but he's mostly air."]
   ],()=>{l2.mapleDone=true;l2.dogGone=true;dogOn=true;sayToast((has("Smudgy Key")?"":"Grab the Smudgy Key first! ")+"Floaty! Jump up to the bars on the right side of the stage, then climb to the second floor.")});
 }
@@ -1386,7 +1390,7 @@ function updateFestival(dt,oldFeet){
         else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;
           if(health<=0){health=maxHealth;s.x=checkpoint;s.y=G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}}
     l2.drain=Math.min(.9,l2.drain+alive*.03*dt);
-    if(!alive){l2.fightDone=true;start([["Nib","Pointy justice!"],["Dab","Look — the painting's getting its color back!"]],()=>{l2.maple=camera-60})}
+    if(!alive){l2.fightDone=true;start([["Nib","Pointy justice!"],["Dab","Look — the painting's getting its color back!"]],()=>{l2.maple=camera-60;l2.dogGone=true;l2.dogXfer=0})}
   }
   if(l2.fightDone){l2.drain=Math.max(0,l2.drain-dt*.5);for(const m of fsm)if(!m.alive)m.flat=Math.min(1,m.flat+dt*3)}
   if(l2.maple!=null&&!l2.mapleTalked){const target=center()-90;l2.maple+=Math.sign(target-l2.maple)*Math.min(Math.abs(target-l2.maple),150*dt);if(Math.abs(l2.maple-target)<4){l2.mapleTalked=true;mapleFinale()}}
@@ -1606,7 +1610,11 @@ function drawStage(){
   for(const side of[0,1]){const cx=side?x1-60:x0;cut(()=>{g.beginPath();g.moveTo(cx,G-292);g.lineTo(cx+60,G-292);g.quadraticCurveTo(cx+(side?10:50),G-150,cx+(side?44:16),G);g.lineTo(cx+(side?60:0),G);g.closePath()},"#e5577b",{edge:6,shadow:false})}
   cut(()=>rr(3150,G-282,240,40,8),"#f4c84f",{edge:7});g.fillStyle=INK;g.font="bold 20px "+FONT;g.textAlign="center";g.fillText("ART CONTEST",3270,G-255);
   // hung entries
-  cut(()=>rr(3105,G-230,46,38,3),"#fffdf6",{edge:5});g.strokeStyle="#3b8fd6";g.lineWidth=3;g.beginPath();g.moveTo(3112,G-205);g.quadraticCurveTo(3128,G-228,3144,G-205);g.stroke();
+  if(l2.results){g.save();g.translate(3112,G-214);g.rotate(-.07);cut(()=>rr(-40,-46,80,94,3),"#fffdf6",{edge:6});
+    const sg=g.createLinearGradient(0,-38,0,26);sg.addColorStop(0,"#9fd8f5");sg.addColorStop(1,"#d9f1e0");g.fillStyle=sg;g.fillRect(-32,-38,64,62);g.fillStyle="#7cc77a";g.fillRect(-32,14,64,10);
+    g.save();g.beginPath();g.rect(-32,-38,64,62);g.clip();drawBalloonDog(-6,18,.55);g.restore();g.strokeStyle=INK;g.lineWidth=1.5;g.strokeRect(-32,-38,64,62);
+    g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("Balloon Dog",0,38);cut(()=>{g.beginPath();g.arc(0,-46,5,0,7)},"#e5577b",{edge:3,shadow:false});g.restore()}
+  else{cut(()=>rr(3105,G-230,46,38,3),"#fffdf6",{edge:5});g.strokeStyle="#3b8fd6";g.lineWidth=3;g.beginPath();g.moveTo(3112,G-205);g.quadraticCurveTo(3128,G-228,3144,G-205);g.stroke()}
   cut(()=>rr(3395,G-232,50,40,3),"#fffdf6",{edge:5});g.fillStyle="#f08a3c";circle(3420,G-212,10);g.fill();
   // main easel
   cut(()=>{g.beginPath();g.moveTo(3230,G);g.lineTo(3262,G-230);g.lineTo(3294,G);g.lineTo(3286,G);g.lineTo(3262,G-190);g.lineTo(3238,G);g.closePath()},"#a8714a",{edge:5});
@@ -1689,7 +1697,11 @@ function drawFestival(){
   for(const m of fsm){if(m.alive){groundShadow(m.x,G+2,18);sprite(m.x,G+2,46,36,drawSmudgeBody,{sx:m.dir>0?-1:1,sy:1+Math.sin(time*10)*.06});if(m.key)drawIcon("Smudgy Key",m.x,G-52+Math.sin(time*5)*3,.5)}else if(m.flat<1){sprite(m.x,G+2,46,36,drawSmudgeBody,{sy:Math.max(.05,.2-m.flat*.2),sx:1.4,alpha:1-m.flat})}}
   drawLoot();drawDoodles();drawParticles();drawSarah();
   const hs=hideSpot();if(hs)drawCrate(hs);
-  if(l2.maple!=null){groundShadow(l2.maple,G+2,20);sprite(l2.maple,G+3,50,76,drawMapleBody,{sy:1+Math.abs(Math.sin(time*9))*.03})}
+  if(l2.maple!=null){groundShadow(l2.maple,G+2,20);sprite(l2.maple,G+3,50,76,drawMapleBody,{sy:1+Math.abs(Math.sin(time*9))*.03});
+    if(!dogOn){const k=l2.dogXfer||0,e=k*k*(3-2*k),hx=l2.maple+14,hy=G-40,sx=center(),sy=s.y+30,ax=hx+(sx-hx)*e,ay=hy+(sy-hy)*e;
+      const mx=l2.maple+30+Math.sin(time*1.6)*6,my=G-160+Math.sin(time*2.2)*5,tx=center()+6,ty=s.y-70+Math.sin(time*3)*4;
+      const bx=mx+(tx-mx)*e,by=my+(ty-my)*e-Math.sin(e*Math.PI)*40;
+      g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(ax,ay);g.quadraticCurveTo((ax+bx)/2+12,(ay+by)/2+10,bx,by);g.stroke();drawBalloonDog(bx-6,by,.75)}}
   g.restore();g.restore();
 }
 function objectiveL2(){
