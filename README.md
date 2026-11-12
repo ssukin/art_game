@@ -74,17 +74,17 @@ Finishing Level 2 (through the door from the sky) continues into Level 3. The ch
 - Fish from the back of the shipwreck. You'll catch between 1 and 5 Sea Perch, then hook the **Blue Gem**. Falling in the sea costs 1 health.
 - With Red and Blue in hand, cross the rocks to the lighthouse.
 
-**3-2: The Gray Lighthouse.** A tall vertical climb with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) There are no Save Blocks in Level 3: your checkpoint is the start of the beach, then the lighthouse entrance, then the top deck.
+**3-2: The Gray Lighthouse.** A tall vertical climb with static and **moving platforms** (blue, with ◀ ▶ or ▲▼ arrows) The only Save Block in Level 3 sits on the last platform before the boss deck; otherwise your checkpoint is the start of the beach, then the lighthouse entrance.
 - The **Green Gem** is hidden in a nook high on the left, reached from the big landing by a quick elevator, a tiny ledge and a fast sideways platform.
 - A chest partway up holds the **Shell Shield**. Use it from Pockets: a bubble that blocks the next **2 hits** and then breaks away.
-- At the top: a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down, dodge falling ink drops (watch their shadows) and stomp its head when it peeks over the railing. It has a health bar.
+- At the top: a **Health Potion**, then the boss, **The Blot**, a giant ink squid. Jab its tentacles with Nib when they slam down (a slam that lands on Sarah costs 2 health), dodge falling ink drops (watch their shadows; about 1 in 10 sprouts legs and becomes an **Inklet**) and stomp its head when it rises over the railing (1 damage per stomp). It has a health bar.
 - Set the three gems in the lamp to light the lighthouse and bring the coast's colors back. If the Green Gem is missing, drop down the gap on the left of the deck to go find it.
 
-**New creatures:** Sidecrabs (stomp only when their claws are down), Gulls (swoop to steal a coin; hit them while they're low to get it back), Hermit Smudges (too hard to stomp until Nib flips them over).
+**New creatures:** Sidecrabs (stomp only when their claws are down), Gulls (swoop to steal a coin; hit them while they're low to get it back), Hermit Smudges (too hard to stomp until Nib flips them over; then stomp or jab again), Inklets (tiny ink squids from The Blot's drops).
 
 ## XP and leveling up
 
-Defeating creatures earns **XP**. A Smudge, Prickles and a Sidecrab are worth 1 XP each, a Gull or a Hermit Smudge 2 XP, and The Blot 10 XP. The XP bar sits under the health counter. Level 2 needs 3 XP, and each level after that needs 2 more than the last (5, 7, 9…). On a level up the game freezes, confetti falls, and an announcement shows the new level: **+5 max health and health refilled**. Press Space to keep going.
+Defeating creatures earns **XP**. A Smudge, Prickles, a Sidecrab and an Inklet are worth 1 XP each, a Gull or a Hermit Smudge 2 XP, and The Blot 10 XP. The XP bar sits under the health counter. Level 2 needs 15 XP, and each level after that needs 10 more than the last (25, 35, 45…). On a level up the game freezes, confetti falls, and an announcement shows the new level: **+5 max health and health refilled**. Press Space to keep going.
 
 The **Journal** tab in Pockets shows Sarah's level and XP, plus a page for each creature: how many you've defeated, how much XP each is worth, where it lives and how to beat it. Creatures you haven't beaten yet show as gray silhouettes.
 
