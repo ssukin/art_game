@@ -627,7 +627,7 @@ const onLadder=()=>scene==="resident"&&ladderGiven&&Math.abs(center()-478)<34;
 function update(dt){
   for(const p of xpPops)p.t+=dt;xpPops=xpPops.filter(p=>p.t<1.4);
   if(lvlUp){lvlUp.t+=dt;for(const c of confetti){c.x+=c.vx*dt;c.y+=c.vy*dt;c.rot+=c.vr*dt;c.vx+=Math.sin(c.y*.02)*20*dt;if(c.y>H+20){c.y=-20;c.x=Math.random()*W}}return}
-  time+=dt;
+  if(!invOpen)time+=dt;
   toastTimer=Math.max(0,toastTimer-dt);flash=Math.max(0,flash-dt*1.5);shake=Math.max(0,shake-dt);pulse=Math.max(0,pulse-dt*1.4);
   if(tearT>0)tearT=Math.min(1,tearT+dt*1.6);if(l2.tearT>0)l2.tearT=Math.min(1,l2.tearT+dt*1.6);jabT=Math.max(0,jabT-dt);for(const b of balloonsAway){b.t+=dt;b.y-=80*dt}balloonsAway=balloonsAway.filter(b=>b.t<6);
   if(stormDone&&!flowerRestored)grayT=Math.min(1,grayT+dt*.6);
