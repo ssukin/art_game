@@ -86,6 +86,56 @@ Unlocking the first door on the festival's second floor leads into Level 1. It's
 
 **New creatures:** Sidecrabs (stomp only when their claws are down), Gulls (swoop to steal a coin; hit them while they're low to get it back), Hermit Smudges (too hard to stomp until Nib flips them over; then stomp or jab again).
 
+## Back in town after Level 1 (the hub)
+
+When the lamp is lit, its beam swings up to point at the sky, right where Sarah fell in. Dab explains that when a page is whole again, its light shines back through the door it came from, like a bookmark showing the way home. Sarah steps into the beam, the "Level 1 complete!" screen appears, and **Press Space to head home to town** carries her up through the inky dark and out through the page door onto the festival's second floor. A "Level 0 — Back in Town" title card appears.
+
+**Replaying Level 1.** The Level 1 door on the second floor (marked ✓ LEVEL 1) can be entered again. The replay starts on the beach with the coast already in full color: Reel is with you, the three gems are already in the lamp and The Blot is gone. Creatures, treasure, the tide flats, the hidden dock and the lighthouse climb are all there to play. At the top of the lighthouse, step into the beam to ride home.
+
+**The story so far.** The world is one enormous sketchbook, and every place is a page. Long ago Sarah's Grandma, a young painter named Monty and Dab kept every page colorful. After Mr. Biscuits gave Monty's festival painting a terrible review, Monty went gray, became **Professor Monochrome**, and started ripping pages out of the world. Every torn-out page becomes a door. Grandma went after him years ago and never came home. Every page Sarah stitches back in brings her closer to finding Grandma.
+
+The Professor is glimpsed three times before the reveal: a gray figure on a far hill during the first storm (Part 1), a gray-gloved hand poking out of the tear above the stage (Part 2), and a figure in a gray top hat rowing away with the tiny squid after The Blot (Level 1).
+
+**Coming home, step by step:**
+1. The beam drops Sarah out of the page door, and **Gus's newly fixed elevator** carries her straight down to the ground floor. Gus explains that the festival is over and some shops have opened up again. Dab recognizes the man in the rowboat. (Ride the elevator back up to the second floor any time.)
+2. **Mrs. Maple**, at the far right end of town, tells the story of Grandma, Monty and the sketchbook world.
+3. **Quill**, outside the library, shows **The Great Sketchbook**: the Watercolor Coast page is back, five pages are still torn out. Then a second door thuds onto the second floor.
+4. The town opens up to explore.
+
+**Doors on the second floor.** The Level 1 door can be replayed (see above). The new Level 2 door says "Coming soon": the page is still being drawn by the game's developers.
+
+**Things to do in town now:** The festival is over: the registration table, sculptures, contest stage, bunting and booths are packed away (except Chef Crumb's kitchen and the Art Supplies booth, which stay open). Mr. Biscuits the cat now suns himself outside the pet store. Shops that are closed have an **ON VACATION** sign.
+
+Open shops have an **OPEN!** sign. Press Space at the door to **go inside**, walk up to the counter and talk to the shopkeeper behind it. Press Space at the EXIT door to leave.
+- **Paws & Claws pet store:** Polly sells Dog Food for 4 coins (bring it to **Waffles** at the lake and he trades you 3 **Fresh Eggs**) and **Bait ×3 for 5 coins**.
+- **Odds & Ends general store** (the old Toy Shop, near the festival entrance): Mr. Tally buys almost anything in your Pockets except key items. Pick an item to sell one (use **More items** to page through), or **Sell all fish**. Prices: Lake/Sea Perch 3, Sunfish 6, Sea Bass 6, Pufferfish 8, Catfish 15, Swordfish 20, Golden Koi 40, Seashell 4, Turnip 5, Fresh Eggs 2, Health Potion 6, Shell Shield 8, Lopsided Teapot 6, Cheese Wedge 4, Ball of Clay 3, Dog Food 2, Balloon 2, Butter Pat 2, Bait 1.
+- **Chef Crumb's Kitchen** still cooks from recipe cards, and **Inka's Art Supplies** still sells balloons.
+- **Fishing** at the lake works now that Sarah has Reel. If you have Bait, each cast uses one: fish bite faster and rare fish show up much more often.
+- **Undertown shops** are open (go inside each one):
+  - **Lost & Found:** Mr. Pocket hands over the **Old Sketch** ("The Three of Us": Grandma, Monty and Dab).
+  - **Underground Arcade:** Pixel's **Stop the Smudge** mini-game (1 coin to play; press Space when the Smudge is in the box; 2 coins per bullseye over 3 rounds).
+  - **Alchemy Shop:** Madame Fizz brews a **Health Potion** from any fish plus 1 seashell (or 3 coins instead of the shell).
+- Still closed for later: the Grimy Grotto, the orchard apples and the mysterious gate.
+
+## Fish
+
+| Lake (town) | How rare | Sea (Watercolor Coast) | How rare |
+|---|---|---|---|
+| Lake Perch | common | Sea Perch | common |
+| Sunfish | uncommon | Sea Bass | uncommon |
+| Catfish | rare | Pufferfish | uncommon |
+| Golden Koi | very rare | Swordfish | rare |
+
+On the coast, the Blue Gem still turns up within your first 1–5 catches.
+
+## Saving
+
+The game **saves in your browser only when you use a Save Block**. When you open the game again you get **Continue** or **New Game**. Continue puts you back at your last Save Block with everything you had at that moment: pockets, coins, buddies, XP and level progress. Anything you did after that save (fish caught, things bought or sold) isn't kept unless you save again. New Game wipes the browser save.
+
+A browser save only lives in that one browser on that one computer, and clearing browsing data erases it. For a backup, use the buttons under the game:
+- **Download save** downloads your last Save Block save as `sarah-fading-world-save.json`.
+- **Load save file** loads one of those files back in (on any computer or browser).
+
 ## XP and leveling up
 
 Defeating creatures earns **XP**. A Smudge, Prickles and a Sidecrab are worth 1 XP each, a Gull or a Hermit Smudge 2 XP, and The Blot 10 XP. The XP bar sits under the health counter. Reaching Lv 2 takes 15 XP, and each Lv after that needs 10 more than the last (25, 35, 45…). On a level up the game freezes, confetti falls, and an announcement shows the new level: **+5 max health and health refilled**. Press Space to keep going.
@@ -96,6 +146,6 @@ The **Journal** tab in Pockets shows Sarah's level and XP, plus a page for each 
 
 The cheat panel under the game is collapsed by default; click **Admin Cheats Only** to open it.
 
-Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 0 — Part 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L0-2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, Level 1 buttons (**Start Level 1**, then **L1: …**) jump to the beach, the tide flats, the hidden dock, the shipwreck chest, the fishing spot, the bottom of the lighthouse, the big landing (for the Green Gem detour), the top of the lighthouse and the boss fight, plus **Give all 3 gems** and **Give Shell Shield**. **+20 coins** tops up your wallet, **Level up now** triggers a level up, and **Fill & open Journal** fills in every Journal page. **Restart Level 1** reloads the page.
+Below the game there's a red **Admin Cheats Only** box for testing. **Start Level 0 — Part 2** begins in the orchard with the Turnip, Festival Pin and Dab. **L0-2: festival (registered)** skips straight into town. Other buttons jump to after the chase, the contest results, or the Smudge fight, **Hub: back in town after Level 1** jumps straight to coming home, and **Replay Level 1 (from the hub)** starts a replay, **Hub: general store (fish + bait)** drops you inside Odds & Ends at Mr. Tally's counter with fish, bait and shells to sell, **Clear saved game** deletes the browser save, and **Restart from the beginning** starts a new game in Sarah's bedroom after you confirm (the browser save is kept until you use a Save Block). Level 1 buttons (**Start Level 1**, then **L1: …**) jump to the beach, the tide flats, the hidden dock, the shipwreck chest, the fishing spot, the bottom of the lighthouse, the big landing (for the Green Gem detour), the top of the lighthouse and the boss fight, plus **Give all 3 gems** and **Give Shell Shield**. **+20 coins** tops up your wallet, **Level up now** triggers a level up, and **Fill & open Journal** fills in every Journal page. **Restart Level 1** reloads the page.
 
 `movement_test.html` is the earlier movement-only prototype and can be kept in the repository as a separate reference.

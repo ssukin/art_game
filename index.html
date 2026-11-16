@@ -40,6 +40,9 @@
     <p class="help"><kbd>A</kbd><kbd>D</kbd> / arrows move · <kbd>W</kbd>/<kbd>↑</kbd> jump or climb · <kbd>S</kbd>/<kbd>↓</kbd> climb down · <kbd>Space</kbd> activate / talk · <kbd>Q</kbd> Buddy power · <kbd>E</kbd> swap buddy · <kbd>I</kbd> pockets · <kbd>R</kbd> back to Save Block</p>
     <button class="button action" id="activate" disabled>Activate</button>
     <button class="button" id="inventory">Pockets</button>
+    <button class="button" id="dlSave" title="Download your last Save Block save as a file">Download save</button>
+    <button class="button" id="ulSave" title="Load progress from a save file">Load save file</button>
+    <input type="file" id="ulFile" accept=".json,application/json" hidden>
   </div>
   <details class="cheats" aria-label="Admin cheats only">
     <summary><h2>Admin Cheats Only</h2></summary>
@@ -49,6 +52,11 @@
     <button class="button" data-cheat="nib">L0-2: after the chase (Nib trail)</button>
     <button class="button" data-cheat="results">L0-2: contest results</button>
     <button class="button" data-cheat="fight">L0-2: Smudge fight</button>
+    <button class="button" data-cheat="hub">Hub: back in town after Level 1</button>
+    <button class="button" data-cheat="shop">Hub: general store (fish + bait)</button>
+    <button class="button" data-cheat="clearsave">Clear saved game</button>
+    <button class="button" id="restartBtn" title="Start a new game from Sarah's bedroom">Restart from the beginning</button>
+    <button class="button" data-cheat="l3replay">Replay Level 1 (from the hub)</button>
     <button class="button" data-cheat="l3">Start Level 1 (1-1 beach)</button>
     <button class="button" data-cheat="l3tide">L1: tide flats</button>
     <button class="button" data-cheat="l3dock">L1: hidden dock</button>
@@ -267,6 +275,7 @@ function drawDialogue(){
 // ---------------------------------------------------------------------------
 function objective(){
   if(level===3)return objectiveL3();
+  if(level===2&&l2.hub)return objectiveHub();
   if(level===2)return objectiveL2();
   if(complete)return"Part 1 complete! The festival awaits on the other side of the gate.";
   if(gateKey)return"Head all the way back left to the mysterious gate and unlock it with the Town Gate Key.";
@@ -286,6 +295,7 @@ function getInteract(){
   if(scene==="orchard")return orchardInteract();
   if(scene==="lake")return lakeInteract();
   if(scene==="under")return underInteract();
+  if(scene==="shop")return shopInteract();
   if(scene==="bedroom"){
     if(near(645,50)&&!closetOpen)return["Open the wardrobe",()=>{closetOpen=true;burst(645,360,10);sayToast("The wardrobe creaks open. A potion and a tiny key try to look casual.")}];
     if(near(527,26))return["Admire your painting",easel];
@@ -358,7 +368,7 @@ function roadChest(){
   firstChestOpen=true;removeItem("Road Chest Key");spill(850,G-50,"item","Turnip",90);burst(879,G-40,14);
   sayToast("Click! A Turnip bounces out and lands with tremendous dignity.");
 }
-function saveBlock(){
+function saveBlock(){setTimeout(saveGame,0);
   checkpointY=null;checkpoint=1180;checkpointScene="outside";health=maxHealth;burst(1201,G-70,12,["#f4c84f","#fff"]);
   sayToast("Saved! Health restored. Press R any time to come back to this Save Block.");
 }
@@ -438,6 +448,7 @@ function triggerStorm(){
     ["Narrator","A bolt of lightning tears across the sky like a page ripped out of a sketchbook."],
     ["Sarah","Whoa! Did the sky just… RIP?"],
     ["Narrator","The tremor races down the road. Far ahead, one little flower's color drains right out of it."],
+    ["Narrator","On a far hill, a tall gray figure in a gray top hat watches the color drain away… then he's gone."],
     ["Narrator","Also, some Smudges fell out of the tear. Stomp them. They're mostly ink and bad attitude."]
   ],()=>{stormDone=true;smudges=[[1900,2080],[2230,2450],[2520,2690]].map(([a,b],i)=>({x:(a+b)/2,min:a,max:b,dir:i%2?1:-1,alive:true,flat:0}))});
 }
@@ -445,7 +456,7 @@ function triggerStorm(){
 // ---------------------------------------------------------------------------
 // Pockets (inventory)
 // ---------------------------------------------------------------------------
-const TABS=["Items","Key Items","Buddy","Journal","Hints"];const KEY_ITEMS=["Town Map","Recipe Card","Cheese Recipe","Festival Pin","Heart Necklace","Blue Gem","Green Gem"];
+const TABS=["Items","Key Items","Buddy","Journal","Hints"];const KEY_ITEMS=["Town Map","Recipe Card","Cheese Recipe","Festival Pin","Heart Necklace","Blue Gem","Green Gem","Old Sketch"];
 const inv={tab:0,sel:0};
 const INFO={
   "Health Potion":["Tastes like strawberries and courage. Restores all your health.","Use"],
@@ -454,10 +465,20 @@ const INFO={
   "Town Map":["A map of the whole town, folded sixteen ways. Found under the town, by the bar. (What it does: coming soon!)","Unfold"],
   "Lake Perch":["A Lake Perch. Every fish in this lake is this fish. Nobody knows why. Maybe the chef will want these someday.","Admire"],
   "Reel":["A fishing-pole little buddy and amateur poet, found hiding in a shipwreck's treasure chest. At a fishing spot, press Space to cast; press Space again when the bobber gets yanked under.","Equip"],
+  "Dog Food":["A crunchy bag of dog food from Paws & Claws. Smells like happiness, if happiness were mostly crunchy.",null],
+  "Fresh Eggs":["Three fresh eggs from the lake coop, a thank-you from Waffles and the chickens. Still warm.","Admire"],
+  "Old Sketch":["A faded drawing of a young woman with paint on her nose, a lanky young man in a beret, and a tiny paintbrush with a face. On the back: \"The Three of Us.\"","Look"],
   "Heart Necklace":["A glittering necklace with a big heart-shaped gem, red as a cherry. It glows. This is the lighthouse's Red gem!",null],
   "Blue Gem":["Fished out of the sea beside the shipwreck. Cool and glowing, like a tiny piece of sky. The lighthouse's Blue gem.",null],
   "Green Gem":["Found hidden high in the lighthouse. Glows green as a fresh leaf. The lighthouse's Green gem.",null],
   "Seashell":["A pretty seashell dug out of the painted sand. Marina at the Shell Shack trades 3 of them for her Shell Shield.","Admire"],
+  "Sunfish":["A round little Sunfish from the lake, yellow as a lemon drop. Mr. Tally pays 6 coins.","Admire"],
+  "Catfish":["A whiskery Catfish. Rare! It looks like it has opinions. Mr. Tally pays 15 coins.","Admire"],
+  "Golden Koi":["A GOLDEN KOI. Very rare. It glitters even in your pocket. Mr. Tally pays 40 coins.","Admire"],
+  "Sea Bass":["A stripy Sea Bass from the coast. Mr. Tally pays 6 coins.","Admire"],
+  "Pufferfish":["A Pufferfish. It is not puffed right now. Please keep it that way. Mr. Tally pays 8 coins.","Admire"],
+  "Swordfish":["A Swordfish! Rare. Nib keeps glaring at its nose. Mr. Tally pays 20 coins.","Admire"],
+  "Bait":["A little tin of wriggly bait from Polly's. Casting with it uses one: fish bite faster and rare fish show up more.",null],
   "Sea Perch":["A Sea Perch from beside the shipwreck. It looks like a Lake Perch that went to the beach and got a tan.","Admire"],
   "Shell Shield":["A shimmery shield made from a giant seashell. Use it to wrap yourself in a bubble that blocks the next 2 hits.","Use"],
   "Wooden Ladder":["Folded completely flat. Everything does, around here. Mrs. Maple will want this.",null],
@@ -491,6 +512,9 @@ function useSelected(){
   if(n==="Festival Pin"){pinWorn=!pinWorn;invOpen=false;sayToast(pinWorn?"You pin the Festival Pin to your dress. Fancy! (Pin-wearers get into the festival free.)":"You take off the Festival Pin and pocket it.");return}
   if(n==="Town Map"){sayToast("You unfold the map. And unfold. And unfold. You'll figure out how to read it later.");return}
   if(n==="Lake Perch"){sayToast("The Lake Perch stares at you. You stare back. Nobody wins.");return}
+  if(n==="Fresh Eggs"){sayToast("You admire the eggs. They admire you back. Probably. Eggs are hard to read.");return}
+  if(n==="Old Sketch"){sayToast("Grandma looks so young. She has paint on her nose. Some things never change.");return}
+  if(FISH_NAMES.includes(n)&&n!=="Lake Perch"&&n!=="Sea Perch"){sayToast("You admire your "+n+". Mr. Tally at Odds & Ends would pay "+SELL[n]+" coins for it.");return}
   if(n==="Sea Perch"){sayToast("The Sea Perch has the confidence of a fish that has seen a shipwreck.");return}
   if(n==="Seashell"){sayToast("You hold the shell to your ear. It's the ocean. Also faintly, Marina saying \"bring me three.\"");return}
   if(n==="Shell Shield"){useShield();return}
@@ -506,7 +530,17 @@ function drawIcon(n,x,y,scale=1){
 }
 function iconArt(n){
   g.strokeStyle=INK;g.lineWidth=2.5;
+  if(n==="Sunfish"){g.filter="hue-rotate(-70deg) saturate(1.8) brightness(1.15)";g.scale(.85,1.15);iconArt("Lake Perch");g.filter="none";return}
+  if(n==="Catfish"){g.filter="hue-rotate(-100deg) saturate(.5) brightness(.8)";iconArt("Lake Perch");g.filter="none";g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(16,2);g.quadraticCurveTo(24,6,26,14);g.moveTo(16,2);g.quadraticCurveTo(26,0,28,6);g.stroke();return}
+  if(n==="Golden Koi"){g.filter="hue-rotate(-80deg) saturate(2.4) brightness(1.3)";iconArt("Lake Perch");g.filter="none";g.fillStyle="#fff";for(const [x,y] of[[-18,-14],[14,-14],[0,15]]){g.beginPath();g.moveTo(x,y-5);g.lineTo(x+2,y);g.lineTo(x,y+5);g.lineTo(x-2,y);g.closePath();g.fill()}return}
+  if(n==="Sea Bass"){g.filter="hue-rotate(190deg) saturate(.9)";iconArt("Lake Perch");g.filter="none";return}
+  if(n==="Pufferfish"){g.fillStyle="#f2d16b";circle(0,0,14);g.fill();g.stroke();g.strokeStyle=INK;g.lineWidth=1.5;for(let i=0;i<10;i++){const a=i/10*Math.PI*2;g.beginPath();g.moveTo(Math.cos(a)*14,Math.sin(a)*14);g.lineTo(Math.cos(a)*19,Math.sin(a)*19);g.stroke()}g.fillStyle="#fff";circle(6,-4,4);g.fill();g.stroke();g.fillStyle=INK;circle(7,-4,1.6);g.fill();g.fillStyle="#e09a3a";g.beginPath();g.moveTo(-14,0);g.lineTo(-22,-7);g.lineTo(-22,7);g.closePath();g.fill();g.stroke();return}
+  if(n==="Swordfish"){g.fillStyle="#5b8fd6";g.beginPath();g.moveTo(10,0);g.quadraticCurveTo(0,-11,-14,-2);g.lineTo(-22,-12);g.lineTo(-19,0);g.lineTo(-22,12);g.lineTo(-14,2);g.quadraticCurveTo(0,11,10,0);g.closePath();g.fill();g.stroke();g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.moveTo(10,-1);g.lineTo(26,-3);g.stroke();g.fillStyle="#3b6fb0";g.beginPath();g.moveTo(-4,-7);g.lineTo(2,-18);g.lineTo(4,-6);g.closePath();g.fill();g.stroke();g.fillStyle="#fff";circle(5,-2,2.5);g.fill();g.fillStyle=INK;circle(5.5,-2,1.1);g.fill();return}
+  if(n==="Bait"){cut(()=>rr(-15,-8,30,18,5),"#c98a5a",{edge:3,shadow:false});g.fillStyle="#8a5a3a";g.fillRect(-15,-8,30,5);g.strokeStyle="#e5577b";g.lineWidth=3;g.beginPath();g.moveTo(-6,-8);g.quadraticCurveTo(-2,-18,4,-12);g.quadraticCurveTo(8,-6,12,-16);g.stroke();g.fillStyle="#fff";g.font="bold 8px "+FONT;g.textAlign="center";g.fillText("BAIT",0,7);g.textAlign="left";return}
   if(n==="Sea Perch"){g.filter="hue-rotate(150deg) saturate(1.3)";iconArt("Lake Perch");g.filter="none";return}
+  if(n==="Dog Food"){g.fillStyle="#c98a5a";g.beginPath();g.moveTo(-14,20);g.lineTo(-16,-12);g.lineTo(-10,-20);g.lineTo(10,-20);g.lineTo(16,-12);g.lineTo(14,20);g.closePath();g.fill();g.stroke();g.fillStyle="#fff3d6";g.beginPath();g.ellipse(0,2,9,8,0,0,7);g.fill();g.stroke();g.fillStyle="#c98a5a";for(const [px,py] of[[-3,0],[3,0],[0,5],[-4,-5],[4,-5]]){circle(px,py,2);g.fill()}return}
+  if(n==="Fresh Eggs"){g.fillStyle="#c58a52";g.beginPath();g.moveTo(-18,2);g.lineTo(18,2);g.lineTo(12,20);g.lineTo(-12,20);g.closePath();g.fill();g.stroke();g.fillStyle="#fffdf6";for(const ex of[-9,0,9]){g.beginPath();g.ellipse(ex,-4,6,9,0,0,7);g.fill();g.stroke()}g.strokeStyle="#8d5a36";g.beginPath();g.moveTo(-18,2);g.quadraticCurveTo(0,-30,18,2);g.stroke();return}
+  if(n==="Old Sketch"){g.save();g.rotate(-.12);g.fillStyle="#f3e6c8";rr(-16,-20,32,40,2);g.fill();g.stroke();g.strokeStyle="#8a7a5a";g.lineWidth=1.5;for(const sx of[-8,2]){g.beginPath();g.arc(sx,-6,4,0,7);g.moveTo(sx,-2);g.lineTo(sx,10);g.stroke()}g.beginPath();g.moveTo(10,-4);g.lineTo(10,8);g.stroke();g.restore();return}
   if(n==="Blue Gem"||n==="Green Gem"){const c=n==="Blue Gem"?["#3b8fd6","#9fd2f7"]:["#4fae5a","#b6ec9f"];g.fillStyle=c[0];g.beginPath();g.moveTo(-14,-8);g.lineTo(-6,-18);g.lineTo(6,-18);g.lineTo(14,-8);g.lineTo(0,20);g.closePath();g.fill();g.stroke();
     g.fillStyle=c[1];g.beginPath();g.moveTo(-6,-18);g.lineTo(-2,-8);g.lineTo(-14,-8);g.closePath();g.fill();g.beginPath();g.moveTo(-14,-8);g.lineTo(14,-8);g.stroke();g.beginPath();g.moveTo(-2,-8);g.lineTo(0,20);g.moveTo(-6,-18);g.lineTo(-2,-8);g.lineTo(6,-18);g.stroke();return}
   if(n==="Heart Necklace"){g.strokeStyle="#c9a23a";g.lineWidth=2.5;g.beginPath();g.arc(0,-6,18,Math.PI*1.05,Math.PI*1.95,true);g.stroke();g.fillStyle="#c9a23a";for(let a=.1;a<3.1;a+=.4){circle(Math.cos(a+Math.PI)*-18*-1,-6-Math.sin(a)*-18*-1,0);}
@@ -575,7 +609,7 @@ function drawHints(px,py,pw,ph){
   g.strokeStyle="#f2a1b5";g.beginPath();g.moveTo(nx+60,ny+6);g.lineTo(nx+60,ny+nh-6);g.stroke();
   g.fillStyle="#e5577b";g.font="bold 19px "+FONT;g.fillText("Right now:",nx+74,ny+40);
   g.fillStyle=INK;wrap(objective(),nw-110,"bold 17px "+FONT).forEach((l,i)=>g.fillText(l,nx+74,ny+68+i*28));
-  const beats=level===3?beatsL3():level===2?[["Register for the festival",l2.festReg],["Arrive at the festival",l2.intro],["Enter the art contest (optional)",l2.clayEntered],["Free Mr. Biscuits",l2.catFreed],["Survive the butter sculptor",l2.chaseDone],["Find Nib",hasNib],["Hear the contest results",l2.results],["Defeat the festival Smudges",l2.fightDone],["Open the door from the sky",l2.doorOpen]]:[["Raid the wardrobe",potionCollected&&roadChestKeyCollected],["Investigate the overnight gate",homeIntroSeen],["Unlock the road chest",firstChestOpen],["Ride the upside-down fountain",fountainKeyCollected],["Fetch Mrs. Maple a ladder",ladderGiven],["Open Grandma's chest",grandChestOpen],["Bring color back to the flower",flowerRestored],["Unlock the town gate",gateOpen]];
+  const beats=level===3?beatsL3():level===2&&l2.hub?beatsHub():level===2?[["Register for the festival",l2.festReg],["Arrive at the festival",l2.intro],["Enter the art contest (optional)",l2.clayEntered],["Free Mr. Biscuits",l2.catFreed],["Survive the butter sculptor",l2.chaseDone],["Find Nib",hasNib],["Hear the contest results",l2.results],["Defeat the festival Smudges",l2.fightDone],["Open the door from the sky",l2.doorOpen]]:[["Raid the wardrobe",potionCollected&&roadChestKeyCollected],["Investigate the overnight gate",homeIntroSeen],["Unlock the road chest",firstChestOpen],["Ride the upside-down fountain",fountainKeyCollected],["Fetch Mrs. Maple a ladder",ladderGiven],["Open Grandma's chest",grandChestOpen],["Bring color back to the flower",flowerRestored],["Unlock the town gate",gateOpen]];
   const done=beats.filter(b=>b[1]);g.fillStyle="#17a398";g.font="bold 17px "+FONT;g.fillText("Done so far ("+done.length+"/"+beats.length+")"+(level===1&&roofItemCollected?"  ★ Roof secret found!":""),nx+74,ny+156);
   g.font="16px "+FONT;done.slice(-4).forEach((b,i)=>{g.fillStyle="#17a398";g.fillText("✔",nx+78,ny+184+i*28);g.fillStyle=INK;g.fillText(b[0],nx+102,ny+184+i*28)});
   if(!done.length){g.fillStyle="#8d8578";g.fillText("Nothing yet. The day is young.",nx+78,ny+184)}
@@ -590,16 +624,19 @@ function invClick(mx,my){
 // Input
 // ---------------------------------------------------------------------------
 function toggleInv(){if(dlg.on||showEndScreen)return;invOpen=!invOpen;if(invOpen){inv.sel=0}}
-actionBtn.onclick=()=>{actionBtn.blur();if((scene==="lake"||scene==="beach")&&fish.ph>0){fishSpace();return}if(lvlUp){closeLvl();return}if(dlg.on)advance();else{const it=getInteract();if(it&&!invOpen)it[1]()}};
+actionBtn.onclick=()=>{actionBtn.blur();if(titleMenu){titlePick(titleMenu.sel);return}if((scene==="lake"||scene==="beach")&&fish.ph>0){fishSpace();return}if(mini){miniPress();return}if(book){if(book.t>.4)closeBook();return}if(lvlUp){closeLvl();return}if(dlg.on)advance();else{const it=getInteract();if(it&&!invOpen)it[1]()}};
 invBtn.onclick=()=>{invBtn.blur();toggleInv()};
-c.addEventListener("click",e=>{if(lvlUp){closeLvl();return}const r=c.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height;
-  if(showEndScreen){if(endT>1){if(level===1)startLevel2();else if(level===2)startLevel3()}return}
+c.addEventListener("click",e=>{if(titleMenu){const r=c.getBoundingClientRect(),my=(e.clientY-r.top)*H/r.height-H/2;if(my>-30&&my<16)titlePick(0);else if(my>28&&my<74)titlePick(1);return}if(mini){miniPress();return}if(book){if(book.t>.4)closeBook();return}if(lvlUp){closeLvl();return}const r=c.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height;
+  if(showEndScreen){if(endT>1){if(level===1)startLevel2();else if(level===2)startLevel3();else if(level===3)returnHome()}return}
   if(dlg.on){const hit=dlg.rects.findIndex(([x,y,w,h])=>mx>x&&mx<x+w&&my>y&&my<y+h);if(dlg.rects.length&&hit<0)return;if(hit>=0)dlg.choice=hit;advance();return}if(invOpen)invClick(mx,my)});
 const key=k=>k.length===1?k.toLowerCase():k;
 window.addEventListener("keydown",e=>{
   const k=key(e.key);if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," ","Tab"].includes(k))e.preventDefault();
+  if(titleMenu){if(k==="ArrowUp"||k==="w"||k==="ArrowDown"||k==="s")titleMenu.sel=1-titleMenu.sel;if((k===" "||k==="Enter")&&!e.repeat)titlePick(titleMenu.sel);return}
+  if(mini){if((k===" "||k==="Enter")&&!e.repeat)miniPress();return}
+  if(book){if((k===" "||k==="Enter"||k==="Escape")&&!e.repeat&&book.t>.4)closeBook();return}
   if(lvlUp){if((k===" "||k==="Enter")&&!e.repeat)closeLvl();return}
-  if(showEndScreen){if(endT>1&&(k===" "||k==="Enter")&&!e.repeat){if(level===1)startLevel2();else if(level===2)startLevel3()}return}
+  if(showEndScreen){if(endT>1&&(k===" "||k==="Enter")&&!e.repeat){if(level===1)startLevel2();else if(level===2)startLevel3();else if(level===3)returnHome()}return}
   if(dlg.on){const p=dlg.pages[dlg.page];if(p[2]&&dlg.chars>=p[1].length){const n=p[2].length;if(k==="ArrowUp"||k==="w")dlg.choice=(dlg.choice+n-1)%n;if(k==="ArrowDown"||k==="s")dlg.choice=(dlg.choice+1)%n}
     if((k===" "||k==="Enter")&&!e.repeat)advance();return}
   if(k==="i"&&!e.repeat){toggleInv();return}
@@ -633,7 +670,10 @@ const onLadder=()=>scene==="resident"&&ladderGiven&&Math.abs(center()-478)<34;
 // Update
 // ---------------------------------------------------------------------------
 function update(dt){
+  if(titleMenu)return;
   for(const p of xpPops)p.t+=dt;xpPops=xpPops.filter(p=>p.t<1.4);
+  if(mini){updateMini(dt);return}
+  if(book){book.t+=dt;return}
   if(lvlUp){lvlUp.t+=dt;for(const c of confetti){c.x+=c.vx*dt;c.y+=c.vy*dt;c.rot+=c.vr*dt;c.vx+=Math.sin(c.y*.02)*20*dt;if(c.y>H+20){c.y=-20;c.x=Math.random()*W}}return}
   if(!invOpen)time+=dt;
   toastTimer=Math.max(0,toastTimer-dt);flash=Math.max(0,flash-dt*1.5);shake=Math.max(0,shake-dt);pulse=Math.max(0,pulse-dt*1.4);
@@ -656,7 +696,7 @@ function update(dt){
   if((scene==="lake"||scene==="beach")&&fish.ph>0){updateFishing(dt);updateAction();return}
   let dir=(keys.has("ArrowRight")||keys.has("d")?1:0)-(keys.has("ArrowLeft")||keys.has("a")?1:0);
   s.duck=(keys.has("s")||keys.has("ArrowDown"))&&s.ground&&!onLadder();if(s.duck)dir=0;
-  const oldX=s.x;s.x+=dir*245*dt;s.x=clamp(s.x,worldMin(),worldW()-s.w);
+  const oldX=s.x;s.x+=dir*245*dt;s.x=clamp(s.x,worldMin(),worldW()-s.w);if(scene==="shop")s.x=clamp(s.x,30,COUNTER.x-6-s.w);
   if(scene==="festival")for(const b of CRATES){if(s.x+s.w>b.x&&s.x<b.x+b.w&&s.y+s.h>b.y+6&&s.y<b.y+b.h){if(oldX+s.w<=b.x+1)s.x=b.x-s.w;else if(oldX>=b.x+b.w-1)s.x=b.x+b.w}}if(dir)s.face=dir;s.walk=dir&&s.ground?s.walk+dt*14:0;
   s.inv=Math.max(0,s.inv-dt);
   if(level===3)l3Pre(dt);
@@ -848,6 +888,7 @@ function drawOutsideBackground(tear=tearT>0?{x:1260,t:tearT}:null){
   const far=camera*.25;g.save();g.translate(-(far%480),0);
   for(let k=-1;k<4;k++){const ox=k*480;cut(()=>{g.beginPath();g.moveTo(ox,G);const steps=[[0,330],[60,300],[120,270],[200,250],[280,280],[340,310],[420,340],[480,G]];for(const [sx,sy] of steps){g.lineTo(ox+sx,sy);g.lineTo(ox+sx+60,sy)}g.lineTo(ox+480,G);g.closePath()},"#a7dcc0",{edge:5,line:2,shadow:false})}
   g.restore();
+  if(/^On a far hill/.test(curPage()))drawProf(tear?tear.x-camera*.55+150:620,300,.9);
   g.save();g.globalAlpha=.35;g.fillStyle="#fff";for(let x=-(far%40);x<W;x+=40)for(let y=290;y<G;y+=40){g.fillRect(x+10,y+10,6,6)}g.restore();
   // near rounded hills
   const nearX=camera*.5;g.save();g.translate(-(nearX%360),0);
@@ -857,10 +898,17 @@ function drawOutsideBackground(tear=tearT>0?{x:1260,t:tearT}:null){
   // background trees on cardboard stands
   const tx=camera*.75;for(const [x,sc,col] of [[300,.8,"#4fae67"],[760,.7,"#66bf72"],[1180,.85,"#4fae67"],[1700,.7,"#66bf72"],[2100,.8,"#4fae67"],[2600,.75,"#66bf72"],[3000,.8,"#4fae67"]]){const px=x-tx;if(px>-100&&px<W+100)tree(px,G,sc,col)}
 }
+const curPage=()=>dlg.on&&dlg.pages[dlg.page]?dlg.pages[dlg.page][1]:"";
+function drawProf(x,y,sc){g.save();g.translate(x,y);g.scale(sc,sc);
+  cut(()=>{g.beginPath();g.moveTo(-14,0);g.lineTo(-10,-60);g.quadraticCurveTo(0,-70,10,-60);g.lineTo(14,0);g.closePath()},"#6b6b72",{edge:4,shadow:false});
+  cut(()=>{g.beginPath();g.arc(0,-72,9,0,7)},"#a9a9b0",{edge:3,shadow:false});
+  cut(()=>rr(-14,-84,28,4,2),"#4a4a52",{edge:3,shadow:false});cut(()=>rr(-9,-108,18,26,2),"#4a4a52",{edge:3,shadow:false});
+  g.strokeStyle="#4a4a52";g.lineWidth=2.5;g.beginPath();g.moveTo(16,-36);g.lineTo(22,0);g.stroke();g.restore()}
+function drawGlove(x,y){g.save();g.translate(x,y+Math.sin(time*6)*3);cut(()=>{g.beginPath();g.ellipse(0,0,12,10,0,0,7);for(let i=0;i<4;i++){g.moveTo(-9+i*6,-6);g.ellipse(-9+i*6,-12,3,7,0,0,7)}},"#8f8f98",{edge:4,shadow:false});cut(()=>rr(-10,6,20,14,3),"#6b6b72",{edge:3,shadow:false});g.restore()}
 function drawTear(x,y,t){g.save();g.translate(x,y);g.scale(1,t);
   cut(()=>{g.beginPath();const pts=[[0,0],[24,30],[8,55],[40,90],[20,120],[52,160],[30,190],[60,220]];g.moveTo(-8,0);pts.forEach(([px,py])=>g.lineTo(px-14,py));for(let i=pts.length-1;i>=0;i--)g.lineTo(pts[i][0]+14+(i%2)*8,pts[i][1]);g.closePath()},"#2f2a4a",{edge:9,line:2});
   g.fillStyle="#f4c84f";for(let i=0;i<6;i++){const sx=10+Math.sin(time*2+i)*16,sy=20+i*32;g.globalAlpha=.6+Math.sin(time*4+i)*.3;star(sx+i*6,sy,4,1.8);g.fill()}
-  g.restore()}
+  g.restore();}
 function drawGround(){
   const x0=Math.floor(camera/60)*60;
   for(let x=x0;x<camera+W+60;x+=60){const i=x/60;
@@ -1036,7 +1084,7 @@ function drawEndScreen(){
   g.fillStyle=INK;g.textAlign="center";g.font="bold 36px "+FONT;g.fillText(level===1?"Level 0 — Part 1 complete!":level===2?"Level 0 — Part 2 complete!":"Level 1 complete!",0,-10);
   g.fillStyle="#17a398";g.font="bold 26px "+FONT;
   if(level<3){if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText("Press Space (or click) to continue to "+(level===1?"Part 2":"Level 1")+" →",0,40);g.globalAlpha=1}}
-  else g.fillText("The lighthouse shines again! To be continued…",0,40);
+  else if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText("Press Space (or click) to head home to town →",0,40);g.globalAlpha=1}
   g.fillStyle="#7a7088";g.font="italic 16px "+FONT;g.fillText("Coins collected: "+coins+"  ·  Sarah is Lv "+plv+(level===1?(roofItemCollected?"  ·  Roof secret: found!":"  ·  Roof secret: still up there…"):(l2.clayEntered?"  ·  \""+l2.entry+"\": tried, and rewarded":"")),0,86);
   g.restore();g.textAlign="left";
   if(Math.random()<.3)parts.push({scene,x:camera+Math.random()*W,y:-10,vx:(Math.random()-.5)*60,vy:60,life:3,rot:0,vr:(Math.random()-.5)*8,color:["#e5577b","#f4c84f","#17a398","#7cc6f2"][Math.floor(Math.random()*4)]});
@@ -1057,6 +1105,14 @@ const SKYTOP=CLOUDS[3];
 const CRATES=[{x:1770,y:G-36,w:46,h:36},{x:1995,y:G-36,w:46,h:36},{x:2075,y:G-30,w:60,h:30,hay:true},{x:2250,y:G-36,w:46,h:36}];
 const HIDES=[0,1,3].map(i=>CRATES[i]);const hideSpot=()=>HIDES.find(b=>s.duck&&Math.abs(center()-(b.x+b.w/2))<b.w/2+30);
 const TRAIL=[{x:2510,y:385,w:72},{x:2600,y:330,w:72},{x:2690,y:274,w:72},{x:2600,y:218,w:72},{x:2690,y:162,w:110}];
+const HUB_SIGNS={
+  [-230]:"HATTER'S — ON VACATION. Gone somewhere sunny. Our hats insisted.",
+  [-650]:"PAWS & CLAWS PET STORE — OPEN AGAIN! Dog food and fishing bait in stock. (You're welcome, Waffles.)",
+  [-85]:"ODDS & ENDS — GENERAL STORE. The toy shop has a new owner! We buy fish, seashells, eggs, turnips and other odds (and ends).",
+  [1890]:"CRUMB & DAUGHTERS BAKERY — ON VACATION. Resting after the festival. The ovens need a nap too.",
+  [2150]:"TOWN LIBRARY — ON VACATION. Even quiet needs a break sometimes. Back soon.",
+  [2890]:"WEATHER STATION — ON VACATION. Forecast: sunny, with a chance of more doors appearing.",
+  [1085]:"POTTER'S STUDIO — ON VACATION. Pat is resting her wheel arm after the festival. (Please still do not lick the kiln.)"};
 const SIGNS=[[-230,"HATTER'S — CLOSED FOR FESTIVAL. Our hats are also enjoying the festival. On other people's heads."],
   [-650,"PAWS & CLAWS PET STORE — CLOSED FOR FESTIVAL. Even the goldfish took the day off. Dog food back in stock soon! (Sorry, Waffles.)"],
   [-85,"TOY SHOP — CLOSED FOR FESTIVAL. The toys are finally playing with each other. Please don't interrupt."],
@@ -1098,31 +1154,32 @@ function startLevel2(){
 
 // ---- who can Sarah talk to / activate? ----
 function festInteract(){
-  if(l2.chase===1||(l2.finale&&!l2.fightDone)||l2.done)return null;
+  if(l2.hub){const h=hubInteract();if(h)return h}
+  if(l2.chase===1||(l2.finale&&!l2.fightDone)||(l2.done&&!l2.hub))return null;
   if(!l2.roofChest&&near(2150,40)&&Math.abs(s.y+s.h-LIB_ROOF.y)<3)return["Open the rooftop chest",roofChest];
-  if(near(SAVE_DOOR,30)&&s.ground&&s.y+s.h<=FLOOR2.y+2)return["Save at the Save Block",()=>{checkpoint=SAVE_DOOR-s.w/2;checkpointY=FLOOR2.y-s.h;checkpointScene="festival";health=maxHealth;burst(SAVE_DOOR,FLOOR2.y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back here.")}];
+  if(near(SAVE_DOOR,30)&&s.ground&&s.y+s.h<=FLOOR2.y+2)return["Save at the Save Block",()=>{setTimeout(saveGame,0);checkpoint=SAVE_DOOR-s.w/2;checkpointY=FLOOR2.y-s.h;checkpointScene="festival";health=maxHealth;burst(SAVE_DOOR,FLOOR2.y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back here.")}];
   if(l2.doorY!=null&&l2.doorY>=FLOOR2.y&&!l2.doorOpen&&near(DOOR_X,44)&&s.y+s.h<=FLOOR2.y+2)return[has("Smudgy Key")?"Unlock the sky door":"Inspect the sky door",skyDoor];
   if(!onFloor())return null;
   const T=(label,fn)=>[label,fn,true];
-  if(near(npcX("Mr. Umber"),26))return T("Talk to Mr. Umber",umber);
-  if(near(npcX("Pippa"),24))return T("Talk to Pippa",pippa);
-  if(near(1112,22))return["Inspect the balloon dog",()=>sayToast(l2.dogGone?"The empty pedestal says \"Good Boy\" (on loan). On loan to you, technically.":"A giant balloon dog sculpture titled \"Good Boy.\" It squeaks when the wind blows. Very good boy.")];
-  if(near(1166,16))return["Inspect the ice duck",()=>sayToast("\"Ice Duck (Melting).\" The artist calls it a meditation on impermanence. It is mostly a puddle now.")];
-  if(near(560,40))return T("Talk to Potter Pat",potter);
+  if(!l2.hub&&near(npcX("Mr. Umber"),26))return T("Talk to Mr. Umber",umber);
+  if(!l2.hub&&near(npcX("Pippa"),24))return T("Talk to Pippa",pippa);
+  if(!l2.hub&&near(1112,22))return["Inspect the balloon dog",()=>sayToast(l2.dogGone?"The empty pedestal says \"Good Boy\" (on loan). On loan to you, technically.":"A giant balloon dog sculpture titled \"Good Boy.\" It squeaks when the wind blows. Very good boy.")];
+  if(!l2.hub&&near(1166,16))return["Inspect the ice duck",()=>sayToast("\"Ice Duck (Melting).\" The artist calls it a meditation on impermanence. It is mostly a puddle now.")];
+  if(!l2.hub&&near(560,40))return T("Talk to Potter Pat",potter);
   if(near(700,30))return["Save at the Save Block",()=>saveFest(700)];
   if(near(860,45))return T("Talk to Chef Crumb",chef);
   if(near(1005,30))return T("Talk to Gus",gus);
   if(near(-578,24))return["Read the sign",()=>{if(!l2.holeSign){sayToast("The sign is so faded and gray you can't read a word.");return}start([["Sign","DIG CREW ENTRY HERE. Hard hats recommended. Bravery required. Jump in if you dare! ♥"]])}];
-  for(const [x,t] of SIGNS)if(near(x,24))return["Read the sign",()=>start([["Sign",t]])];
-  if(near(l2.brieX,30))return T("Talk to Brie",brie);
-  if(near(1300,40))return["Inspect the butter swan",swan];
+  for(const [x,t] of SIGNS)if(near(x,24))return["Read the sign",()=>start([["Sign",l2.hub&&HUB_SIGNS[x]||t]])];
+  if(!l2.hub&&near(l2.brieX,30))return T("Talk to Brie",brie);
+  if(!l2.hub&&near(1300,40))return["Inspect the butter swan",swan];
   if(near(1565,50)&&l2.catState==="stuck")return T("Help Mr. Biscuits",catStuck);
-  if(near(2365,28))return T("Talk to Lou",lou);
+  if(!l2.hub&&near(2365,28))return T("Talk to Lou",lou);
   if(near(2470,40))return T("Talk to Inka",inka);
   if(near(SAVE2,30))return["Save at the Save Block",()=>saveFest(SAVE2)];
-  if(near(npcX("Announcer"),28))return T("Talk to the Announcer",announcer);
-  if(near(npcX("Juniper"),28))return T("Talk to Juniper",juniper);
-  if(l2.catState==="judge"&&near(catX(),36))return T("Greet Mr. Biscuits",()=>sayToast("Mr. Biscuits gives you one slow blink. In cat, that's a standing ovation."));
+  if(!l2.hub&&near(npcX("Announcer"),28))return T("Talk to the Announcer",announcer);
+  if(!l2.hub&&near(npcX("Juniper"),28))return T("Talk to Juniper",juniper);
+  if(!l2.hub&&l2.catState==="judge"&&near(catX(),36))return T("Greet Mr. Biscuits",()=>sayToast("Mr. Biscuits gives you one slow blink. In cat, that's a standing ovation."));
   return null;
 }
 function umber(){if(!l2.talk.umberTip){l2.talk.umberTip=1;start([["Mr. Umber","A tip from an old-timer: if you ever need to hide, crouch down behind something — a crate, a hay bale — by holding Down (or S)."],["Mr. Umber","Works on angry sculptors, nosy neighbors and the tax collector. Ask me how I know."]]);return}const l=l2.results?["Told you. Called it. Somebody write down that I called it."]:["In my day, legendary adventurers wore capes. Do you own a cape? You should own a cape.","That butter swan took Brie three weeks, four hundred pounds of butter and one very cold room.","The sky did something funny this morning. Rumbled. Skies shouldn't rumble at a festival."];start([["Mr. Umber",l[tcount("umber")%l.length]]])}
@@ -1161,14 +1218,14 @@ function potter(){
     ],()=>{addItem(made);sayToast("Got a "+made+"! Hand it to the Registrar to enter the contest (optional).")});
   }]]));
 }
-function saveFest(x){
+function saveFest(x){setTimeout(saveGame,0);
   checkpointY=null;checkpoint=x-s.w/2;checkpointScene="festival";health=maxHealth;burst(x,G-70,12,["#f4c84f","#fff"]);
   sayToast("Saved! Health restored. Press R any time to come back to this Save Block.");
 }
 function chef(){
   const pre=l2.chefMet?[]:[["Chef Crumb","Bonjour! I am Chef Crumb. I cook healing recipes — but only from proper recipe cards. Fire codes. Also, feelings."]];l2.chefMet=true;
   const menu=[];if(has("Recipe Card"))menu.push(["Turnip-Butter Tonic (Turnip + Butter Pat)","tonic"]);if(has("Cheese Recipe"))menu.push(["Butter Cheese (2 Butter Pats)","cheese"]);menu.push(["Nothing right now",null]);
-  if(menu.length===1){start(pre.concat([["Chef Crumb","Bring me a recipe card and the ingredients, and I will cook! I saw a card blowing around by the café table, near the Clay Corner."]]));return}
+  if(menu.length===1){start(pre.concat([["Chef Crumb",l2.hub?"The festival is over, but Chef Crumb's kitchen never closes! Bring me a recipe card and the ingredients, and I will cook.":"Bring me a recipe card and the ingredients, and I will cook! I saw a card blowing around by the café table, near the Clay Corner."]]));return}
   start(pre.concat([["Chef Crumb","Ah, recipe cards! What shall I cook, chérie?",menu.map(m=>m[0]),i=>{
     const what=menu[i][1];
     if(!what){start([["Chef Crumb","Très bien. My stove is always warm. Like my heart."]]);return}
@@ -1183,8 +1240,9 @@ function chef(){
   }]]));
 }
 function gus(){
-  if(!l2.talk.gus){l2.talk.gus=1;start([["Gus","Watch your step! This pipe goes way, WAY down under the town. And it's clogged something fierce."],["Sarah","What's down there?"],["Gus","Dunno. That's the fun part. Give me some time — I'll let you know when it's clear."]]);return}
-  const l=["Still clogged. I'm on it. Mostly on it. Spiritually on it.","Found a sock in there. Not mine. Probably not mine.","Pretty sure I heard something down there say \"hello.\" Pipes don't say hello."];start([["Gus",l[tcount("gus2")%3]]]);
+  if(l2.hub&&!l2.talk.gusHub){l2.talk.gusHub=1;start([["Gus","Hey! You're back! Look — the elevator's FIXED. Plaza to the second floor and back. Hop in any time!"]]);return}
+  if(!l2.talk.gus){l2.talk.gus=1;start([["Gus","Watch your step! This elevator goes way, WAY up above the festival. And it's busted something fierce."],["Sarah","What's up there?"],["Gus","Dunno. That's the fun part. Give me some time — I'll let you know when it's running."]]);return}
+  const l=l2.hub?["Fixed it! Turns out it was never broken. It was just shy. And full of socks.","Up AND down! Both directions! I'm very proud of us.","Ride all you like. Just don't ask me where the socks came from."]:["Still busted. I'm on it. Mostly on it. Spiritually on it.","Found a sock in there. Not mine. Probably not mine.","Pretty sure I heard something up there say \"hello.\" Elevators don't say hello."];start([["Gus",l[tcount("gus2")%3]]]);
 }
 function brie(){
   if(l2.chaseDone){start([["Brie",l2.slapped?"We're even. Stay away from my swan.":"Apology accepted. I'm still watching you. And your fingers."]]);return}
@@ -1284,6 +1342,7 @@ function startFinale(){
   start([
     ["Narrator","KRAKA-THOOM! Lightning splits the sky again — right above the stage!"],
     ["Narrator","Smudges tumble out of the tear and swarm Juniper's painting. The color starts draining right out of it!"],
+    ["Narrator","For a heartbeat, a gray-gloved hand pokes out of the tear… snaps its fingers… and slips back inside."],
     ["Narrator","Then — THUD. Way, way up, a door falls out of the sky and lands upright on the festival's second floor. Just a door. No house. Very rude."],
     ["Dab","One of those Smudges is carrying something shiny… a key!"],
     ["Nib","FINALLY. Something to poke! Press Q to jab. Stomping works too!"]
@@ -1510,7 +1569,7 @@ function shopFront(x,w,name,wall,trim,kind){
   g.fillStyle="#f4c84f";circle(cx+14,G-40,3);g.fill();
   shopProps(kind,x,w,top,trim);
   g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(cx-12,G-70);g.lineTo(cx,G-82);g.lineTo(cx+12,G-70);g.stroke();
-  g.save();g.translate(cx,G-70);g.rotate(Math.sin(time*1.5+x)*.05);cut(()=>rr(-36,0,72,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
+  {const open=l2.hub&&(kind==="pet"||kind==="lost"||kind==="arcade"||kind==="toy");g.save();g.translate(cx,G-70);g.rotate(Math.sin(time*1.5+x)*.05);cut(()=>rr(-36,0,72,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle=open?"#2f9a4a":"#e5577b";g.font="bold 10px "+FONT;g.textAlign="center";if(open){g.font="bold 15px "+FONT;g.fillText("OPEN!",0,21)}else if(l2.hub){g.fillText("ON",0,12);g.fillText("VACATION",0,25)}else{g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25)}g.restore();g.textAlign="left"}
 }
 function shopBack(kind,x,w,top,wall,trim){
   const cx=x+w/2;
@@ -1684,23 +1743,24 @@ function drawFestival(){
   drawOutsideBackground(l2.tearT>0?{x:2050,t:l2.tearT}:null);
   g.save();g.translate(-camera,0);
   drawSkyClouds();
-  drawGround();drawBunting();drawFestEntrance();
+  drawGround();if(!l2.hub)drawBunting();drawFestEntrance();
   shopFront(1820,140,"BAKERY","#ffe9c7","#f08a3c","bakery");shopFront(2080,140,"LIBRARY","#e3f2ff","#3b8fd6","library");drawChest(2121,LIB_ROOF.y-38,l2.roofChest,"#f4c84f");if(!l2.roofChest){g.fillStyle="#fff6a8";star(2172,LIB_ROOF.y-52,6+Math.sin(time*6)*2,2.4);g.fill()}shopFront(2830,120,"WEATHER","#e9f4e0","#5fb35a","weather");
-  booth(560,120,"CLAY CORNER","#c98a5a",()=>npc("Potter Pat",560,undefined,-26));
+  if(!l2.hub){booth(560,120,"CLAY CORNER","#c98a5a",()=>npc("Potter Pat",560,undefined,-26));
   cut(()=>rr(636,G-40,8,40,2),"#a8714a");cut(()=>{g.beginPath();g.ellipse(640,G-40,26,7,0,0,7)},"#fff3d6",{edge:5});
   if(!l2.cardTaken){g.save();g.globalAlpha=.35+Math.sin(time*4)*.2;g.fillStyle="#fff6a8";circle(640,G-66,24);g.fill();g.restore();drawIcon("Recipe Card",640,G-66+Math.sin(time*3)*3,.7);g.fillStyle="#fff6a8";star(660,G-88,6+Math.sin(time*7)*2,2);g.fill()}
+  }
   for(const x of[700,SAVE2]){sprite(x,G-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,G+2,20)}
   booth(860,130,"CHEF CRUMB'S KITCHEN","#e5577b",()=>npc("Chef Crumb",860,undefined,-26));
   drawElevator(1050);npc("Gus",1005);
-  drawSwan(1300);drawSculptures();drawJungleGym(1565);
+  if(!l2.hub){drawSwan(1300);drawSculptures();drawJungleGym(1565)}
   for(const b of CRATES)drawCrate(b);
   booth(2470,120,"ART SUPPLIES","#b98ad8",()=>npc("Inka",2470,undefined,-26));
-  drawTrail();drawStage();drawBars();drawSkyDoor();
-  for(const n of["Mr. Umber","Pippa","Lou","Announcer","Juniper"])npc(n,npcX(n));
-  const bx=l2.brieX;if(l2.chase===1){const hop=Math.abs(Math.sin(time*12))*6;groundShadow(bx,G+2,18);sprite(bx,G+3-hop,50,78,()=>drawPersonBody(LOOKS.Brie),{sx:l2.brieFace});
+  drawTrail();if(!l2.hub)drawStage();drawBars();drawSkyDoor();drawHubFestival();
+  if(!l2.hub)for(const n of["Mr. Umber","Pippa","Lou","Announcer","Juniper"])npc(n,npcX(n));
+  const bx=l2.brieX;if(l2.hub){}else if(l2.chase===1){const hop=Math.abs(Math.sin(time*12))*6;groundShadow(bx,G+2,18);sprite(bx,G+3-hop,50,78,()=>drawPersonBody(LOOKS.Brie),{sx:l2.brieFace});
     g.font="bold 22px "+FONT;g.fillStyle=l2.confused>0?"#3b8fd6":"#e5577b";g.textAlign="center";g.fillText(l2.confused>0?"?":"!!",bx,G-92);g.textAlign="left"}
   else npc("Brie",bx,center()<bx?-1:1);
-  if(l2.catState==="judge"){const cx=catX(),walking=l2.catWalk>0&&l2.catWalk<.8;if(l2.catWalk<.8)groundShadow(cx,G+2,14);drawCatSit(cx,G-catLift()-(walking?Math.abs(Math.sin(l2.catWalk*40))*5:0))}
+  if(l2.catState==="judge"&&!l2.hub){const cx=catX(),walking=l2.catWalk>0&&l2.catWalk<.8;if(l2.catWalk<.8)groundShadow(cx,G+2,14);drawCatSit(cx,G-catLift()-(walking?Math.abs(Math.sin(l2.catWalk*40))*5:0))}
   if(!l2.spikeDown){groundShadow(SPIKE_X,G+2,26);const fl=l2.spikeFlash>0;sprite(SPIKE_X+(fl?Math.sin(time*60)*4:0),G+3,72,170,drawSpikeBody,{sx:center()<SPIKE_X?1:-1,sy:1+Math.sin(time*4)*.02,alpha:fl&&Math.sin(time*40)>0?.45:1});
     if(l2.spikeHit>0||Math.abs(center()-SPIKE_X)<420){const bw=76,bx=SPIKE_X-bw/2,by=G-196,hp=(2-l2.spikeHit)/2;
       cut(()=>rr(bx-4,by-4,bw+8,18,6),"#fffdf6",{edge:4});g.fillStyle="#3a3352";rr(bx,by,bw,10,4);g.fill();
@@ -1715,6 +1775,7 @@ function drawFestival(){
       const bx=mx+(tx-mx)*e,by=my+(ty-my)*e-Math.sin(e*Math.PI)*40;
       g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(ax,ay);g.quadraticCurveTo((ax+bx)/2+12,(ay+by)/2+10,bx,by);g.stroke();drawBalloonDog(bx-6,by,.75)}}
   g.restore();g.restore();
+  if(/^For a heartbeat/.test(curPage())&&l2.tearT>0){const tx=clamp(2050-camera*.55+30,200,W-140),ty=200;g.save();g.translate(tx,ty);cut(()=>{g.beginPath();g.moveTo(-30,-60);g.lineTo(10,-20);g.lineTo(-14,6);g.lineTo(26,40);g.lineTo(40,30);g.lineTo(6,0);g.lineTo(30,-24);g.lineTo(-14,-64);g.closePath()},"#2f2a4a",{edge:7});g.scale(1.8,1.8);drawGlove(6,4+Math.sin(time*6)*2);g.restore()}
 }
 function objectiveL2(){
   if(l2.done)return"Level 0 complete! On to Level 1.";
@@ -1770,7 +1831,7 @@ function drawAlchemyShop(x){
   g.fillStyle="#f4c84f";circle(cx+12,G-34,3);g.fill();
   // name plate + closed sign
   cut(()=>rr(cx-48,G-112,96,22,8),"#7cc488",{edge:5,shadow:false});g.fillStyle="#2b2540";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("ALCHEMY",cx,G-96);
-  g.save();g.translate(cx,G-70);g.rotate(Math.sin(time*1.5+x)*.05);cut(()=>rr(-36,0,72,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
+  g.save();g.translate(cx,G-70);g.rotate(Math.sin(time*1.5+x)*.05);cut(()=>rr(-36,0,72,30,4),"#fffdf6",{edge:4,shadow:false});if(l2.hub){g.fillStyle="#2f9a4a";g.font="bold 15px "+FONT;g.textAlign="center";g.fillText("OPEN!",0,21)}else{g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25)}g.restore();g.textAlign="left";
   // little cauldron outside, still bubbling
   cut(()=>{g.beginPath();g.moveTo(x+150,G-30);g.quadraticCurveTo(x+148,G,x+170,G);g.quadraticCurveTo(x+192,G,x+190,G-30);g.closePath()},"#1b1730",{edge:5});
   g.fillStyle="#7cf2c0";g.beginPath();g.ellipse(x+170,G-30,20,5,0,0,7);g.fill();
@@ -1802,7 +1863,7 @@ function orchardInteract(){
   if(!onFloor())return null;const T=(l,f)=>[l,f,true];
   if(near(300,26))return["Read the sign",()=>start([["Sign","THE ORCHARD"]])];
   for(const x of ORCH_TREES)if(near(x,30))return["Look at the apples",()=>sayToast("Shiny red apples, juuust out of reach. Maybe someday you'll be able to shake them loose.")];
-  if(near(1250,46))return T("Talk to the Registrar",festRegistrar);
+  if(!l2.hub&&near(1250,46))return T("Talk to the Registrar",festRegistrar);
   if(near(ORCH_LAKE_DOOR,34))return["Go to the lake",()=>{l2.lakeFrom="orchard";goScene("lake",170)}];
   return null;
 }
@@ -1859,12 +1920,14 @@ function drawOrchard(){
   ORCH_TREES.forEach((x,i)=>{tree(x,G,1.15,i%2?"#66bf72":"#4fae67");for(const [dx,dy] of[[-26,-112],[18,-98],[0,-128],[-12,-84],[30,-118],[-34,-96]]){cut(()=>{g.beginPath();g.arc(x+dx,G+dy,6,0,7)},"#e5463f",{edge:3,shadow:false});g.fillStyle="#3a7a3a";g.fillRect(x+dx-1,G+dy-9,2,4)}});
   ORCH_COINS.forEach(([x,y],i)=>{if(!l2.orchCoins[i])drawCoin(x,y+Math.sin(time*4+i)*2,8)});
   // registration table + velvet rope
+  if(!l2.hub){
   cut(()=>rr(1190,G-46,130,46,5),"#fff3d6",{edge:7});g.fillStyle="#17a398";g.fillRect(1196,G-40,118,8);
   cut(()=>rr(1205,G-150,100,28,8),"#17a398",{edge:6});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("REGISTRATION",1255,G-131);g.textAlign="left";
   cut(()=>rr(1209,G-122,4,76,2),"#a8714a",{edge:3,shadow:false});cut(()=>rr(1297,G-122,4,76,2),"#a8714a",{edge:3,shadow:false});
   npc("Registrar",1250,undefined,-26);cut(()=>rr(1190,G-46,130,46,5),"#fff3d6",{edge:7,shadow:false});g.fillStyle="#17a398";g.fillRect(1196,G-40,118,8);
   for(const x of[1336,1420])cut(()=>rr(x-4,G-60,8,60,3),"#d4bf7d",{edge:4});
   if(!l2.festReg){g.strokeStyle="#c0392b";g.lineWidth=6;g.beginPath();g.moveTo(1336,G-52);g.quadraticCurveTo(1378,G-30,1420,G-52);g.stroke()}
+  }
   drawLoot();drawParticles();drawSarah();g.restore();
 }
 
@@ -1878,7 +1941,7 @@ function festIntroCheck(){if(!l2.intro&&center()>130){start([
     ["Narrator","The townsfolk exchange meaningful looks. Several of them are very bad at it."]
   ],()=>{l2.intro=true;sayToast("Explore the festival! The Clay Corner is the first booth.")});return true}return false}
 function drawFestEntrance(){
-  shopFront(-720,140,"PET STORE","#e9f7ff","#3bb6c4","pet");shopFront(-300,140,"HATTER'S","#f7d6e0","#d0648f","hat");shopFront(-150,130,"TOY SHOP","#fff1d6","#f08a3c","toy");
+  shopFront(-720,140,"PET STORE","#e9f7ff","#3bb6c4","pet");shopFront(-300,140,"HATTER'S","#f7d6e0","#d0648f","hat");shopFront(-150,130,l2.hub?"ODDS & ENDS":"TOY SHOP","#fff1d6","#f08a3c","toy");
   // the hole
   g.fillStyle="#1b1730";g.fillRect(HOLE.x,G,HOLE.w,H);g.fillStyle="#8d5a36";g.fillRect(HOLE.x,G,7,H);g.fillRect(HOLE.x+HOLE.w-7,G,7,H);g.fillStyle="rgba(0,0,0,.35)";g.fillRect(HOLE.x+7,G,HOLE.w-14,14);g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.moveTo(HOLE.x,G);g.lineTo(HOLE.x,H);g.moveTo(HOLE.x+HOLE.w,G);g.lineTo(HOLE.x+HOLE.w,H);g.stroke();
   cut(()=>rr(HOLE.x-34,G-70,6,70,2),"#a8714a");g.save();g.translate(HOLE.x-38,G-84);g.rotate(Math.sin(time*1.4)*.04);
@@ -1897,7 +1960,8 @@ function drawElevator(x){const top=FLOOR2.y+16;
   cut(()=>rr(x-20,G-96,40,96,4),"#8fa3a0",{edge:0,line:2,shadow:false});g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(x,G-96);g.lineTo(x,G);g.stroke();
 
   g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(x-10,G-62);g.lineTo(x,G-74);g.lineTo(x+10,G-62);g.stroke();
-  g.save();g.translate(x,G-62);g.rotate(Math.sin(time*1.5+x)*.05-.04);cut(()=>rr(-20,0,40,30,4),"#e5577b",{edge:4,shadow:false});g.fillStyle="#fff";g.font="bold 9px "+FONT;g.textAlign="center";g.fillText("OUT OF",0,12);g.fillText("ORDER",0,24);g.restore();g.textAlign="left";
+  if(l2.hub){cut(()=>rr(x-12,G-120,24,16,4),"#2b2540",{edge:3,shadow:false});g.fillStyle="#a6e39a";g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("▲▼",x,G-108);g.textAlign="left"}
+  else{g.save();g.translate(x,G-62);g.rotate(Math.sin(time*1.5+x)*.05-.04);cut(()=>rr(-20,0,40,30,4),"#e5577b",{edge:4,shadow:false});g.fillStyle="#fff";g.font="bold 9px "+FONT;g.textAlign="center";g.fillText("OUT OF",0,12);g.fillText("ORDER",0,24);g.restore();g.textAlign="left";}
 }
 function drawBalloonDog(x,y,sc,c="#ff8fc8"){g.save();g.translate(x,y);g.scale(sc,sc);
   const bal=(cx,cy,rx,ry,a)=>cut(()=>{g.beginPath();g.ellipse(cx,cy,rx,ry,a,0,7)},c,{edge:4,shadow:false});
@@ -1920,7 +1984,7 @@ function drawBars(){
     cut(()=>rr(b.x,b.y,b.w,b.h,5),"#b9c7c5",{edge:5});g.fillStyle="#fff";g.fillRect(b.x+6,b.y+2,b.w-12,2)}
   // the festival's second floor: a long sky walkway with room for six level doors
   const fy=FLOOR2.y,fx0=FLOOR2.x,fx1=FLOOR2.x+FLOOR2.w;
-  for(const x of[3060,3500])cut(()=>rr(x-6,fy+16,12,G-292-fy-16,3),"#8a6a4d",{edge:5});
+  for(const x of[3060,3500])cut(()=>rr(x-6,fy+16,12,(l2.hub?G:G-292)-fy-16,3),"#8a6a4d",{edge:5});
   for(let x=fx0+180;x<fx1-200;x+=420){cut(()=>{g.beginPath();g.ellipse(x,fy+34,70,22,0,0,7);g.ellipse(x-48,fy+30,40,16,0,0,7);g.ellipse(x+52,fy+32,44,18,0,0,7)},"#fffdf6",{edge:6,shadow:false})}
   cut(()=>rr(fx0,fy,FLOOR2.w,FLOOR2.h,5),"#c58a52",{edge:7});
   g.strokeStyle="#a8714a";g.lineWidth=1.5;for(let x=fx0+40;x<fx1;x+=40){g.beginPath();g.moveTo(x,fy+3);g.lineTo(x,fy+13);g.stroke()}
@@ -1945,7 +2009,7 @@ function lakeInteract(){
   if(near(DOCK.x+DOCK.w-40,50))return[hasReel?"Cast your line":"Fish (you need a fishing pole)",()=>{if(!hasReel){sayToast("You'd need a fishing pole. Nobody around here seems to have one to spare.");return}castLine()}];
   return null;
 }
-function waffles(){
+function waffles(){if(l2.hub&&wafflesHub())return;
   const n=l2.wafflesTalk++;
   if(n===0){start([
     ["Waffles","WOOF! Halt! Nobody gets into the coop. Strict orders from the chickens."],
@@ -1965,18 +2029,18 @@ function meetReel(){
     ["Reel","Stand at the end of the dock and press Space to cast. Watch the bobber. When it gets yanked under — press Space again, fast! You've got two seconds. No pressure. Lots of pressure."]
   ],()=>{hasReel=true;equipped="Reel";burst(1000,G-30,16,["#7cc6f2","#fff","#f4c84f"]);sayToast("Reel joined you! Stand at the end of the dock and press Space to fish.")});
 }
-function castLine(bx){equipped="Reel";fish.bx=bx??1330+Math.random()*80;s.face=fish.bx<center()?-1:1;fish.ph=1;fish.t=0}
+function castLine(bx){equipped="Reel";fish.bait=false;if(has("Bait")){useOne("Bait");fish.bait=true;sayToast("Baited the hook! ("+count("Bait")+" bait left)")}fish.bx=bx??1330+Math.random()*80;s.face=fish.bx<center()?-1:1;fish.ph=1;fish.t=0}
 function rodTip(){return[center()+36*s.face,s.y+4]}
 function fishSpace(){
   if(fish.ph===4&&scene==="beach"){fish.ph=5;fish.t=0;fishCatchBeach();return}
-  if(fish.ph===4){fish.ph=5;fish.t=0;addItem("Lake Perch");l2.fishCaught++;burst(fish.bx,G+14,18,["#7cc6f2","#fff","#f4c84f"]);
-    sayToast(l2.fishCaught===1?"You caught a Lake Perch! Reel: \"Our first fish! I'm going to cry. Do fishing poles cry?\"":"You caught a Lake Perch! (That's "+count("Lake Perch")+" now.)");return}
+  if(fish.ph===4){fish.ph=5;fish.t=0;const n=rollFish("lake",fish.bait);fish.last=n;addItem(n);l2.fishCaught++;burst(fish.bx,G+14,18,["#7cc6f2","#fff","#f4c84f"]);
+    sayToast(l2.fishCaught===1?"You caught a "+n+"! Reel: \"Our first fish! I'm going to cry. Do fishing poles cry?\"":"You caught a "+fishLine(n)+" (That's "+count(n)+" now.)");return}
   if(fish.ph===1)return;
   fish.ph=0;sayToast("Too soon! You yanked the line before the fish bit, and it swam off. Wait for the bobber to get pulled under.");
 }
 function updateFishing(dt){
   fish.t+=dt;fish.dip=Math.max(0,fish.dip-dt);
-  if(fish.ph===1&&fish.t>.6){fish.ph=2;fish.t=0;fish.wait=1+Math.random()*2}
+  if(fish.ph===1&&fish.t>.6){fish.ph=2;fish.t=0;fish.wait=fish.bait?.4+Math.random()*.8:1+Math.random()*2}
   else if(fish.ph===2&&fish.t>fish.wait){fish.ph=3;fish.t=0;fish.need=1+Math.floor(Math.random()*4);fish.n=0;fish.next=.2}
   else if(fish.ph===3&&fish.t>fish.next){if(fish.n<fish.need){fish.n++;fish.dip=.3;fish.next=fish.t+.7+Math.random()*.7}else{fish.ph=4;fish.t=0}}
   else if(fish.ph===4&&fish.t>2){fish.ph=0;sayToast("It got away!")}
@@ -2012,7 +2076,7 @@ function drawLake(){
   groundShadow(530,G+2,22);sprite(530,G+2,58,48,drawDogBody,{sx:center()<530?-1:1});
   // Reel waiting on the dock
   drawLoot();drawParticles();drawSarah();
-  drawFishing(wy,"Lake Perch");
+  drawFishing(wy,fish.last||"Lake Perch");
   g.restore();
 }
 function drawSpikeBody(){
@@ -2064,7 +2128,8 @@ function underInteract(){
   if(!l2.mapTaken&&near(500,22))return["Pick up the town map",()=>{l2.mapTaken=true;addItem("Town Map");burst(500,G-72,14);sayToast("Got the Town Map! It's folded sixteen ways. You'll figure it out later.")}];
   if(near(570,40))return T("Talk to the Bartender",()=>{const l=["We're closed. We're always closed. It's a whole vibe.","Take the map if you want. Nobody down here needs directions. Everyone down here is already lost.","Trampoline's by the drain. Bounce your way out. Tip your bartender. (You can't. We're closed.)"];start([["Bartender",l[l2.barTalk++%3]]])});
   if(near(770,34)||near(870,30))return T("Talk to the Bouncer",bouncer);
-  for(const [x,txt] of UNDER_SIGNS)if(near(x,34))return["Read the sign",()=>start([["Sign",txt]])];
+  {const hu=underHubInteract();if(hu)return hu}
+  for(const [x,txt] of UNDER_SIGNS)if(!(l2.hub&&[1500,1900,2305].includes(x))&&near(x,34))return["Read the sign",()=>start([["Sign",l2.hub&&HUB_SIGNS[x]||txt]])];
   if(near(2920,50))return["Inspect the fossil",()=>start([["Narrator","A dinosaur skeleton, stuck fast in the packed dirt. It grins at you. Dinosaurs always grin. It's the teeth."],["Dab","We'd need some serious digging skills to get that out. Someday!"]])];
   return null;
 }
@@ -2099,7 +2164,7 @@ function drawUnder(){
   cut(()=>rr(1010,G-180,150,180,8),"#b9825a",{edge:8});cut(()=>rr(1000,G-200,170,26,6),"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 13px "+FONT;g.textAlign="center";g.fillText("POTTER'S STUDIO",1085,G-182);
   cut(()=>rr(1030,G-160,50,44,6),"#a6def5",{edge:5,shadow:false});g.fillStyle="#8d5a36";for(const [x,h] of[[1040,14],[1056,20],[1070,12]]){rr(x-5,G-116-h,10,h,4);g.fill()}
   cut(()=>rr(1095,G-96,46,96,5),"#8d5a36",{edge:5,shadow:false});
-  g.save();g.translate(1118,G-74);g.rotate(Math.sin(time*1.5)*.05);cut(()=>rr(-34,0,68,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25);g.restore();g.textAlign="left";
+  g.save();g.translate(1118,G-74);g.rotate(Math.sin(time*1.5)*.05);cut(()=>rr(-34,0,68,30,4),"#fffdf6",{edge:4,shadow:false});g.fillStyle="#e5577b";g.font="bold 10px "+FONT;g.textAlign="center";if(l2.hub){g.fillText("ON",0,12);g.fillText("VACATION",0,25)}else{g.fillText("CLOSED FOR",0,12);g.fillText("FESTIVAL",0,25)}g.restore();g.textAlign="left";
   shopFront(1430,140,"LOST & FOUND","#d6d0e8","#7a5c99","lost");shopFront(1830,140,"ARCADE","#2f2a4a","#ff8fe8","arcade");drawAlchemyShop(2230);
   for(const [x,c] of[[1870,"#7cc6f2"],[1900,"#f4c84f"],[1930,"#e5577b"]]){g.save();g.globalAlpha=.5+Math.sin(time*5+x)*.3;g.fillStyle=c;g.fillRect(x-8,G-160,16,10);g.restore()}
   // tunnel to the sewers
@@ -2161,7 +2226,7 @@ function resetL3(){
 }
 resetL3();
 const CRE_NAME={smudge:"Smudge",crab:"Sidecrab",hermit:"Hermit Smudge",gull:"Gull"};
-function startLevel3(){
+function startLevel3(replay){
   level=3;resetL3();dogOn=false;balloonOn=false;showEndScreen=false;complete=false;invOpen=false;parts=[];loot=[];hasDab=true;health=maxHealth;
   goScene("beach",90);s.face=1;s.flip=1;checkpointScene="beach";checkpoint=170-s.w/2;checkpointY=G-s.h;if(hasNib)equipped="Nib";
   start([
@@ -2171,9 +2236,16 @@ function startLevel3(){
     ["Dab","That's not sand, that's paint! This whole beach was painted so recently it's still dripping."],
     ["Nib","And the colors are running right down into the sea. That can't be good."],
     ["Narrator","Down the shore, someone is waving a claw from a little shell-shaped shack."]
-  ],()=>{chapterCard={t:0,title:"Level 1-1",sub:"The Watercolor Coast"};0});
+  ].slice(0,replay?0:99).concat(replay?[
+    ["Narrator","Sarah steps back through the Level 1 door. The inky dark, the smell of fresh paint… FWUMP."],
+    ["Sarah","Sand again! But this time it's dry. And properly sand-colored."],
+    ["Dab","The coast is all finished now. It's nice to visit a page that's already fixed!"],
+    ["Reel","And when we're ready to go home, the lighthouse beam will take us. Same as last time."]
+  ]:[]),()=>{chapterCard={t:0,title:replay?"Level 1 — Replay":"Level 1-1",sub:"The Watercolor Coast"};0});
+  if(replay){Object.assign(l3,{replay:true,lit:true,marina:true,reel:true,blue:true,necklace:true,green:true,gemSeen:true,bossDone:true,inLH:true});
+    l3.dig[DIGS.findIndex(d=>d.item==="Heart Necklace")]=2;hasReel=true}
 }
-function saveL3(x,y){checkpoint=x-s.w/2;checkpointY=y-s.h;checkpointScene=scene;health=maxHealth;burst(x,y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back to this Save Block.")}
+function saveL3(x,y){setTimeout(saveGame,0);checkpoint=x-s.w/2;checkpointY=y-s.h;checkpointScene=scene;health=maxHealth;burst(x,y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back to this Save Block.")}
 function respawnL3(){health=maxHealth;goScene(checkpointScene,checkpoint+s.w/2,checkpointY??G-s.h);if(l3.boss&&!l3.bossDone){l3.boss=null}}
 function hurtHP(n=1){if(shield>0){shield--;burst(center(),s.y+30,16,["#7cc6f2","#fff","#b98ad8"]);sayToast(shield===0?"CRACK! The Shell Shield breaks away. It did its best!":"The Shell Shield blocks the hit! (1 more hit left)");return false}health=Math.max(0,health-n);return true}
 function hurt3(fromX,msg,n=1){if(s.inv>0)return;s.inv=1.3;s.vy=-320;s.x+=center()<fromX?-46:46;shake=.3;const real=hurtHP(n);
@@ -2211,6 +2283,7 @@ function lhInteract(){
   if(near(150,40)&&onPlat(G))return["Back to the beach",()=>{goScene("beach",LH_DOOR);sayToast("Back out on the beach.")}];
   for(const [x,y] of LH_SAVES)if(near(x,30)&&onPlat(y))return["Save at the Save Block",()=>saveL3(x,y)];
   if(l3.bossDone&&!l3.lit&&near(LAMP_X,70)&&onPlat(DY))return T3("Set the gems in the lamp",lamp);
+  if(l3.replay&&l3.lit&&near(LAMP_X,70)&&onPlat(DY))return T3("Step into the beam",rideBeamHome);
   return null;
 }
 const T3=(l,f)=>[l,f,true];
@@ -2270,7 +2343,7 @@ function openReelChest(){
 }
 function lhDoor(){
   if(!hasReel){sayToast("The lighthouse door is stuck tight. Maybe someone around here knows what's going on…");return}
-  if(!has("Heart Necklace")||!has("Blue Gem")){start([["Reel","Not yet! The lamp needs all three gems. Let's get the Red and Blue ones here on the beach first."+(has("Heart Necklace")?" The Blue one's still in the sea by the wreck.":has("Blue Gem")?" The Red one's buried in the sand somewhere.":"")]]);return}
+  if(!l3.replay&&(!has("Heart Necklace")||!has("Blue Gem"))){start([["Reel","Not yet! The lamp needs all three gems. Let's get the Red and Blue ones here on the beach first."+(has("Heart Necklace")?" The Blue one's still in the sea by the wreck.":has("Blue Gem")?" The Red one's buried in the sand somewhere.":"")]]);return}
   goScene("lighthouse",230);checkpointScene="lighthouse";checkpoint=300-s.w/2;checkpointY=G-s.h;
   if(!l3.inLH){l3.inLH=true;start([
     ["Narrator","Inside, the lighthouse is gray from floor to ceiling, and a long, long way up."],
@@ -2283,9 +2356,9 @@ function useShield(){if(shield>0){sayToast("You're already shielded!");return}us
 function fishCatchBeach(){
   if(!l3.blue&&l3.fishN>=l3.gemAt){l3.blue=true;l3.lastCatch="Blue Gem";addItem("Blue Gem");burst(fish.bx,G+10,26,["#3b8fd6","#7cc6f2","#fff"]);
     start([["Narrator","Something heavy is on the line… and it's glowing blue!"],["Reel","THE BLUE GEM! Fishing pole of the year, right here. Right here!"],["Dab",has("Heart Necklace")?"That's Red and Blue! Now to the lighthouse — it's past the rocks on the right.":"That's Blue! Now we still need the Red one. Something buried on the beach, maybe?"]],()=>sayToast("Got the Blue Gem!"));return}
-  l3.fishN++;l3.lastCatch="Sea Perch";addItem("Sea Perch");burst(fish.bx,G+14,18,["#7cc6f2","#fff","#f4c84f"]);
+  l3.fishN++;const n=rollFish("sea",fish.bait);l3.lastCatch=n;addItem(n);burst(fish.bx,G+14,18,["#7cc6f2","#fff","#f4c84f"]);
   const l=["You caught a Sea Perch! Reel: \"Not blue. But very handsome.\"","Another Sea Perch! Reel: \"The gem's down there. I can feel it in my reel.\"","A Sea Perch! Reel: \"Keep going! Third time's the… fourth time's the… keep going!\"","Sea Perch again! Reel: \"So close. I can smell it. Gems don't smell. But still.\""];
-  sayToast(l3.blue?"You caught a Sea Perch! (That's "+count("Sea Perch")+" now.)":l[Math.min(l3.fishN-1,3)]);
+  sayToast(l3.blue?"You caught a "+fishLine(n)+" (That's "+count(n)+" now.)":n!=="Sea Perch"?"You caught a "+fishLine(n)+" Reel: \"Still not blue… but WOW.\"":l[Math.min(l3.fishN-1,3)]);
 }
 
 // ---- creatures ----
@@ -2358,7 +2431,10 @@ function defeatBoss(){for(const f of l3.foes)if(f.fromInk&&f.alive){f.alive=fals
     ["The Blot","…bloop."],
     ["Reel","Aww. It's kind of cute now."],
     ["Dab","Ink monsters are always grumpy when they're big. It's the pressure."],
-    ["Narrator","The tiny squid plops back into the sea with a sulky little splash. The lamp room is clear!"]
+    ["Narrator","The tiny squid plops back into the sea with a sulky little splash. The lamp room is clear!"],
+    ["Narrator","Far below, the squid paddles over to a little gray rowboat waiting in the fog."],
+    ["Narrator","A tall figure in a gray top hat scoops it up, tips his hat toward the lighthouse… and rows away."],
+    ["Dab","…No. It can't be."]
   ],()=>{l3.boss=null;0});
 }
 function updateBoss(dt,oldFeet){
@@ -2386,6 +2462,13 @@ function updateBoss(dt,oldFeet){
 }
 
 // ---- lamp + ending ----
+const BEAM_HOME=[
+  ["Reel","Hey… the beam's swinging back around. Now it's pointing straight up at the sky — right where we fell in!"],
+  ["Dab","That's the page door! When a page is whole again, its light shines back through the door it came from. Like a bookmark, showing the way home."],
+  ["Nib","So we just… hop in the light?"],
+  ["Dab","We just hop in the light. Hold on to your colors, everybody!"],
+  ["Narrator","Sarah steps into the warm white beam. It lifts her right off her feet…"]];
+function rideBeamHome(){start([["Dab","The page is still whole, so the beam still points home. Ready?"],["Narrator","Sarah steps into the warm white beam. It lifts her right off her feet…"]],()=>{flash=1;returnHome()})}
 function lamp(){
   const need=["Heart Necklace","Blue Gem","Green Gem"].filter(n=>!has(n));
   if(need.length){start([["Narrator","Sarah sets the gems she has into the lamp. "+(need.includes("Green Gem")?"The green socket stays dark and empty.":"Something's still missing.")],
@@ -2398,7 +2481,8 @@ function lamp(){
     ["Dab","Paint all mixed together makes mud. Light all mixed together makes sunshine. I'm not jealous. I'm a little jealous."],
     ["Narrator","The beam sweeps out across the sea. Everywhere it touches, the runny colors snap back into place: the sand, the waves, the shipwreck, the sky."],
     ["Sarah","The Watercolor Coast looks like a painting again. A finished one."]
-  ],()=>{l3.lit=true;flash=1;burst(LAMP_X,DY-110,40,["#e5463f","#5fb35a","#3b8fd6","#fff","#f4c84f"]);setTimeout(()=>{complete=true;showEndScreen=true;endT=0},1600)});
+  ],()=>{l3.lit=true;flash=1;burst(LAMP_X,DY-110,40,["#e5463f","#5fb35a","#3b8fd6","#fff","#f4c84f"]);
+    start(BEAM_HOME,()=>{flash=1;setTimeout(()=>{complete=true;showEndScreen=true;endT=0},900)})});
 }
 
 // ---- main per-frame update ----
@@ -2554,6 +2638,7 @@ function drawLighthouse(){
   cut(()=>{g.beginPath();g.moveTo(LAMP_X-90,DY-150);g.quadraticCurveTo(LAMP_X,DY-230,LAMP_X+90,DY-150);g.closePath()},lit?"#e5463f":"#8f8aa0",{edge:7});
   cut(()=>{g.beginPath();g.arc(LAMP_X,DY-80,34,0,7)},lit?"#fffbe0":"#b8b4c2",{edge:5});
   ["#e5463f","#5fb35a","#3b8fd6"].forEach((c,i)=>{g.fillStyle=lit?c:"#8f8aa0";circle(LAMP_X-24+i*24,DY-34,7);g.fill();g.strokeStyle=INK;g.lineWidth=1.5;g.stroke()});
+  if(lit){g.save();g.globalAlpha=.5+Math.sin(time*3)*.08;const bg=g.createLinearGradient(0,DY-160,0,DY-1100);bg.addColorStop(0,"#fffbe0");bg.addColorStop(1,"rgba(255,251,224,0)");g.fillStyle=bg;g.beginPath();g.moveTo(LAMP_X-22,DY-150);g.lineTo(LAMP_X-90,DY-1100);g.lineTo(LAMP_X+90,DY-1100);g.lineTo(LAMP_X+22,DY-150);g.closePath();g.fill();g.restore()}
   if(lit){g.save();g.globalAlpha=.3;g.fillStyle="#fffbe0";const a=Math.sin(time*.8)*.5;g.beginPath();g.moveTo(LAMP_X,DY-80);g.lineTo(LAMP_X+900,DY-260+a*200);g.lineTo(LAMP_X+900,DY+60+a*200);g.closePath();g.fill();g.beginPath();g.moveTo(LAMP_X,DY-80);g.lineTo(LAMP_X-900,DY-260-a*200);g.lineTo(LAMP_X-900,DY+60-a*200);g.closePath();g.fill();g.restore()}
   drawBlotBack();
   g.strokeStyle=INK;g.lineWidth=3;g.beginPath();g.moveTo(180,DY-46);g.lineTo(870,DY-46);g.stroke();for(let x=190;x<870;x+=40){g.beginPath();g.moveTo(x,DY-46);g.lineTo(x,DY);g.stroke()}
@@ -2647,6 +2732,7 @@ function drawChapterCard(){const c=chapterCard,a=Math.min(1,c.t*3,(3.6-c.t)*2.5)
   g.fillStyle="#fff4d6";g.font="bold 32px "+FONT;g.fillText(c.sub,0,26);g.textAlign="left";g.restore()}
 function drawShieldBubble(){if(shield<=0)return;g.save();g.globalAlpha=.35+Math.sin(time*5)*.1;g.fillStyle="#bfe6ff";g.beginPath();g.ellipse(center(),s.y+36,40,48,0,0,7);g.fill();g.globalAlpha=.9;g.strokeStyle="#7cc6f2";g.lineWidth=3;g.setLineDash(shield===1?[8,8]:[]);g.stroke();g.restore()}
 function objectiveL3(){
+  if(l3.replay)return scene==="lighthouse"&&s.y<DY+200?"Step into the lighthouse beam to ride home.":"Replaying the Watercolor Coast. When you're ready, climb the lighthouse and step into the beam to ride home.";
   if(l3.lit)return"Level 1 complete! The lighthouse shines again.";
   if(l3.bossDone)return has("Green Gem")?"Set the three gems in the lighthouse lamp (Space next to the lamp).":"The lamp needs the Green Gem! It's hidden in the lighthouse — on the left side, above the big landing. (Drop down through the gap on the left of the deck.)";
   if(l3.boss)return"Defeat The Blot! Jab its tentacles with Nib (Q) when they slam down, dodge the ink drops, and stomp its head when it peeks over the railing.";
@@ -2663,6 +2749,331 @@ function cheatBeach(x,y){dlg.on=false;scene="beach";s.x=x-s.w/2;s.y=(y??G)-s.h;s
 function cheatLH(x,y){dlg.on=false;goScene("lighthouse",x,y-s.h);camY=clamp(s.y-300,DY-420,0);l3.marina=l3.reel=l3.blue=l3.necklace=l3.inLH=true;hasReel=true;checkpointScene="lighthouse";checkpoint=x-s.w/2;checkpointY=y-s.h;
   if(!has("Heart Necklace"))addItem("Heart Necklace");if(!has("Blue Gem"))addItem("Blue Gem")}
 
+// ===========================================================================
+// FISH TYPES, BAIT, THE GENERAL STORE, AND SAVING
+// ===========================================================================
+const FISH={lake:[["Lake Perch",60],["Sunfish",28],["Catfish",10],["Golden Koi",2]],sea:[["Sea Perch",60],["Sea Bass",22],["Pufferfish",14],["Swordfish",4]]};
+const FISH_NAMES=[...FISH.lake,...FISH.sea].map(f=>f[0]);
+const SELL={"Lake Perch":3,"Sunfish":6,"Catfish":15,"Golden Koi":40,"Sea Perch":3,"Sea Bass":6,"Pufferfish":8,"Swordfish":20,"Seashell":4,"Fresh Eggs":2,"Turnip":5,"Health Potion":6,"Shell Shield":8,"Dog Food":2,"Bait":1,"Balloon":2,"Butter Pat":2,"Cheese Wedge":4,"Ball of Clay":3,"Lopsided Teapot":6};
+const TALLY_X=-110;
+function rollFish(where,bait){const tab=FISH[where].map(([n,w],i)=>[n,bait?(i===0?w*.4:w*(i===3?4:1.6)):w]);let r=Math.random()*tab.reduce((a,b)=>a+b[1],0);for(const [n,w] of tab){r-=w;if(r<=0)return n}return tab[0][0]}
+const fishLine=n=>({"Lake Perch":"Lake Perch","Sunfish":"Sunfish! Bright as a lemon.","Catfish":"Catfish! Look at those whiskers.","Golden Koi":"GOLDEN KOI! Reel is speechless. (Reel is never speechless.)","Sea Perch":"Sea Perch","Sea Bass":"Sea Bass! Stripy.","Pufferfish":"Pufferfish! It's… puffing. Respectfully.","Swordfish":"SWORDFISH! Nib is jealous of the pointy nose."})[n]||n;
+// ---- the general store ----
+function tally(page=0){
+  const sellable=items.filter(n=>SELL[n]&&count(n)>0&&!KEY_ITEMS.includes(n));
+  if(!sellable.length){start([["Mr. Tally",l2.tallyMet?"You're all sold out! Come back when your pockets are full of odds. Or ends.":"Welcome to Odds & Ends! I buy just about anything that isn't nailed down: fish, shells, eggs, potions, turnips, teapots… You've got nothing I can buy right now, though."]]);return}
+  const per=4,pages=Math.ceil(sellable.length/per);page=page%pages;const shown=sellable.slice(page*per,page*per+per);
+  const opts=shown.map(n=>n+" ×"+count(n)+" — "+SELL[n]+" each");
+  if(pages>1)opts.push("More items ▶ ("+(page+1)+"/"+pages+")");
+  const fishHeld=items.filter(n=>FISH_NAMES.includes(n));if(fishHeld.length)opts.push("Sell all fish");opts.push("Done");
+  start([["Mr. Tally",l2.tallyMet?"What'll it be today?":"Welcome to Odds & Ends! I buy just about anything that isn't nailed down: fish, shells, eggs, potions, turnips, teapots… What are you selling?",opts,k=>{
+    l2.tallyMet=true;const o=opts[k];
+    if(o==="Done"){start([["Mr. Tally","Come back any time. Bring me something weird."]]);return}
+    if(o.startsWith("More items")){tally(page+1);return}
+    if(o==="Sell all fish"){let tot=0;for(const n of fishHeld){const c=count(n);tot+=c*SELL[n];removeItem(n)}coins+=tot;burst(SHOPK_X,G-80,18,["#f4c84f","#fff"]);start([["Mr. Tally","All your fish?! Pleasure doing business. That's "+tot+" coins!"]],tally);return}
+    const n=shown[k];useOne(n);coins+=SELL[n];burst(SHOPK_X,G-80,8,["#f4c84f","#fff"]);sayToast("Sold 1 "+n+" for "+SELL[n]+" coin"+(SELL[n]>1?"s":"")+".");tally(page)}]]);
+}
+// ---- saving ----
+const SAVE_KEY="sarah-fading-world-save-v1";
+const L3_KEEP=["marina","marinaTalk","traded","dig","reel","blue","fishN","gemAt","lastCatch","inLH","green","gemSeen","potion","bossDone","bossSeen","lit","dock","necklace","replay","tinkTip"];
+let titleMenu=null;
+function gatherSave(){
+  return{v:1,saved:Date.now(),level,scene:checkpointScene,x:checkpoint+s.w/2,feet:checkpointY!=null?checkpointY+s.h:G,
+    cp:{scene:checkpointScene,x:checkpoint,y:checkpointY},coins,maxHealth,xp,plv,journal,items:[...items],counts:{...counts},
+    buddies:{hasDab,hasNib,hasReel,equipped,pinWorn,shield},
+    l1:{doorOpen,closetOpen,potionCollected,roadChestKeyCollected,homeIntroSeen,residentDoorOpen,residentTalked,ladderCollected,ladderGiven,firstChestOpen,grandChestOpen,roofItemCollected,bedBounced,stormStarted,stormDone,flowerTalked,firstFlowerTalked,bonusFlowerTalked,flowerRestored,fountainKeyCollected,gateKey,gateOpen,saveTalked,mailRead,gateAnim,tearT,firstStomp,catTalk,easelTalk},
+    doodles:doodles.map(d=>d.found),smudges,l2:JSON.parse(JSON.stringify(l2)),l3:Object.fromEntries(L3_KEEP.map(k=>[k,l3[k]]))};
+}
+function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(gatherSave()))}catch(e){}}
+function readSave(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");return d&&d.v===1?d:null}catch(e){return null}}
+function applySave(d){
+  level=d.level;const L1=d.l1||{};
+  ({doorOpen,closetOpen,potionCollected,roadChestKeyCollected,homeIntroSeen,residentDoorOpen,residentTalked,ladderCollected,ladderGiven,firstChestOpen,grandChestOpen,roofItemCollected,bedBounced,stormStarted,stormDone,flowerTalked,firstFlowerTalked,bonusFlowerTalked,flowerRestored,fountainKeyCollected,gateKey,gateOpen,saveTalked,mailRead,gateAnim,tearT,firstStomp,catTalk,easelTalk}=Object.assign({doorOpen,closetOpen,potionCollected,roadChestKeyCollected,homeIntroSeen,residentDoorOpen,residentTalked,ladderCollected,ladderGiven,firstChestOpen,grandChestOpen,roofItemCollected,bedBounced,stormStarted,stormDone,flowerTalked,firstFlowerTalked,bonusFlowerTalked,flowerRestored,fountainKeyCollected,gateKey,gateOpen,saveTalked,mailRead,gateAnim,tearT,firstStomp,catTalk,easelTalk},L1));
+  (d.doodles||[]).forEach((f,i)=>{if(doodles[i])doodles[i].found=f});smudges=d.smudges||[];
+  items=[...d.items];for(const k in counts)delete counts[k];Object.assign(counts,d.counts);
+  coins=d.coins;maxHealth=d.maxHealth;health=maxHealth;xp=d.xp;plv=d.plv;journal=d.journal||{};
+  ({hasDab,hasNib,hasReel,equipped,pinWorn,shield}=Object.assign({hasDab,hasNib,hasReel,equipped,pinWorn,shield},d.buddies));
+  resetL2();resetL2Extra();Object.assign(l2,d.l2);fsm=[];if(l2.chase===1)l2.chase=0;
+  resetL3();Object.assign(l3,d.l3||{});l3.boss=null;
+  checkpointScene=d.cp.scene;checkpoint=d.cp.x;checkpointY=d.cp.y;
+  dogOn=false;balloonOn=false;complete=false;showEndScreen=false;invOpen=false;dlg.on=false;fish.ph=0;loot=[];parts=[];mini=null;book=null;lvlUp=null;
+  goScene(d.scene,d.x,d.feet-s.h);
+  camY=scene==="festival"?clamp(s.y-150,FLOOR2.y-250,0):scene==="lighthouse"?clamp(s.y-300,DY-420,0):0;
+  sayToast("Welcome back! You're at your last Save Block.");
+}
+function newGameFromTitle(){titleMenu=null}
+function drawTitleMenu(){g.fillStyle="rgba(43,37,64,.72)";g.fillRect(0,0,W,H);g.save();g.translate(W/2,H/2);
+  cut(()=>rr(-230,-130,460,250,26),"#fff3d6",{edge:10});g.textAlign="center";g.fillStyle=INK;g.font="bold 28px "+FONT;g.fillText("Sarah and the Fading World",0,-80);
+  const d=titleMenu.save;g.font="13px "+FONT;g.fillStyle="#7a7088";g.fillText("Saved game: "+(d.level===3?"Level 1":"Level 0")+" · Lv "+d.plv+" · "+d.coins+" coins",0,-52);
+  ["Continue","New Game"].forEach((o,i)=>{const sel=titleMenu.sel===i,y=-6+i*58;cut(()=>rr(-120,y-24,240,44,14),sel?"#17a398":"#fffdf6",{edge:5,shadow:false});g.fillStyle=sel?"#fff":INK;g.font="bold 20px "+FONT;g.fillText(o,0,y+5)});
+  g.fillStyle="#7a7088";g.font="12px "+FONT;g.fillText("↑ ↓ to choose · Space to start",0,108);g.restore();g.textAlign="left"}
+function titlePick(i){if(i===0)applySave(titleMenu.save);else{titleMenu=null;try{localStorage.removeItem(SAVE_KEY)}catch(e){}}titleMenu=null}
+function downloadSave(){const d=readSave();if(!d){sayToast("Nothing saved yet. Use a Save Block first, then download.");return}const blob=new Blob([JSON.stringify(d,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="sarah-fading-world-save.json";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);sayToast("Save file downloaded!")}
+function uploadSave(file){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||d.v!==1)throw 0;try{localStorage.setItem(SAVE_KEY,JSON.stringify(d))}catch(e){}titleMenu=null;applySave(d);sayToast("Save file loaded!")}catch(e){sayToast("Hmm, that doesn't look like a save file for this game.")}};r.readAsText(file)}
+{let skip=false;try{skip=sessionStorage.getItem("sfw-skip-title")==="1";sessionStorage.removeItem("sfw-skip-title")}catch(e){}const sv=readSave();if(sv&&!skip)titleMenu={sel:0,save:sv}}
+
+// ---- shop interiors: walk in through the door, talk to the keeper behind the counter ----
+const SHOPK_X=730,COUNTER={x:610,w:250},SHOP_DOOR_X=110;
+const SHOPS={
+  pet:{name:"PAWS & CLAWS",keeper:"Polly",from:"festival",door:-650,wall:["#e9f7ff","#d6eff6","diamonds"],floor:["#c98c58","#bd8150"],trim:"#3bb6c4"},
+  odds:{name:"ODDS & ENDS",keeper:"Mr. Tally",from:"festival",door:-85,wall:["#fff1d6","#f6e3bf","stripes"],floor:["#b5713f","#a8653a"],trim:"#f08a3c"},
+  lost:{name:"LOST & FOUND",keeper:"Mr. Pocket",from:"under",door:1500,wall:["#e4def0","#d6cfe6","diamonds"],floor:["#8d6a52","#7d5c46"],trim:"#7a5c99"},
+  arcade:{name:"ARCADE",keeper:"Pixel",from:"under",door:1900,wall:["#2f2a4a","#3a3360","stripes"],floor:["#3a3352","#2f2a48"],trim:"#ff8fe8"},
+  alch:{name:"ALCHEMY",keeper:"Madame Fizz",from:"under",door:2305,wall:["#2e3a3a","#354646","diamonds"],floor:["#5a4a6a","#4d3f5c"],trim:"#7cc488"}};
+const SHOP_TALK={pet:()=>polly(),odds:()=>tally(),lost:()=>pocket(),arcade:()=>pixel(),alch:()=>fizz()};
+let shopId=null;
+function enterShop(id){shopId=id;SCENE_NPCS.shop={[SHOPS[id].keeper]:SHOPK_X};goScene("shop",SHOP_DOOR_X+70,G-s.h);s.face=1}
+function leaveShop(){const sh=SHOPS[shopId];goScene(sh.from,sh.door,G-s.h);s.face=1;camY=0;shopId=null}
+function shopInteract(){
+  if(!onFloor()||!shopId)return null;const sh=SHOPS[shopId];
+  if(near(SHOP_DOOR_X,46))return["Leave the shop",leaveShop];
+  if(center()>COUNTER.x-110)return["Talk to "+sh.keeper,SHOP_TALK[shopId],true];
+  return null;
+}
+function shopDoorAt(id){const sh=SHOPS[id];return near(sh.door,30)?["Go inside",()=>enterShop(id)]:null}
+function drawShop(){const sh=SHOPS[shopId];if(!sh)return;
+  wallpaper(sh.wall[0],sh.wall[1],sh.wall[2]);floorBlocks(sh.floor[0],sh.floor[1]);
+  const dark=shopId==="arcade"||shopId==="alch",ink=dark?"#fff4d6":INK;
+  // name banner along the top
+  cut(()=>rr(W/2-140,70,280,38,12),sh.trim,{edge:7});g.fillStyle=dark?"#2b2540":"#fff";g.font="bold 22px "+FONT;g.textAlign="center";g.fillText(sh.name,W/2,97);g.textAlign="left";
+  // exit door (with daylight or tunnel glow behind it)
+  cut(()=>rr(SHOP_DOOR_X-46,G-170,92,170,14),sh.trim,{edge:9});g.fillStyle=sh.from==="under"?"#5b4a6e":"#a6def5";rr(SHOP_DOOR_X-36,G-160,72,156,8);g.fill();
+  if(sh.from!=="under"){g.fillStyle="#6cc06b";g.fillRect(SHOP_DOOR_X-36,G-34,72,30)}
+  g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";cut(()=>rr(SHOP_DOOR_X-30,G-196,60,20,6),"#fffdf6",{edge:4,shadow:false});g.fillStyle=INK;g.fillText("EXIT",SHOP_DOOR_X,G-182);g.textAlign="left";
+  // decor per shop
+  if(shopId==="pet"){
+    for(const [x,y,c] of[[260,160,"#7cc6f2"],[420,160,"#9fd8f5"]]){cut(()=>rr(x-60,y,120,80,8),c,{edge:7});g.fillStyle="rgba(255,255,255,.35)";g.fillRect(x-52,y+8,104,10);
+      for(let i=0;i<3;i++){const fx=x-35+((time*30+i*40)%70),fy=y+35+i*12;g.fillStyle=["#f08a3c","#f4c84f","#e5577b"][i];g.beginPath();g.ellipse(fx,fy,8,5,0,0,7);g.fill();g.beginPath();g.moveTo(fx-8,fy);g.lineTo(fx-14,fy-5);g.lineTo(fx-14,fy+5);g.fill()}
+      cut(()=>rr(x-66,y+80,132,12,4),"#8a6a4d",{edge:5,shadow:false})}
+    for(const [x,c] of[[230,"#f4c84f"],[290,"#e5577b"],[350,"#17a398"]]){cut(()=>rr(x-22,G-58,44,58,6),c,{edge:5});g.fillStyle="#fff";g.font="bold 9px "+FONT;g.textAlign="center";g.fillText("DOG",x,G-32);g.fillText("FOOD",x,G-21);g.textAlign="left"}
+    for(const x of[440,480,520]){g.save();g.translate(x,G-20);iconArt("Bait");g.restore()}
+    cut(()=>{g.beginPath();g.arc(560,280,26,0,7)},"#fffdf6",{edge:5});g.fillStyle=INK;g.font="bold 9px "+FONT;g.textAlign="center";g.fillText("BAIT",560,278);g.fillText("3 for 5¢",560,290);g.textAlign="left"}
+  if(shopId==="odds"){
+    for(const y of[180,270]){cut(()=>rr(190,y,380,14,4),"#8a6a4d",{edge:6});}
+    const stuff=[["Seashell",230,166],["Turnip",300,166],["Fresh Eggs",370,166],["Lake Perch",450,166],["Sea Bass",520,166],["Old Sketch",240,256],["Bait",320,256],["Golden Koi",400,256],["Pufferfish",480,256]];
+    for(const [n,x,y] of stuff){g.save();g.translate(x,y-10);g.scale(.7,.7);iconArt(n);g.restore()}
+    // balance scale
+    g.strokeStyle=INK;g.lineWidth=3;g.beginPath();g.moveTo(800,G-58);g.lineTo(800,G-106);g.moveTo(770,G-100+Math.sin(time*1.5)*3);g.lineTo(830,G-100-Math.sin(time*1.5)*3);g.stroke();
+    for(const k of[-1,1])cut(()=>{g.beginPath();g.ellipse(800+30*k,G-92-k*Math.sin(time*1.5)*3,14,4,0,0,7)},"#f4c84f",{edge:3,shadow:false});
+    cut(()=>rr(230,G-44,70,44,4),"#c98a5a",{edge:5});cut(()=>rr(250,G-80,46,36,4),"#d4a06a",{edge:5});g.fillStyle=INK;g.font="bold 9px "+FONT;g.fillText("ODDS",255,G-58);g.fillText("ENDS",240,G-18)}
+  if(shopId==="lost"){
+    for(const [x,w,h,c] of[[230,70,60,"#c98a5a"],[300,60,90,"#b9825a"],[250,56,40,"#d4a06a"]])cut(()=>rr(x-w/2,G-h-(x===250?60:0),w,h,4),c,{edge:5});
+    g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(380,150);g.lineTo(560,150);g.stroke();
+    for(const [x,c] of[[400,"#e5577b"],[440,"#7cc6f2"],[480,"#f4c84f"],[520,"#5fb35a"]]){cut(()=>{g.beginPath();g.moveTo(x-8,150);g.lineTo(x+8,150);g.lineTo(x+10,190);g.quadraticCurveTo(x+16,200,x+4,202);g.lineTo(x-8,190);g.closePath()},c,{edge:4,shadow:false})}
+    g.fillStyle=ink;g.font="italic bold 11px "+FONT;g.fillText("one sock each. we don't know either.",380,222);
+    cut(()=>{g.beginPath();g.moveTo(440,G);g.lineTo(450,G-110);g.lineTo(458,G)},"#3b5a8f",{edge:4});cut(()=>{g.beginPath();g.arc(450,G-110,36,Math.PI,0)},"#e5577b",{edge:5})}
+  if(shopId==="arcade"){
+    for(const [x,c,t] of[[230,"#3b8fd6","ZAP!"],[330,"#e5577b","SMUDGE!"],[430,"#5fb35a","BLIP"]]){cut(()=>rr(x-36,G-170,72,170,6),c,{edge:7});cut(()=>rr(x-28,G-156,56,48,4),"#1b1730",{edge:0,line:2,shadow:false});
+      g.save();g.globalAlpha=.6+Math.sin(time*6+x)*.3;g.fillStyle=["#ff8fe8","#7cc6f2","#f4c84f"][x%3];g.fillRect(x-20,G-146+((time*40+x)%30),10,8);g.restore();
+      g.fillStyle="#fff";g.font="bold 8px "+FONT;g.textAlign="center";g.fillText(t,x,G-96);g.textAlign="left";
+      g.fillStyle="#1b1730";g.fillRect(x-24,G-80,48,8);g.fillStyle="#e5463f";circle(x-12,G-84,4);g.fill();g.fillStyle="#f4c84f";circle(x+6,G-84,4);g.fill()}
+    g.fillStyle="#f4c84f";g.font="bold 12px "+FONT;g.fillText("HIGH SCORE: KEVIN",490,150)}
+  if(shopId==="alch"){
+    for(const y of[170,250]){cut(()=>rr(190,y,360,12,4),"#5b3a28",{edge:5});for(let i=0;i<7;i++){const x=215+i*50,c=["#b98ad8","#5fb35a","#e5577b","#7cc6f2","#f4c84f"][(i+y)%5];cut(()=>{g.beginPath();g.ellipse(x,y-14,11,14,0,0,7)},c,{edge:3,shadow:false});g.fillStyle="#5b3a28";g.fillRect(x-4,y-34,8,8)}}
+    cut(()=>{g.beginPath();g.ellipse(360,G-34,62,38,0,0,Math.PI);g.lineTo(298,G-34);g.closePath()},"#2b2540",{edge:6});
+    g.fillStyle="#7cc488";g.beginPath();g.ellipse(360,G-36,56,10,0,0,7);g.fill();
+    for(let i=0;i<3;i++){const t=(time*.8+i/3)%1;g.save();g.globalAlpha=1-t;g.fillStyle="#b9f0c6";circle(340+i*20,G-46-t*80,6+t*6);g.fill();g.restore()}
+    g.fillStyle="#f08a3c";for(const x of[330,360,390]){g.beginPath();g.moveTo(x-8,G);g.quadraticCurveTo(x,G-24-Math.sin(time*9+x)*6,x+8,G);g.fill()}}
+  // shopkeeper behind the counter, then the counter in front
+  npc(sh.keeper,SHOPK_X,-1,-54);
+  cut(()=>rr(COUNTER.x,G-50,COUNTER.w,50,6),dark?"#5b4a6e":"#c98a5a",{edge:8});cut(()=>rr(COUNTER.x-8,G-58,COUNTER.w+16,12,5),sh.trim,{edge:6});
+  g.fillStyle="rgba(255,255,255,.18)";for(let x=COUNTER.x+20;x<COUNTER.x+COUNTER.w-10;x+=40)g.fillRect(x,G-40,20,32);
+  // a little bell on the counter
+  cut(()=>{g.beginPath();g.arc(COUNTER.x+40,G-58,10,Math.PI,0)},"#f4c84f",{edge:3,shadow:false});
+  drawLoot();drawParticles();drawSarah();
+}
+
+// ===========================================================================
+// HUB — coming home to town after Level 1 (Level 0 becomes the hub)
+// ===========================================================================
+const HUB_CAT_X=-770,DOOR2_X=DOOR_SLOTS[1],QUILL_X=2040,POLLY_X=-690,POCKET_X=1455,PIXEL_X=1855,FIZZ_X=2262;
+let mini=null,book=null;
+Object.assign(LOOKS,{
+  "Quill":{skin:"#c98e64",hair:"#2b2540",style:"bun",top:"#2f6f6a",bottom:"#3a3352",acc:"glasses"},
+  "Polly":{skin:"#ffd9b8",hair:"#f08a3c",style:"pigtails",top:"#5fb35a",bottom:"#3b5a8f",acc:"apron",apron:"#f4c84f"},
+  "Mr. Pocket":{skin:"#e9b98f",hair:"#8a8f98",style:"short",top:"#8a6a4d",bottom:"#3a3352",acc:"mustache",hat:"cap",hatCol:"#5b3a28"},
+  "Pixel":{kid:true,skin:"#b07a55",hair:"#e5577b",style:"curly",top:"#3b8fd6",bottom:"#2b2540",acc:"shades"},
+  "Mr. Tally":{skin:"#f0c9a0",hair:"#e9e4d8",style:"short",top:"#c0392b",bottom:"#3a3352",acc:"apron",apron:"#fff3d6",hat:"cap",hatCol:"#2f6f6a"},
+  "Madame Fizz":{skin:"#d6c2f0",hair:"#5fb35a",style:"long",top:"#3a2f5e",bottom:"#2b2540",hat:"top",hatCol:"#2b2540",acc:"glasses"}
+});
+Object.assign(NPC_X,{"Quill":QUILL_X,"Polly":POLLY_X,"Mr. Tally":TALLY_X});
+SCENE_NPCS.under=Object.assign(SCENE_NPCS.under||{},{"Mr. Pocket":POCKET_X,"Pixel":PIXEL_X,"Madame Fizz":FIZZ_X});
+Object.assign(speakerColor,{"Quill":"#2f6f6a","Polly":"#5fb35a","Mr. Pocket":"#8a6a4d","Pixel":"#3b8fd6","Madame Fizz":"#6b4fa0","Professor Monochrome":"#6b6b6b"});
+const onF2=()=>s.ground&&Math.abs(s.y+s.h-FLOOR2.y)<3;
+
+function finishL2State(){Object.assign(l2,{intro:true,registered:true,festReg:true,chaseDone:true,catFreed:true,catState:"judge",catWalk:1,walk:1,spikeDown:true,results:true,curtain:1,finale:true,fightDone:true,mapleDone:true,mapleTalked:true,dogGone:true,dogUsed:true,on2F:true,nibMet:true,trail:true,done:true,drain:0,w1:true,w2:true,pendRes:false});if(!(l2.tearT>0))l2.tearT=1;fsm=[];hasNib=true}
+function returnHome(){
+  const land=()=>{goScene("festival",1115,G-s.h);s.face=1;camY=0;checkpoint=700-s.w/2;checkpointY=null;checkpointScene="festival"};
+  if(l2.hub&&l2.hubStep!=null){level=2;complete=false;showEndScreen=false;invOpen=false;dogOn=false;balloonOn=false;fish.ph=0;health=maxHealth;parts=[];loot=[];land();
+    start([["Narrator","The beam carries Sarah up through the inky dark and out the page door on the second floor. The elevator is waiting with its doors open. Ding! Ground floor."]]);return}
+  finishL2State();level=2;l2.hub=true;l2.hubStep=1;complete=false;showEndScreen=false;invOpen=false;dogOn=false;balloonOn=false;fish.ph=0;
+  l2.maple=2980;l2.doorOpen=true;l2.doorY=FLOOR2.y;health=maxHealth;parts=[];loot=[];land();
+  start([
+    ["Narrator","The beam carries Sarah up and up, through the inky dark, and straight out through the page door she fell in by, onto the second floor."],
+    ["Narrator","Right beside her, the old elevator gives a cheerful DING. Its lights are on. Someone fixed it! Down it goes, all the way to the ground floor."],
+    ["Gus","Welcome back! Told you I'd get her running. Up and down, smooth as butter. Fresh butter, not swan butter."],
+    ["Narrator","Sarah steps out into town. The festival is over: the booths, the stage and the sculptures are all packed away, and the streets feel quiet and roomy."],
+    ["Gus","And now that the festival's done, some of the shops have opened back up. The pet store, the new general store by the entrance, and the shops down in Undertown. Chef Crumb and Inka kept their booths open too. Everyone else is on vacation."],
+    ["Sarah","We made it! The coast is colorful again, and we're… home."],
+    ["Dab","Sarah. That man in the rowboat. Gray coat, gray hat, gray everything. I know him."],
+    ["Dab","His name is Professor Monochrome. A long time ago, he painted with me. And with your Grandma."],
+    ["Sarah","With GRANDMA?!"],
+    ["Dab","Mrs. Maple knows the whole story. She's at the far right end of town, waving like a windmill."]
+  ],()=>{chapterCard={t:0,title:"Level 0",sub:"Back in Town"}});
+}
+function hubInteract(){
+  if(onF2()){
+    if(near(1050,40))return["Ride the elevator down",()=>{l2.hubStep=Math.max(l2.hubStep,1);goScene("festival",1050,G-s.h);camY=0;sayToast("Ding! Ground floor.")}];
+    if(near(DOOR_X,44))return["Go back to the Watercolor Coast",()=>startLevel3(true)];
+    if(l2.door2&&near(DOOR2_X,44))return["Read the sign on the door",()=>start([["Sign","COMING SOON. This page is still being drawn by the game's developers. (That's us again. Pencils are moving as fast as they can.)"]])];
+    return null;
+  }
+  if(!onFloor())return null;const T=(l,f)=>[l,f,true];
+  if(center()>1030&&near(1050,26))return["Ride the elevator up",()=>{goScene("festival",1050,FLOOR2.y-s.h);camY=clamp(s.y-150,FLOOR2.y-250,0);sayToast("Ding! Second floor.")}];
+  if(near(l2.maple,30))return T("Talk to Mrs. Maple",hubMaple);
+  if(near(QUILL_X,30))return T("Talk to Quill",quill);
+  {const d=shopDoorAt("pet")||shopDoorAt("odds");if(d)return d}
+  if(near(HUB_CAT_X,34))return T("Greet Mr. Biscuits",()=>sayToast("Mr. Biscuits is sunning himself outside the pet store. He gives you one slow blink. In cat, that's a five-star review."));
+  return null;
+}
+function hubMaple(){
+  if(l2.hubStep>=2){const l=["Every page you bring back, the closer you get to your Grandma. I just know it.","Quill at the library will show you the Great Sketchbook, dear.","Your Grandma used to say: \"Gray is just color that's waiting.\""];start([["Mrs. Maple",l[(l2.mapleTalk=(l2.mapleTalk||0)+1)%3]]]);return}
+  start([
+    ["Mrs. Maple","Sarah! You came back through the door! And you smell like the seaside."],
+    ["Sarah","Mrs. Maple, Dab says you know about Grandma… and someone called Professor Monochrome?"],
+    ["Mrs. Maple","Oh, dear. Sit down. Well — stand. There's nowhere to sit, it's a festival."],
+    ["Mrs. Maple","Long ago, your Grandma and a young painter named Monty were the best of friends. With little Dab, they kept this whole world colorful."],
+    ["Mrs. Maple","You see, the world is one enormous sketchbook. Every place is a page. And the three of them painted every single one."],
+    ["Mrs. Maple","Then Monty entered the Town Art Festival… and a certain cat gave his painting a very, VERY bad review."],
+    ["Narrator","Somewhere nearby, Mr. Biscuits sneezes. He is not sorry."],
+    ["Mrs. Maple","Monty decided color was messy. Cheating, even. He went gray, called himself Professor Monochrome, and started ripping pages out of the world."],
+    ["Mrs. Maple","Your Grandma went after him to bring the pages back. That was years ago. She never came home."],
+    ["Sarah","Grandma's… missing?"],
+    ["Dab","Every torn-out page makes a door. Every page we stitch back in brings us closer to her. I'm sure of it."],
+    ["Mrs. Maple","Quill keeps the Great Sketchbook in the library. Go see how many pages are still missing, dear."]
+  ],()=>{l2.hubStep=Math.max(l2.hubStep,2)});
+}
+function quill(){
+  if(l2.hubStep<2){start([["Quill","Shhh. …Sorry. Habit. The library's closed for the festival, but I'm guarding something important. Come back later."]]);return}
+  if(l2.hubStep>=3){start([["Quill","Want another look at the Great Sketchbook?",["Yes, please","No thanks"],k=>{if(k===0)book={t:0}}]]);return}
+  start([
+    ["Quill","So YOU'RE the one who stitched the coast back in. Mrs. Maple sent word."],
+    ["Quill","Behold: the Great Sketchbook. Every page of our world is in here. Or was."]
+  ],()=>{book={t:0,first:true}});
+}
+function closeBook(){const first=book&&book.first;book=null;
+  if(first){l2.hubStep=3;start([
+    ["Quill","One page back. Five still missing. Every one of them is a door waiting to be opened."],
+    ["Narrator","THUD. Somewhere far overhead, another door lands on the festival's second floor."],
+    ["Dab","The next page! …It's not finished, though. I can tell. Its edges are still all sketchy."],
+    ["Quill","Then we wait. In the meantime, the town could use some help. The pet store's open again, and the shops downstairs too."]
+  ],()=>{l2.door2=true;shake=.5})}}
+function polly(){
+  const dog=!has("Dog Food")&&!l2.wafflesFed;
+  const opts=[...(dog?["Buy Dog Food (4 coins)"]:[]),"Buy Bait ×3 (5 coins)","Just looking"];
+  const hi=l2.pollyMet?(l2.wafflesFed?"Waffles came by to say thank you. Well. He barked. I'm translating generously. Need anything?":"Back again! What can I get you?"):"Welcome to Paws & Claws! We're open again! Dog food for a certain lake dog, and bait for anyone with a fishing pole.";
+  start([["Polly",hi,opts,k=>{l2.pollyMet=true;const o=opts[k];
+    if(o==="Just looking"){start([["Polly",has("Dog Food")&&!l2.wafflesFed?"That bag's for Waffles, right? Down by the lake. He's been very patient.":"Take your time! The goldfish are judging you, but gently."]]);return}
+    const cost=o.startsWith("Buy Dog")?4:5;
+    if(coins<cost){start([["Polly","Oh — you're a little short. "+cost+" coins, sweetie. The goldfish believe in you."]]);return}
+    coins-=cost;
+    if(cost===4){addItem("Dog Food");sayToast("Got Dog Food!")}
+    else{addItem("Bait",3);start([["Polly","Three tins of bait! Fish bite faster with it, and the fancy ones get curious. Each cast uses one."]],()=>sayToast("Got Bait ×3! ("+count("Bait")+" total)"))}}]]);
+}
+function wafflesHub(){
+  if(has("Dog Food")){useOne("Dog Food");l2.wafflesFed=true;addItem("Fresh Eggs",3);burst(530,G-50,20,["#f4c84f","#fff","#c98a5a"]);start([
+    ["Waffles","Is that… is that DOG FOOD?! For ME?! Oh happy day! Oh glorious, crunchy day!"],
+    ["Narrator","Waffles inhales the entire bowl in four seconds. Then he trots into the coop and trots back out, very carefully, with a basket in his mouth."],
+    ["Waffles","The chickens said you can have these. Actually they said \"bawk.\" But I know what they meant."]
+  ],()=>sayToast("Got 3 Fresh Eggs!"));return true}
+  if(l2.wafflesFed){const l=["Best. Day. Ever. Also yesterday was the best day ever. I have a lot of best days.","The chickens like you now. That's huge. They don't like anybody."];start([["Waffles",l[(l2.wTalk=(l2.wTalk||0)+1)%2]]]);return true}
+  return false;
+}
+function underHubInteract(){
+  if(!l2.hub||!onFloor())return null;const T=(l,f)=>[l,f,true];
+  {const d=shopDoorAt("lost")||shopDoorAt("arcade")||shopDoorAt("alch");if(d)return d}
+  return null;
+}
+function pocket(){
+  if(!has("Old Sketch")&&!l2.sketchGot){l2.sketchGot=true;addItem("Old Sketch");start([
+    ["Mr. Pocket","Lost & Found, open for business! Lost something? Found something? Lost something you found?"],
+    ["Mr. Pocket","Wait. You've got paint on your shoes and sand in your pockets. You came back through a page door, didn't you?"],
+    ["Mr. Pocket","Someone left this here years and years ago. The note says: \"For whoever comes back through a page door.\""],
+    ["Narrator","It's an old sketch: a young woman with paint on her nose, a lanky young man in a beret, and a tiny paintbrush with a face. On the back: \"The Three of Us.\""],
+    ["Dab","That's me! And your Grandma! And… Monty. Before he went gray."],
+    ["Sarah","They look so happy."],
+    ["Dab","They were."]
+  ],()=>sayToast("Got the Old Sketch!"));return}
+  const l=["Still haven't found the owner of one left sock. Or the other left sock.","If you lose anything on those pages, I'll keep an eye out. That's my whole job. Eyes. Out."];start([["Mr. Pocket",l[(l2.pTalk=(l2.pTalk||0)+1)%2]]]);
+}
+function pixel(){
+  start([["Pixel","Welcome to the Underground Arcade! Wanna play STOP THE SMUDGE? Stop the Smudge inside the box. 1 coin to play, 2 coins back for every bullseye!",["Play (1 coin)","Maybe later"],k=>{
+    if(k!==0){start([["Pixel","Kevin's high score awaits. It's always Kevin."]]);return}
+    if(coins<1){start([["Pixel","No coins? The arcade weeps. Come back with at least one."]]);return}
+    coins--;mini={t:0,round:0,hits:0,pos:0,dir:1,speed:260,res:null,resT:0,zone:120+Math.random()*200,done:false}}]]);
+}
+function fizz(){
+  const fishName=["Lake Perch","Sea Perch","Sunfish","Sea Bass","Pufferfish","Catfish","Swordfish","Golden Koi"].find(n=>has(n))||null;
+  start([["Madame Fizz","Welcome, welcome! Madame Fizz brews the finest potions under the town. Bring me one fish and one seashell — or 3 coins instead of the shell — and I'll brew you a Health Potion.",["Brew a Health Potion","Just browsing"],k=>{
+    if(k!==0){start([["Madame Fizz","Browse away. Please don't sniff the purple one. It sniffs back."]]);return}
+    if(!fishName){start([["Madame Fizz","No fish, no potion! Reel could help with that, I suspect."]]);return}
+    if(has("Seashell"))useOne("Seashell");else if(coins>=3)coins-=3;else{start([["Madame Fizz","I need a seashell — or 3 coins. Potions don't brew themselves. Well, some do. Not this one."]]);return}
+    useOne(fishName);addItem("Health Potion");burst(SHOPK_X,G-90,20,["#b98ad8","#5fb35a","#fff"]);start([["Narrator","BLORP. FIZZ. A tiny purple cloud. Madame Fizz hands over a warm, wobbly bottle."],["Madame Fizz","One Health Potion! Fish-flavored. You can't taste it. Mostly."]],()=>sayToast("Got a Health Potion!"))}]]);
+}
+// ---- arcade mini-game: STOP THE SMUDGE ----
+function updateMini(dt){const m=mini;m.t+=dt;
+  if(m.res){m.resT-=dt;if(m.resT<=0){m.res=null;if(m.round>=3){m.done=true}else{m.zone=60+Math.random()*280;m.speed+=70;m.pos=0;m.dir=1}}return}
+  if(m.done)return;m.pos+=m.dir*m.speed*dt;if(m.pos>400){m.pos=400;m.dir=-1}if(m.pos<0){m.pos=0;m.dir=1}}
+function miniPress(){const m=mini;if(m.done){const won=m.hits*2;coins+=won;mini=null;start([["Pixel",won?"You won "+won+" coins! Kevin is shaking. Probably.":"No bullseyes this time. Kevin sends his regards."]]);return}
+  if(m.res)return;const hit=m.pos+16>m.zone&&m.pos+16<m.zone+60;m.round++;if(hit)m.hits++;m.res=hit?"BULLSEYE!":"MISS!";m.resT=.8}
+function drawMini(){const m=mini;g.fillStyle="rgba(43,37,64,.55)";g.fillRect(0,0,W,H);
+  g.save();g.translate(W/2,H/2-20);cut(()=>rr(-260,-130,520,250,26),"#1f1b33",{edge:9});
+  g.fillStyle="#f4c84f";g.font="bold 28px "+FONT;g.textAlign="center";g.fillText("STOP THE SMUDGE",0,-82);
+  g.fillStyle="#fff";g.font="15px "+FONT;g.fillText("Press Space when the Smudge is in the box!",0,-54);
+  const bx=-200;g.fillStyle="#3a3352";rr(bx,-20,432,44,12);g.fill();g.strokeStyle="#fff";g.lineWidth=2;rr(bx,-20,432,44,12);g.stroke();
+  g.fillStyle="rgba(95,179,90,.7)";rr(bx+m.zone,-16,60,36,8);g.fill();g.strokeStyle="#a6e39a";g.lineWidth=3;rr(bx+m.zone,-16,60,36,8);g.stroke();
+  g.save();g.translate(bx+m.pos+16,22);sprite(0,0,46,36,drawSmudgeBody,{shadow:false,sx:.75,sy:.75});g.restore();
+  g.fillStyle="#fff";g.font="bold 16px "+FONT;g.fillText("Round "+Math.min(3,m.round+(m.res||m.done?0:1))+" of 3   ·   Bullseyes: "+m.hits,0,62);
+  if(m.res){g.fillStyle=m.res==="MISS!"?"#e5577b":"#a6e39a";g.font="bold 30px "+FONT;g.fillText(m.res,0,100)}
+  else if(m.done){g.fillStyle="#f4c84f";g.font="bold 18px "+FONT;g.fillText("Press Space to collect "+m.hits*2+" coins",0,100)}
+  g.restore();g.textAlign="left"}
+// ---- the Great Sketchbook ----
+function drawBook(){const k=Math.min(1,book.t*3);g.fillStyle=`rgba(43,37,64,${.55*k})`;g.fillRect(0,0,W,H);
+  g.save();g.translate(W/2,H/2-10);g.scale(.85+.15*k,.85+.15*k);
+  cut(()=>rr(-380,-200,760,390,18),"#8a5a3b",{edge:9});
+  cut(()=>rr(-366,-188,362,366,10),"#fffdf6",{edge:0,line:2,shadow:false});cut(()=>rr(4,-188,362,366,10),"#fffdf6",{edge:0,line:2,shadow:false});
+  g.strokeStyle="rgba(0,0,0,.25)";g.lineWidth=3;g.beginPath();g.moveTo(0,-188);g.lineTo(0,178);g.stroke();
+  g.fillStyle=INK;g.textAlign="center";g.font="bold 20px "+FONT;g.fillText("THE GREAT SKETCHBOOK",-185,-156);g.font="italic 13px "+FONT;g.fillText("Every page of the world",-185,-136);
+  const slots=[[-295,-110],[-175,-110],[-237,24],[75,-110],[195,-110],[133,24]];
+  slots.forEach(([sx,sy],i)=>{if(i===0){g.save();g.beginPath();g.rect(sx,sy,104,110);g.clip();const sg=g.createLinearGradient(0,sy,0,sy+110);sg.addColorStop(0,"#8fd3f0");sg.addColorStop(.55,"#fde8d0");sg.addColorStop(.56,"#4fa3dc");sg.addColorStop(1,"#f3d79f");g.fillStyle=sg;g.fillRect(sx,sy,104,110);
+      g.fillStyle="#ffd65c";circle(sx+80,sy+20,10);g.fill();g.fillStyle="#fffdf6";g.fillRect(sx+22,sy+30,12,50);g.fillStyle="#e5463f";g.fillRect(sx+22,sy+40,12,8);g.fillRect(sx+22,sy+60,12,8);g.fillStyle="#fff6a8";g.fillRect(sx+20,sy+22,16,10);g.restore();
+      g.strokeStyle=INK;g.lineWidth=2;g.strokeRect(sx,sy,104,110);g.fillStyle=INK;g.font="bold 11px "+FONT;g.fillText("The Watercolor Coast",sx+52,sy+128)}
+    else{g.save();g.setLineDash([6,6]);g.strokeStyle="#b8ab92";g.lineWidth=2;g.beginPath();g.moveTo(sx,sy);for(let y=0;y<=110;y+=10)g.lineTo(sx+(y/10%2?6:0),sy+y);g.lineTo(sx+104,sy+110);g.lineTo(sx+104,sy);g.closePath();g.stroke();g.restore();
+      g.fillStyle="#b8ab92";g.font="bold 34px "+FONT;g.fillText("?",sx+52,sy+68);g.font="italic 11px "+FONT;g.fillText("torn out",sx+52,sy+128)}});
+  g.fillStyle=INK;g.font="bold 16px "+FONT;g.fillText("1 of 6 pages restored",185,-150);
+  if(book.t>.6){g.globalAlpha=.6+Math.sin(time*5)*.3;g.fillStyle="#7a7088";g.font="bold 13px "+FONT;g.fillText("Press Space to close",185,168)}
+  g.restore();g.textAlign="left"}
+// ---- hub drawing bits on the second floor / plaza / Undertown ----
+function drawHubFestival(){
+  if(!l2.hub)return;
+  npc("Quill",QUILL_X);groundShadow(HUB_CAT_X,G+2,14);drawCatSit(HUB_CAT_X,G);
+  // a sign hung on the Level 1 door
+  const fy=FLOOR2.y;g.save();g.translate(DOOR_X,fy-78);g.rotate(Math.sin(time*1.4)*.04);g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(-14,-14);g.lineTo(0,-26);g.lineTo(14,-14);g.stroke();
+  cut(()=>rr(-30,-14,60,30,4),"#fff3d6",{edge:4,shadow:false});g.fillStyle="#2f9a4a";g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("✓ LEVEL 1",0,5);g.restore();g.textAlign="left";
+  if(l2.door2){const x=DOOR2_X;cut(()=>rr(x-38,fy-150,76,150,8),"#2f2a4a",{edge:9});cut(()=>rr(x-28,fy-140,56,140,5),"#7a8a9a",{edge:0,line:2,shadow:false});
+    g.save();g.setLineDash([5,5]);g.strokeStyle="#fff";g.lineWidth=1.5;g.strokeRect(x-22,fy-132,44,124);g.restore();
+    g.save();g.translate(x,fy-90);g.rotate(-.05);cut(()=>rr(-32,-14,64,30,4),"#fff3d6",{edge:4,shadow:false});g.fillStyle="#3b8fd6";g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("COMING",0,0);g.fillText("SOON",0,12);g.restore();g.textAlign="left"}
+}
+function drawHubUnder(){}
+function objectiveHub(){
+  if(l2.hubStep===0)return"Take Gus's elevator down. It's at the far left end of the second floor.";
+  if(l2.hubStep===1)return"Find Mrs. Maple at the far right end of town.";
+  if(l2.hubStep===2)return"Visit Quill outside the library to see the Great Sketchbook.";
+  return"The next door is still being drawn. Explore town: the pet store is open again, the shops in Undertown are open, and Reel can fish at the lake.";
+}
+function beatsHub(){return[["Come home from Level 1",true],["Ride Gus's elevator down",l2.hubStep>=1],["Hear Mrs. Maple's story",l2.hubStep>=2],["See the Great Sketchbook",l2.hubStep>=3],["Bring Waffles some dog food (optional)",!!l2.wafflesFed],["Visit the Lost & Found (optional)",!!l2.sketchGot]]}
+function cheatHub(){cheat3();for(const n of["Heart Necklace","Blue Gem","Green Gem"])removeItem(n);hasReel=true;l3.lit=true;returnHome();dlg.on=false;chapterCard=null}
+
 // ---- Admin cheats ----
 function cheatBase(){items=[];for(const k in counts)delete counts[k];addItem("Turnip");addItem("Festival Pin");hasDab=true;hasNib=false;hasReel=false;pinWorn=false;dogOn=false;balloonOn=false;
   potionCollected=roadChestKeyCollected=homeIntroSeen=firstChestOpen=fountainKeyCollected=ladderGiven=grandChestOpen=flowerRestored=gateOpen=true;
@@ -2677,6 +3088,10 @@ const CHEATS={
   fight:()=>{CHEATS.results();l2.results=true;cheatTele(3010);startFinale()},
   coins:()=>{coins+=20;sayToast("+20 coins (cheater!)")},
   l3:()=>cheat3(),
+  hub:()=>cheatHub(),
+  shop:()=>{cheatHub();titleMenu=null;dlg.on=false;l2.hubStep=3;enterShop("odds");s.x=COUNTER.x-20-s.w;addItem("Bait",3);addItem("Catfish");addItem("Golden Koi");addItem("Sea Bass",2);addItem("Seashell",2);coins+=10;sayToast("Cheat: hub, by the general store, with fish + bait.")},
+  clearsave:()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}sayToast("Saved game cleared.")},
+  l3replay:()=>{cheatHub();dlg.on=false;startLevel3(true);dlg.on=false},
   l3wreck:()=>{cheat3();l3.dock=true;cheatBeach(CHEST_X+50,WRECK.y)},
   l3dock:()=>{cheat3();cheatBeach(3990)},
   l3tide:()=>{cheat3();cheatBeach(2080)},
@@ -2691,6 +3106,10 @@ const CHEATS={
   journal:()=>{for(const c of CREATURES)journal[c.name]=journal[c.name]||1;invOpen=true;inv.tab=3;inv.sel=0},
   reload:()=>location.reload()
 };
+document.getElementById("restartBtn").onclick=e=>{e.target.blur();if(titleMenu){titlePick(1);return}if(mini||book||lvlUp)return;invOpen=false;start([["Narrator","Restart from the very beginning, in Sarah's bedroom? Your saved game is kept until you use a Save Block in the new game.",["Yes, start over","Keep playing"],k=>{if(k===0){try{sessionStorage.setItem("sfw-skip-title","1")}catch(e){}location.reload()}}]])};
+document.getElementById("dlSave").onclick=e=>{e.target.blur();downloadSave()};
+document.getElementById("ulSave").onclick=e=>{e.target.blur();document.getElementById("ulFile").click()};
+document.getElementById("ulFile").onchange=e=>{const f=e.target.files[0];if(f)uploadSave(f);e.target.value=""};
 document.querySelectorAll("[data-cheat]").forEach(b=>b.addEventListener("click",()=>{CHEATS[b.dataset.cheat]();b.blur();c.focus()}));
 
 // ---------------------------------------------------------------------------
@@ -2699,11 +3118,11 @@ document.querySelectorAll("[data-cheat]").forEach(b=>b.addEventListener("click",
 let last=0;
 function frame(t){const dt=Math.min((t-(last||t))/1000,.033);last=t;update(dt);
   g.save();if(shake>0)g.translate((Math.random()-.5)*14*shake,(Math.random()-.5)*10*shake);
-  if(scene==="bedroom")drawBedroom();else if(scene==="resident")drawResident();else if(scene==="festival")drawFestival();else if(scene==="orchard")drawOrchard();else if(scene==="lake")drawLake();else if(scene==="under")drawUnder();else if(scene==="beach")drawBeach();else if(scene==="lighthouse")drawLighthouse();else drawOutside();
+  if(scene==="bedroom")drawBedroom();else if(scene==="resident")drawResident();else if(scene==="festival")drawFestival();else if(scene==="orchard")drawOrchard();else if(scene==="lake")drawLake();else if(scene==="under")drawUnder();else if(scene==="shop")drawShop();else if(scene==="beach")drawBeach();else if(scene==="lighthouse")drawLighthouse();else drawOutside();
   g.restore();
   g.save();g.fillStyle=grain;g.fillRect(0,0,W,H);g.restore();
   if(flash>0){g.fillStyle=`rgba(255,255,255,${Math.min(.95,flash)})`;g.fillRect(0,0,W,H)}
-  drawHud();if(chapterCard)drawChapterCard();if(invOpen)drawInventory();drawDialogue();if(lvlUp)drawLevelUp();if(showEndScreen)drawEndScreen();
+  if(!titleMenu){drawHud();if(chapterCard)drawChapterCard();if(invOpen)drawInventory();drawDialogue()}if(mini)drawMini();if(book)drawBook();if(lvlUp)drawLevelUp();if(showEndScreen)drawEndScreen();if(titleMenu)drawTitleMenu();
   requestAnimationFrame(frame)}
 
 start([
@@ -2715,7 +3134,7 @@ start([
   ["Narrator","(So many things.)"]
 ],()=>sayToast("Walk to the wardrobe and press Space to open it."));
 requestAnimationFrame(frame);
-window.__game={get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},get l3(){return l3},endL2:()=>{level=2;l2.done=true;complete=true;showEndScreen=true;endT=2},get LH(){return LH_STATIC},spawnInklet:x=>spawnInklet(x),get shield(){return shield},get camY(){return camY},gainXP:(n)=>gainXP(n,center(),s.y)};
+window.__game={get titleMenu(){return titleMenu},saveGame,readSave,applySave,rollFish,tally,polly,get coins(){return coins},get items(){return items},count:n=>count(n),get scene(){return scene},get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},get l3(){return l3},get mini(){return mini},get book(){return book},returnHome:()=>returnHome(),endL2:()=>{level=2;l2.done=true;complete=true;showEndScreen=true;endT=2},get LH(){return LH_STATIC},spawnInklet:x=>spawnInklet(x),get shield(){return shield},get camY(){return camY},gainXP:(n)=>gainXP(n,center(),s.y)};
 })();
 </script>
 </body>
