@@ -19,7 +19,7 @@ This file gives an AI (or a person) picking up the project everything needed to 
 
 ## 2. The project
 
-- **Repo:** `ssukin/art_game` on GitHub. Working branch: `paper-style-overhaul`. GitHub Pages serves `main`.
+- **Repo:** `ssukin/art_game` on GitHub. Current working branch: `claude/project-thread-eqpv2o` (Chapter 2-1). The older `paper-style-overhaul` branch is fully merged. GitHub Pages serves `main`. Sarah's rule: push to the working branch as you go, but never merge into `main` until she says so.
 - **Files:** the whole game is one file, `index.html` (about 334 KB, canvas + plain JavaScript, no libraries, no image files). `README.md` is the player guide. `movement_test.html` is an old prototype kept for reference.
 - **Look:** inspired by Super Paper Mario (paper cut-out characters, cardstock scenery, comic speech bubbles, gentle jokes). **No Nintendo characters or IP.**
 - **Canvas:** 960×540. Ground line `G=440`.
@@ -30,8 +30,8 @@ This file gives an AI (or a person) picking up the project everything needed to 
 
 - The world is one big **sketchbook**, and every place is a page.
 - **Sarah** is a young artist. Her paintbrush buddy is **Dab**.
-- **Professor Monochrome ("Monty")** is the villain. Long ago he painted with **Grandma** and **Dab**. He went gray and now **tears pages out of the sketchbook world**. Each torn-out page becomes a **door** on the festival's second floor (room for six doors).
-- **Grandma** went after Monty years ago and is **missing**. Restoring pages brings Sarah closer to finding her.
+- **Professor Monochrome ("Monty")** is the villain. Long ago he painted with **Grandma** and **Dab**. He went gray and now **tears pages out of the sketchbook world**. Each torn-out page becomes a **door** on the festival's second floor (six doors, all visible from the first visit).
+- **Grandma** is connected to Dab and Monty's past. She is **not missing**, and Sarah is not searching for her (Sarah decided this on 2026-11-23).
 - **The Great Sketchbook** in the library tracks the six pages/doors and which are restored.
 - Monty is glimpsed before any reveal: a gray figure on a far hill (Level 0 Part 1 storm), a gray-gloved hand in the sky tear (Part 2), and a figure in a gray top hat rowing away with a tiny squid after the Level 1 boss.
 
@@ -59,7 +59,8 @@ This file gives an AI (or a person) picking up the project everything needed to 
   - Dab recognizes the man in the rowboat; Mrs. Maple tells the Grandma/Monty story; the sketchbook is shown; a second door appears.
   - The festival is packed away (stage, sculptures, registration, bunting, Clay Corner booth). **Chef Crumb's Kitchen and Inka's Art Supplies stay open.** Mr. Biscuits sits outside the pet store. Closed shops say **ON VACATION**.
   - **Open shops have interiors** (walk in, talk to the keeper behind the counter): Paws & Claws (Polly: Dog Food, Bait), Odds & Ends (Mr. Tally: buys almost any non-key item), Lost & Found (Mr. Pocket: Old Sketch), Arcade (Pixel: "Stop the Smudge" mini-game), Alchemy (Madame Fizz: fish + seashell → Health Potion).
-  - **Level 2 door** says "Coming soon" (a fourth-wall joke: the developers are still drawing it).
+  - **Gus** gives the welcome-home speech (festival over, shops reopened, take the new fishing pole to the lake). **Mrs. Maple** tells the Monty story, then later gives the **clay errand** whenever Sarah is ready (`l2.clayErrand`). Quill and the sketchbook are optional now.
+- **Level 2 door** (door 2) is unlocked once Level 1 is done and leads to Chapter 2-1 once Mrs. Maple has given the errand. Doors 3–6 are padlocked.
   - Still closed on purpose: Grimy Grotto, orchard apples, the mysterious gate.
 
 ---
@@ -76,7 +77,17 @@ This file gives an AI (or a person) picking up the project everything needed to 
 
 ---
 
-## 6. Next level: Level 2 (being planned, nothing built)
+## 6. Level 2
+
+### Chapter 2-1: The Road to the Clay Store (built)
+
+Built from Sarah's `walkthrough.docx` (in her local Game folder). Summary: landing with the return door (TO TOWN) → secret chest to the left (20 coins + Health Potion) → villager (gray-clay hint) → faded sign at the fork (Dab) → peek at a walled-off chest → pottery yard (tipping shelves, cracked pots you stomp or head-bump) → narrow passage with clay creatures (Nib flips, then stomp) → Save Block → downhill rolling clay road with shelter platforms → hidden nook (crawl under the footprint shelter; Dab doodle stairs; 10 coins + Bait ×3) → collection pit footbridge → canal ferry (Reel hooks the ring, rope handle crosses) → far bank (fishing dock with canal fish, coins under the canal-side steps, Save Block, faded staircase restored by Dab) → upper village climb → wide landing fight → uphill delivery lane (balls roll toward Sarah) → courtyard with Save Block → Clay Store (Clay Order key item) → Monty tears away the return door, seen in a "far below" inset → shopkeeper points past the kilns → "Chapter 2-1 complete!". Sarah stays in 2-1 afterward; the kilns sign says 2-2 is still being drawn.
+
+- Sarah's decisions: Nib only jabs unless a creature's spec says it flips (clay creatures flip, like hermit smudges); no shovel yet; the left chest has 20 coins.
+- Extra Save Block on the far bank (before the faded staircase) was added beyond the walkthrough so a fall on the climb doesn't send Sarah back across the canal.
+- Still to plan: Chapter 2-2 and beyond (where Monty went, the shovel, digging, clay puzzles).
+
+### Older Level 2 notes (before the walkthrough)
 
 Sarah wants it to include **digging** and a **clay** mechanic that ties back to the festival's Clay Corner (where you could make a Ball of Clay or Lopsided Teapot). Keep it simple. Latest simple draft (not approved yet):
 
@@ -94,8 +105,9 @@ Sarah wants it to include **digging** and a **clay** mechanic that ties back to 
 - **Dialogue:** `start(pages, done)`; each page is `[speaker, text, choices?, onPick?]`.
 - **Inventory:** `addItem`, `useOne`, `removeItem`, `has`, `count`; item text in `INFO`; `KEY_ITEMS`.
 - **Scenes:** `scene` = bedroom, resident, outside, orchard, festival, lake, under, shop, beach, lighthouse. `goScene(name, x, y)`. Interactions are in `getInteract()` → per-scene `…Interact()` functions returning `[label, fn]`.
-- **Levels:** `level` is 1 = Level 0 Part 1, 2 = Level 0 Part 2 / hub, 3 = Level 1. State objects: `l2` (festival + hub, `l2.hub`, `l2.hubStep` 0–3) and `l3` (coast).
+- **Levels:** `level` is 1 = Level 0 Part 1, 2 = Level 0 Part 2 / hub, 3 = Level 1, 4 = Level 2 (Chapter 2-1). State objects: `l2` (festival + hub, `l2.hub`, `l2.hubStep` 0–3) and `l3` (coast).
 - **Hub module** (search "HUB — coming home"): `returnHome()`, `hubInteract()`, Mrs. Maple, Quill/sketchbook, shops, arcade mini-game, cheats.
+- **Chapter 2-1 module** (search "CHAPTER 2-1"): scene `clay` (the long village page) and `nook`. The ground there has slopes and cliffs, so it comes from `CL_FLOOR` / `floorAt(x)` instead of `G`, with gaps in `CL_GAPS`. Platforms `CL_PLATS`, pots `CL_POTS`, coins `CL_COINS`, creatures `CL_FOES`, clay-ball chutes `CL_SPAWN`, state `l4` (saved via `CL_KEEP`). The Clay Store interior reuses the shop system (`SHOPS.clay`).
 - **Shops module** (search "shop interiors"): `SHOPS`, `enterShop`, `shopInteract`, `drawShop`.
 - **Fish/bait/store/saving module** (search "FISH TYPES, BAIT"): `FISH`, `rollFish`, `SELL`, `tally()`, `saveGame`, `applySave`, title menu, download/upload.
 - **Checkpoints:** `checkpoint` (x), `checkpointY`, `checkpointScene`; R returns there.
@@ -106,5 +118,5 @@ Sarah wants it to include **digging** and a **clay** mechanic that ties back to 
 
 ## 8. Status
 
-- Everything in sections 4–5 is built and tested, and saved in Sarah's local Game folder.
-- **Not yet pushed to GitHub** since PR #37. Push only when Sarah says so.
+- Everything in sections 4–6 is built and tested, and saved in Sarah's local Game folder.
+- Chapter 2-1 is on the branch `claude/project-thread-eqpv2o`, not merged into `main`.
