@@ -3359,7 +3359,7 @@ function drawWare(f){const sc=f.sc,w=(f.w+8)*sc,h=(f.h+6)*sc,k=f.max-f.hp,body=(
 function gangTalk(){
   l4.gang="talk";l4.balls=[];const n=l4.pots.filter(Boolean).length;s.face=1;
   const fight=()=>start([["Big Teapot","Teacups, GET HER!"]],()=>{l4.gang="fight";l4.gangFoes=mkGang()});
-  const ask3=()=>start([["Big Teapot","Then WHO was it?!",["A clay ball did it!","It was the person at the beginning of the floor!","…Fine. It was me."],k=>{if(k===1)later();else if(k===0)start([["Big Teapot","A CLAY BALL? Nice try."]],fight);else fight()}]]);
+  const ask3=()=>start([["Big Teapot","Then WHO was it?!",["It was the person at the beginning of the floor!","It was me."],k=>{if(k===0)later();else fight()}]]);
   const cousins=n?n+" of our cousins, smashed!":"We heard the crashing all the way up here!";
   const ask2=()=>start([["Teacup",cousins+" And you've got pot crumbs on your shoes!",["Nope. Not me.","Okay, okay. It was me."],k=>{if(k===0)ask3();else fight()}]]);
   const ask1=(again)=>start([["Big Teapot",again?"So. Was it you?":"HALT! You're the one who's been breaking pots all the way up the hill!",
