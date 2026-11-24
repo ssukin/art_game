@@ -3430,7 +3430,7 @@ function gangTalk(){
     ["Big Teapot","And YOU. If we find out you fibbed, we'll be back."],
     ["Narrator","The teapot gang clatters off down the hill."],
     ["Dab","…Sarah."],["Sarah","I know. I know."]],()=>{l4.gang="later"});
-  start([["Narrator","A rattle of china. A big teapot and two teacups march out from behind the kilns and block the way to the Clay Store."]],()=>ask1(false));
+  start([["Narrator","The big teapot and the two teacups standing in front of the Clay Store turn around with a rattle of china. They've been waiting for Sarah."]],()=>ask1(false));
 }
 function gangBeaten(){
   if(l4.gang==="fight"){l4.gang="won";start([["Big Teapot","Okay! Okay! We give up. Go do your shopping."],["Teacup","We're going to go lie down in a cupboard."]],()=>sayToast("The teapot gang is broken up!"));return}
@@ -3751,7 +3751,7 @@ function drawClay(){
     groundShadow(f.x,f.base+2,20);sprite(f.x,f.base+2,54,42,()=>drawClayBody(f.flip>0),{sx:f.dir>0?-1:1,sy:1+Math.sin(f.t*8)*.04})}
   for(const f of allWares())if(f.x>camera-80&&f.x<camera+W+80)drawWare(f);
   drawSteam();drawWaves();
-  if(l4.gang==="talk"||l4.gang==="talk2")GANG_X.forEach((x,i)=>drawWare({...mkWare(i===1?"pot":"cup",x,x,x,G-620,i===1?1.9:1.35,1,0),dir:-1,t:time}));
+  if(l4.gang==="talk"||l4.gang==="talk2"||(l4.gang==null&&!l4.order))GANG_X.forEach((x,i)=>drawWare({...mkWare(i===1?"pot":"cup",x,x,x,G-620,i===1?1.9:1.35,1,0),dir:-1,t:time}));
   for(const f of l4.gulls)if(f.x>camera-60&&f.x<camera+W+60)drawFoe(f);
   drawParticles();drawSarah();
   if(fish.ph>0)drawFishing(CL_WATER+2,l4.lastCatch);
