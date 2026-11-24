@@ -33,7 +33,7 @@ This file gives an AI (or a person) picking up the project everything needed to 
 - **Professor Monochrome ("Monty")** is the villain. Long ago he painted with **Grandma** and **Dab**. He went gray and now **tears pages out of the sketchbook world**. Each torn-out page becomes a **door** on the festival's second floor (six doors, all visible from the first visit).
 - **Grandma** is connected to Dab and Monty's past. She is **not missing**, and Sarah is not searching for her (Sarah decided this on 2026-11-23).
 - **The Great Sketchbook** in the library tracks the six pages/doors and which are restored.
-- Monty is glimpsed before any reveal: a gray figure on a far hill (Level 0 Part 1 storm), a gray-gloved hand in the sky tear (Part 2), and a figure in a gray top hat rowing away with a tiny squid after the Level 1 boss.
+- Monty is glimpsed before any reveal: a gray figure on a far hill (Level 0 Part 1 storm), a gray-gloved hand in the sky tear (Part 2), and a figure in a gray top hat rowing away with The Blot after the Level 1 boss.
 
 ### Story points that need Sarah's decision (open)
 
@@ -80,7 +80,7 @@ This file gives an AI (or a person) picking up the project everything needed to 
 ## 6. Level 2
 
 ### Chapter 1 hoops (added 2026-11-24, Sarah's idea)
-Past the shipwreck, the old rock run was replaced by Reel hoops on poles (same look as the 2-1 ferry hoops). A gray sign on the last rock is revealed by Dab as a picture-only hint, with no other written hints. There are 3 pull hoops over open sea (Q hooks one and pulls Sarah to hang from it, Down drops, grip slips after about 2.6s), then a swing hoop over an unjumpable pit before the lighthouse (hook in mid-air, pump with Left/Right, Up/Q lets go). The lighthouse door moved to x=6330. Cheat: "L1: hoops before the lighthouse".
+Past the shipwreck, the old rock run was replaced by Reel hoops on poles (same look as the 2-1 ferry hoops). A gray sign on the last rock is revealed by Dab as a picture-only hint, with no other written hints. There are 3 swing hoops over open sea (Q hooks one and Sarah swings; Q again hooks the next; Up leaps off, Down drops), then a swing hoop over an unjumpable pit that can only be hooked in mid-air. After that, a longer beach with a Sidecrab leads to the lighthouse (door moved to x=7000, beach width 7120). Cheat: "L1: hoops before the lighthouse".
 
 ### Chapter 2-1: The Road to the Clay Store (built)
 

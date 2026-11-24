@@ -2217,10 +2217,10 @@ resetL2Extra();
 // ===========================================================================
 // LEVEL 3 — The Watercolor Coast (3-1 beach & shipwreck, 3-2 the Gray Lighthouse)
 // ===========================================================================
-const TIDE={x0:2150,x1:3950},DOCK3={x:4070,w:490,y:G-26},BEACH_W=6440,WATER={x0:4050,x1:5850},LH_DOOR=6330,WRECK={x:4800,w:360,y:G-86},STERN=5130,GEM_SPOT=5230,CHEST_X=5000,DY=-2030;
-const BEACH_SOLID=[{x:-50,y:G,w:4100,h:100},{x:5850,y:G,w:130,h:100},{x:6250,y:G,w:300,h:100},{x:2540,y:G-64,w:70,h:22,rock:1,tide:1},{x:2890,y:G-64,w:70,h:22,rock:1,tide:1},{x:3240,y:G-64,w:70,h:22,rock:1,tide:1},{x:3590,y:G-64,w:70,h:22,rock:1,tide:1},{x:DOCK3.x,y:DOCK3.y,w:DOCK3.w,h:14,hidden:1},{x:4645,y:G-22,w:64,h:22,rock:1},{x:4730,y:G-46,w:60,h:22,rock:1},{x:WRECK.x,y:WRECK.y,w:WRECK.w,h:16,deck:1},{x:5280,y:G-40,w:62,h:22,rock:1},{x:5370,y:G-22,w:90,h:22,rock:1}];
+const TIDE={x0:2150,x1:3950},DOCK3={x:4070,w:490,y:G-26},BEACH_W=7120,WATER={x0:4050,x1:5850},LH_DOOR=7000,WRECK={x:4800,w:360,y:G-86},STERN=5130,GEM_SPOT=5230,CHEST_X=5000,DY=-2030;
+const BEACH_SOLID=[{x:-50,y:G,w:4100,h:100},{x:5850,y:G,w:190,h:100},{x:6310,y:G,w:900,h:100},{x:2540,y:G-64,w:70,h:22,rock:1,tide:1},{x:2890,y:G-64,w:70,h:22,rock:1,tide:1},{x:3240,y:G-64,w:70,h:22,rock:1,tide:1},{x:3590,y:G-64,w:70,h:22,rock:1,tide:1},{x:DOCK3.x,y:DOCK3.y,w:DOCK3.w,h:14,hidden:1},{x:4645,y:G-22,w:64,h:22,rock:1},{x:4730,y:G-46,w:60,h:22,rock:1},{x:WRECK.x,y:WRECK.y,w:WRECK.w,h:16,deck:1},{x:5280,y:G-40,w:62,h:22,rock:1},{x:5370,y:G-22,w:90,h:22,rock:1}];
 // hoops on poles past the wreck (they look like the Chapter 2-1 ferry hoops). Reel (Q) hooks one and pulls Sarah to it.
-const HOOPS3=[{x:5560,y:G-150},{x:5720,y:G-185},{x:5895,y:G-150},{x:6100,y:G-215,swing:1}],HOOK_SIGN=5430,HOOK_RANGE=230,PIT3={x0:5980,x1:6250};
+const HOOPS3=[{x:5560,y:G-250},{x:5740,y:G-262},{x:5915,y:G-250},{x:6170,y:G-215,air:1}],HOOK_SIGN=5430,HOOK_RANGE=230,PIT3={x0:6040,x1:6310};
 const DIGS=[{x:430,item:"Seashell"},{x:760,coins:4},{x:1060,item:"Seashell"},{x:1330,item:"Heart Necklace"},{x:1620,item:"Seashell"},{x:1900,coins:5},{x:2040,item:"Seashell"},{x:2760,coins:6},{x:3120,item:"Seashell"},{x:3460,coins:6},{x:3800,item:"Seashell"}];
 const BEACH_SAVES=[];
 const LH_STATIC=[
@@ -2243,7 +2243,7 @@ function resetL3(){
     inLH:false,green:false,shieldChest:false,potion:false,boss:null,bossDone:false,lit:false,litT:0,safe:{x:150,y:G-s.h},tinkTip:false,crabTip:false,necklace:false,
     movers:LH_MOVERS.map(m=>({...m,x:m.x0,y:m.y0,px:m.x0,py:m.y0,h:14,mover:1})),
     foes:[
-      {type:"crab",scene:"beach",x:700,min:560,max:900,base:G},{type:"crab",scene:"beach",x:1250,min:1120,max:1420,base:G},{type:"crab",scene:"beach",x:1800,min:1680,max:1980,base:G},{type:"crab",scene:"beach",x:6360,min:6275,max:6420,base:G},
+      {type:"crab",scene:"beach",x:700,min:560,max:900,base:G},{type:"crab",scene:"beach",x:1250,min:1120,max:1420,base:G},{type:"crab",scene:"beach",x:1800,min:1680,max:1980,base:G},{type:"crab",scene:"beach",x:6600,min:6440,max:6820,base:G},
       {type:"gull",scene:"beach",x:1000,min:820,max:1200,base:G},{type:"gull",scene:"beach",x:1700,min:1500,max:1950,base:G},
       {type:"hermit",scene:"beach",x:4910,min:4885,max:4945,base:WRECK.y},{type:"gull",scene:"beach",x:4200,min:4090,max:4420,base:DOCK3.y},{type:"gull",scene:"beach",x:4450,min:4300,max:4580,base:DOCK3.y},
       {type:"hermit",scene:"lighthouse",x:775,min:715,max:835,base:115},
@@ -2456,13 +2456,13 @@ function jabBoss(hx){const b=l3.boss;if(!b||b.ph==="intro"||b.ph==="dead")return
 function damageBoss(n,x,y){const b=l3.boss;b.hp=Math.max(0,b.hp-n);b.hurtT=.5;shake=.4;burst(x,y,20,[INK,"#5b2a6e","#fff","#b98ad8"]);if(b.hp<=0)defeatBoss()}
 function defeatBoss(){for(const f of l3.foes)if(f.fromInk&&f.alive){f.alive=false;burst(f.x,DY-16,10,[INK,"#5b2a6e","#fff"])}const b=l3.boss;b.ph="dead";b.tent=null;b.blobs=[];l3.bossDone=true;flash=.6;gainXP("The Blot",800,DY-140);
   start([
-    ["Narrator","The Blot lets out a long, gurgly wail. It shrinks… and shrinks… until it's a tiny ink squid the size of a teacup."],
+    ["Narrator","The Blot lets out a long, gurgly wail and slumps against the railing, all the fight gone out of it."],
     ["The Blot","…bloop."],
-    ["Reel","Aww. It's kind of cute now."],
-    ["Dab","Ink monsters are always grumpy when they're big. It's the pressure."],
-    ["Narrator","The tiny squid plops back into the sea with a sulky little splash. The lamp room is clear!"],
-    ["Narrator","Far below, the squid paddles over to a little gray rowboat waiting in the fog."],
-    ["Narrator","A tall figure in a gray top hat scoops it up, tips his hat toward the lighthouse… and rows away."],
+    ["Reel","Aww. It sounds kind of sad now."],
+    ["Dab","Ink monsters are always grumpy. It's the pressure."],
+    ["Narrator","With a sulky little SPLOOSH, The Blot slides back down into the sea. The lamp room is clear!"],
+    ["Narrator","Far below, The Blot paddles over to a little gray rowboat waiting in the fog."],
+    ["Narrator","A tall figure in a gray top hat helps it aboard, tips his hat toward the lighthouse… and rows away."],
     ["Dab","…No. It can't be."]
   ],()=>{l3.boss=null;0});
 }
@@ -2547,13 +2547,15 @@ function updateDrips(dt){
 function drawDrips(){for(const d of l3.drips||[]){if(d.form>0){const k=1-d.form/.7;cut(()=>{g.beginPath();g.ellipse(d.x,d.y+k*8,5+k*4,4+k*8,0,0,7)},"#3a3352",{edge:3,shadow:false});continue}
   cut(()=>{g.beginPath();g.moveTo(d.x,d.y-24);g.quadraticCurveTo(d.x+12,d.y-4,d.x,d.y+4);g.quadraticCurveTo(d.x-12,d.y-4,d.x,d.y-24);g.closePath()},"#3a3352",{edge:4})}}
 function hoopTarget(){let best=null;for(let i=0;i<HOOPS3.length;i++){if(l3.hang===i)continue;const h=HOOPS3[i],dx=(h.x-center())*s.face;
-  if(h.swing&&s.ground)continue;if((h.swing?dx>-30:dx>30)&&dx<HOOK_RANGE&&h.y<s.y+40&&s.y-h.y<260&&(best==null||dx<(HOOPS3[best].x-center())*s.face))best=i}return best}
-function tryHook3(){if(scene!=="beach"||l3.pull)return false;if(l3.swing){letGoSwing();return true}const i=hoopTarget();if(i==null)return false;
-  if(HOOPS3[i].swing){startSwing(i);return true}
+  if(h.air&&s.ground)continue;if(l3.swing&&l3.swing.i===i)continue;if((s.ground?dx>30:dx>-30)&&dx<HOOK_RANGE&&h.y<s.y+40&&s.y-h.y<260&&(best==null||dx<(HOOPS3[best].x-center())*s.face))best=i}return best}
+function tryHook3(){if(scene!=="beach"||l3.pull)return false;
+  if(l3.swing){const w=l3.swing,i=hoopTarget();if(i==null){letGoSwing();return true}
+    l3.flyVx=w.L*Math.cos(w.th)*w.w;s.vy=-w.L*Math.sin(w.th)*w.w;l3.swing=null;startSwing(i,true);return true}const i=hoopTarget();if(i==null)return false;
+  startSwing(i);return true;
   l3.pull={i,t:0,x0:s.x,y0:s.y};l3.hang=null;s.vy=0;burst(HOOPS3[i].x,HOOPS3[i].y,8,["#fff","#f4c84f"]);return true}
 // swinging: Sarah hangs from Reel's line like a pendulum. Left/Right pump the swing, Up (or Q) lets go.
-function startSwing(i){const h=HOOPS3[i],dx=center()-h.x,dy=s.y-h.y,L=clamp(Math.hypot(dx,dy),100,150),th=Math.atan2(dx,Math.max(10,dy));
-  const held=keys.has("d")||keys.has("ArrowRight")?1:keys.has("a")||keys.has("ArrowLeft")?-1:0,vx=held*245+(l3.flyVx||0),vy=s.vy;
+function startSwing(i,keepV){const h=HOOPS3[i],dx=center()-h.x,dy=s.y-h.y,L=clamp(Math.hypot(dx,dy),100,h.air?150:160),th=Math.atan2(dx,Math.max(10,dy));
+  const held=keepV?0:keys.has("d")||keys.has("ArrowRight")?1:keys.has("a")||keys.has("ArrowLeft")?-1:0,vx=held*245+(l3.flyVx||0),vy=s.ground?0:s.vy;
   l3.swing={i,L,th,w:(vx*Math.cos(th)-vy*Math.sin(th))/L,t:0,upOff:false};l3.flyVx=0;l3.hang=null;l3.pull=null;burst(h.x,h.y,8,["#fff","#f4c84f"])}
 function letGoSwing(){const w=l3.swing;l3.swing=null;const vx=w.L*Math.cos(w.th)*w.w,vy=-w.L*Math.sin(w.th)*w.w;l3.flyVx=vx;s.vy=Math.min(vy,0)-260;s.ground=false;s.face=Math.sign(vx)||s.face}
 function updateHook3(dt){
@@ -2561,6 +2563,7 @@ function updateHook3(dt){
     w.w+=(-(1450/w.L)*Math.sin(w.th)+dir*2.2*Math.cos(w.th))*dt;w.w*=1-dt*.15;w.th+=w.w*dt;w.th=clamp(w.th,-1.4,1.4);
     s.x=h.x+w.L*Math.sin(w.th)-s.w/2;s.y=h.y+w.L*Math.cos(w.th)-4;s.vy=0;s.ground=false;if(Math.abs(w.w)>.2)s.face=Math.sign(w.w*Math.cos(w.th))||s.face;
     const up=keys.has("w")||keys.has("ArrowUp");if(!up)w.upOff=true;if(up&&w.upOff&&w.t>.15)letGoSwing();
+    else if((keys.has("s")||keys.has("ArrowDown"))&&w.t>.15){l3.swing=null;l3.flyVx=0;s.vy=60}
     return true}
   if(l3.flyVx){if(s.ground)l3.flyVx=0;else{s.x=clamp(s.x+l3.flyVx*dt,0,BEACH_W-s.w);l3.flyVx*=1-dt*.4}}
   if(l3.pull){const p=l3.pull,h=HOOPS3[p.i];p.t+=dt;const k=Math.min(1,p.t/.55),e=k*k*(3-2*k),tx=h.x-s.w/2,ty=h.y+40;
@@ -2573,7 +2576,7 @@ function drawHoops3(){
   if(PIT3.x1>camera-40&&PIT3.x0<camera+W+40){g.fillStyle="#3a3a4a";g.fillRect(PIT3.x0,G,PIT3.x1-PIT3.x0,H-G+10);g.fillStyle="#2b2540";g.fillRect(PIT3.x0+10,G+30,PIT3.x1-PIT3.x0-20,H-G);
     g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.moveTo(PIT3.x0,G);g.lineTo(PIT3.x0,H+10);g.moveTo(PIT3.x1,G);g.lineTo(PIT3.x1,H+10);g.stroke()}
   for(const h of HOOPS3){if(h.x<camera-200||h.x>camera+W+200)continue;const fy=h.x>WATER.x1?G:G+40;
-    if(h.swing){const px=PIT3.x1+14,ay=h.y-40;cut(()=>rr(px-6,ay,12,G-ay,3),"#8d5a36",{edge:4});cut(()=>rr(h.x-8,ay-6,px-h.x+14,12,3),"#8d5a36",{edge:4});cut(()=>rr(h.x-3,ay+6,6,22,2),"#6b4a35",{edge:3,shadow:false})}
+    if(h.air){const px=PIT3.x1+14,ay=h.y-40;cut(()=>rr(px-6,ay,12,G-ay,3),"#8d5a36",{edge:4});cut(()=>rr(h.x-8,ay-6,px-h.x+14,12,3),"#8d5a36",{edge:4});cut(()=>rr(h.x-3,ay+6,6,22,2),"#6b4a35",{edge:3,shadow:false})}
     else cut(()=>rr(h.x-5,h.y+12,10,fy-h.y-12,3),"#8d5a36",{edge:4});g.strokeStyle="#c9a23a";g.lineWidth=6;g.beginPath();g.arc(h.x,h.y,13,0,7);g.stroke();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.arc(h.x,h.y,16,0,7);g.stroke();g.beginPath();g.arc(h.x,h.y,10,0,7);g.stroke()}
   const i=l3.swing?l3.swing.i:l3.pull?l3.pull.i:l3.hang;if(i!=null){const h=HOOPS3[i],[tx,ty]=rodTip();g.strokeStyle="rgba(255,255,255,.95)";g.lineWidth=1.8;g.beginPath();g.moveTo(tx,ty);g.quadraticCurveTo((tx+h.x)/2,Math.min(ty,h.y)-10,h.x,h.y);g.stroke()}
   // the gray sign on the last rock: Dab brings back a picture (no words)
