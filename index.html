@@ -3110,29 +3110,33 @@ function cheatHub(){cheat3();for(const n of["Heart Necklace","Blue Gem","Green G
 // The ground here has slopes and drops, so it comes from CL_FLOOR (floorAt) instead of G.
 // ===========================================================================
 const CL_MIN=-900,CL_W=10500,CL_START=190,CL_DOOR=110,CL_SIGN=720,CL_LCHEST=-640,CL_PEEK=1040,CL_VILL=470,CL_STORE=10050,CL_KEEPER_OUT=10150,CL_KILNS=10370,CL_DOCK=6480,CL_NOOK=4255;
-const CL_FLOOR=[[CL_MIN-100,G,3350,G],[3350,G,5000,G+220],[5200,G+220,5560,G+220],[6440,G+220,7000,G+220],[7000,G,8000,G],[8000,G-300,8600,G-300],[8690,G-300,9650,G-620],[9650,G-620,CL_W+100,G-620]];
-const CL_GAPS=[{x0:5000,x1:5200,kind:"pit",y:G+330},{x0:5560,x1:6440,kind:"water",y:G+250},{x0:8600,x1:8690,kind:"pit",y:G-170}];
+const CL_FLOOR=[[CL_MIN-100,G,3350,G],[3350,G,5000,G+220],[5200,G+220,5560,G+220],[6440,G+220,7000,G+220],[7000,G,7200,G],[8000,G-300,8600,G-300],[8690,G-300,9650,G-620],[9650,G-620,CL_W+100,G-620]];
+const CL_GAPS=[{x0:5000,x1:5200,kind:"pit",y:G+330},{x0:5560,x1:6440,kind:"water",y:G+250},{x0:7200,x1:8000,kind:"pit",y:G+110},{x0:8600,x1:8690,kind:"pit",y:G-170}];
 const CL_WATER=G+238,FERRY={w:160,a:5562,b:6278,y:G+222};
+// hoops on posts at each bank: from the ferry, Reel hooks the hoop on the other bank and pulls Sarah across
+const HOOPS=[{x:5532,y:G+130},{x:6462,y:G+130}];
 function floorAt(x){for(const [x0,y0,x1,y1] of CL_FLOOR)if(x>=x0&&x<x1)return y0+(y1-y0)*(x-x0)/(x1-x0);return null}
 const shel=(x,w=84)=>({x,y:Math.min(floorAt(x),floorAt(x+w-1))-95,w,shelter:1});
 const CL_PLATS=[
   // the pottery yard (tip:1 shelves tip under Sarah's weight)
   {x:1250,y:G-40,w:70,h:40,block:1},{x:1320,y:G-80,w:70,h:80,block:1},
   {x:1460,y:G-70,w:130,table:1},{x:1640,y:G-140,w:110},{x:1790,y:G-240,w:100},
-  {x:1960,y:G-160,w:100,tip:1},{x:2130,y:G-210,w:100,tip:1},{x:2300,y:G-150,w:100,tip:1},{x:2450,y:G-100,w:100},
+  {x:1960,y:G-160,w:100,tip:1},{x:2130,y:G-210,w:100,tip:1},{x:2300,y:G-150,w:100,tip:1},{x:2450,y:G-100,w:100,tip:1},
+  {x:2045,y:G-300,w:80,tip:1},{x:2215,y:G-330,w:80,tip:1},{x:2385,y:G-290,w:80,tip:1},
   // the narrow passage
-  {x:2700,y:G-95,w:70},{x:2910,y:G-115,w:70},{x:3120,y:G-95,w:70},
+  {x:2700,y:G-95,w:70,crack:1},{x:2910,y:G-115,w:70,crack:1},{x:3120,y:G-95,w:70,crack:1},
   // the rolling clay road (shelter platforms, a detour ledge, a low brick stack, the footbridge over the collection pit)
   shel(3480),shel(3700),shel(3930),{x:3930,y:shel(3930).y-95,w:74,detour:1},shel(4200,110),shel(4560),shel(4860),
   {x:4380,y:floorAt(4426)-38,w:46,h:70,block:1},
-  {x:4985,y:G+220,w:230,bridge:1},
+  {x:4990,y:G+220,w:66,plank:1,crack:1},{x:5072,y:G+220,w:60,plank:1,crack:1},{x:5148,y:G+220,w:62,plank:1,crack:1},
   // far bank: canal-side steps, then the partly faded staircase (steps 2-5 are missing until Dab paints them back)
   {x:6600,y:G+140,w:44,stone:1},{x:6644,y:G+110,w:44,stone:1},{x:6688,y:G+80,w:70,stone:1},
   ...[0,1,2,3,4,5,6].map(i=>({x:6830+i*25,y:G+190-i*30,w:34,stair:i,faded:i>=2&&i<=5})),
   // the uphill route: staggered landings and drying racks, then perches above the wide landing
-  {x:7120,y:G-90,w:110},{x:7290,y:G-170,w:100},{x:7440,y:G-235,w:130,rack:1},{x:7630,y:G-185,w:90},{x:7770,y:G-265,w:130,rack:1},
+  {x:7230,y:G-90,w:100,crack:1},{x:7390,y:G-160,w:90,crack:1},{x:7540,y:G-235,w:120,rack:1},{x:7715,y:G-200,w:90,crack:1},{x:7855,y:G-265,w:105,rack:1},
   {x:8150,y:G-400,w:80},{x:8420,y:G-400,w:80},
   // the uphill delivery lane
+  {x:8606,y:G-300,w:78,plank:1,crack:1},
   shel(8800),shel(9040),shel(9290),shel(9520)
 ];
 const CL_BLOCKS=CL_PLATS.filter(p=>p.block);
@@ -3142,24 +3146,27 @@ const CL_POTS=[
   {x:2790,y:G-34,coin:1},{x:2990,y:G-34,coin:0},{x:3050,y:G-200,hang:1,coin:1},
   {x:3742,y:shel(3700).y-34,coin:1},{x:4600,y:shel(4560).y-34,coin:1},{x:3990,y:shel(3930).y-129,coin:2},
   {x:6635,y:G+186,coin:1},{x:6705,y:G+186,coin:0},
-  {x:7340,y:G-204,coin:1},{x:7675,y:G-219,coin:1},{x:7565,y:G-200,hang:1,coin:1},
+  {x:7600,y:G-269,coin:1},{x:7905,y:G-299,coin:1},{x:7450,y:G-330,hang:1,coin:1},
   {x:8100,y:G-334,coin:1},{x:8460,y:G-434,coin:1}
 ];
-const CL_COINS=[[1815,G-272],[1840,G-282],[1865,G-272],[2945,G-150],[3945,shel(3930).y-125],[3975,shel(3930).y-135],
-  [6620,G+196],[6665,G+196],[6720,G+196],[7175,G-125],[7505,G-270],[7835,G-300],[8190,G-435]];
+const CL_COINS=[[1815,G-272],[1840,G-282],[1865,G-272],[2085,G-335],[2255,G-365],[2425,G-325],[2945,G-150],[3945,shel(3930).y-125],[3975,shel(3930).y-135],
+  [6620,G+196],[6665,G+196],[6720,G+196],[7280,G-125],[7435,G-195],[7760,G-235],[8190,G-435]];
 const CL_FOES=[[2000,1990,2230,G],[2350,2280,2520,G],[2700,2640,2880,G],[3000,2960,3230,G],[8120,8040,8250,G-300],[8330,8270,8420,G-300],[8500,8440,8580,G-300]];
-const CL_SAVES=[[3290,G],[6790,G+220],[9780,G-620]];
+// no Save Blocks in this chapter: Sarah quietly gets a checkpoint (and the game saves) as she reaches each of these spots
+const CL_CHECKS=[[3290,G],[5300,G+220],[6790,G+220],[8040,G-300],[9780,G-620]];
 const CL_SPAWN=[{x:3390,dir:1,zone:[3250,5160],every:2.3,speed:520},{x:9630,dir:-1,zone:[8560,9720],every:2.7,speed:400}];
 const NOOK_STAIRS=[{x:500,y:G-75,w:74},{x:590,y:G-150,w:74},{x:680,y:G-225,w:74}],NOOK_LEDGE={x:790,y:G-300,w:150},NOOK_CHEST=880;
-const CL_KEEP=["started","sign","lchest","peek","villager","crossed","nook","nookStairs","nchest","hooked","ferried","ferry","stairs","order","monty","doorGone","done","keeperOut","fishN","lastCatch","pots","coins","dead","tipTip","rumbled","flipTip","inStore"];
+const CL_KEEP=["started","sign","lchest","peek","villager","crossed","nook","nookStairs","nchest","hooked","ferried","ferry","stairs","order","monty","doorGone","done","keeperOut","fishN","lastCatch","pots","coins","dead","tipTip","rumbled","flipTip","inStore","cp"];
 let l4={};
 function resetL4(){
   l4={started:false,sign:false,lchest:false,peek:false,villager:0,crossed:false,nook:false,nookStairs:false,nchest:false,hooked:false,ferried:false,ferry:1,ferryGo:null,hookT:0,
     stairs:false,order:false,monty:0,doorGone:false,done:false,keeperOut:false,fishN:0,lastCatch:"Canal Minnow",pots:CL_POTS.map(()=>false),coins:CL_COINS.map(()=>false),dead:CL_FOES.map(()=>false),
-    tipTip:false,rumbled:[false,false],flipTip:false,inStore:false,balls:[],sp:CL_SPAWN.map(()=>1.2),tips:new Map(),tearK:0,safe:{x:CL_START,y:G-s.h},fer:{x:FERRY.b,y:FERRY.y,w:FERRY.w,h:14,mover:1,ferry:1,px:FERRY.b,py:FERRY.y}};
+    tipTip:false,rumbled:[false,false],flipTip:false,inStore:false,cp:-1,balls:[],sp:CL_SPAWN.map(()=>1.2),tips:new Map(),cracks:new Map(),pull:null,tearK:0,safe:{x:CL_START,y:G-s.h},fer:{x:FERRY.b,y:FERRY.y,w:FERRY.w,h:14,mover:1,ferry:1,px:FERRY.b,py:FERRY.y}};
   buildFoes4();
 }
-function buildFoes4(){l4.foes=CL_FOES.map(([x,min,max,base],i)=>({x,min,max,base,alive:!l4.dead[i],flat:l4.dead[i]?1:0,t:0,dir:i%2?1:-1,speed:46,flip:0,i}))}
+function buildFoes4(){l4.foes=CL_FOES.map(([x,min,max,base],i)=>({x,min,max,base,alive:!l4.dead[i],flat:l4.dead[i]?1:0,t:0,dir:i%2?1:-1,speed:46,flip:0,i}));
+  // gulls over the canal (they swoop like the Watercolor Coast gulls)
+  l4.gulls=[[5700,5600,5900],[6050,5900,6250],[6300,6150,6420]].map(([x,min,max],i)=>({type:"gull",x,min,max,base:G+220,y:G+70,alive:true,flat:0,t:i,dir:i%2?1:-1,mode:"fly",cool:1.5+i*1.4,carry:0}))}
 resetL4();
 Object.assign(LOOKS,{
   "Villager":{skin:"#e9b98f",hair:"#7a4a2a",style:"bun",top:"#d9a066",bottom:"#6b4a35",acc:"apron",apron:"#c98a5a"},
@@ -3191,7 +3198,7 @@ function startLevel4(){
     ["Narrator","Sarah steps through the second door. Inky dark, the smell of fresh paint… and then, for once, she lands on her feet."],
     ["Narrator","She's standing on a landing above a pottery village: clay rooftops, crooked chimneys, drying racks, and a canal winding off into the distance."],
     ["Sarah","A whole village made of pottery! Okay. One clay order, coming right up."],
-    ["Dab","The Clay Store has to be around here somewhere. Let's find a sign!"],
+    ["Dab","The Clay Store has to be around here somewhere."],
     ["Reel","Is that a canal? I'm not saying we should fish. I'm just saying it's a canal."]
   ],()=>{chapterCard={t:0,title:"Chapter 2-1",sub:"The Road to the Clay Store"}});
 }
@@ -3202,14 +3209,21 @@ function clayToTown(){
 }
 
 // ---- per-frame ----
-function clayPlats(){return[...CL_PLATS.filter(p=>!(p.tip&&tipS(p).down>0)&&!(p.faded&&!l4.stairs)),l4.fer]}
+function clayPlats(){return[...CL_PLATS.filter(p=>!(p.tip&&tipS(p).down>0)&&!(p.crack&&crackS(p).gone>0)&&!(p.faded&&!l4.stairs)),l4.fer]}
+function crackS(p){if(!l4.cracks)l4.cracks=new Map();if(!l4.cracks.has(p))l4.cracks.set(p,{t:0,gone:0,fy:0,vy:0});return l4.cracks.get(p)}
+function updateCracks(dt){
+  for(const p of CL_PLATS){if(!p.crack)continue;const c=crackS(p);
+    if(c.gone>0){c.gone-=dt;c.vy+=1400*dt;c.fy+=c.vy*dt;if(c.gone<=0){c.gone=0;c.t=0;c.fy=0;c.vy=0;burst(p.x+p.w/2,p.y,8,["#d9a86a","#fff"])}continue}
+    if(s.ground&&s.plat===p){c.t+=dt;if(c.t>.6){c.gone=3;c.fy=0;c.vy=0;s.plat=null;s.ground=false;s.vy=40;burst(p.x+p.w/2,p.y+6,16,["#c8643c","#e8a87c","#fff"])}}
+    else if(c.t>0)c.t=Math.max(0,c.t-dt*.4)}
+}
 function nookPlats(){return[...(l4.nookStairs?NOOK_STAIRS:[]),NOOK_LEDGE]}
 function tipS(p){if(!l4.tips.has(p))l4.tips.set(p,{t:0,down:0});return l4.tips.get(p)}
 function clayGroundUnder(){let best=floorAt(center());if(best!=null&&best<s.y+s.h-4)best=null;for(const p of clayPlats())if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4&&(best==null||p.y<best))best=p.y;return best??s.y+s.h+400}
 function l4Pre(dt){
   const f=l4.fer;f.px=f.x;f.py=f.y;
-  if(l4.ferryGo!=null){const sp=l4.hookT>0?.42:.26;l4.ferry+=Math.sign(l4.ferryGo-l4.ferry)*sp*dt;if(Math.abs(l4.ferry-l4.ferryGo)<sp*dt){l4.ferry=l4.ferryGo;l4.ferryGo=null;l4.hookT=0;
-    if(l4.ferry===1&&scene==="clay"&&s.plat===f){l4.ferried=true;sayToast("The ferry bumps gently against the far bank. All ashore!")}}}
+  if(l4.ferryGo!=null){const sp=l4.pull!=null?.22:.42;l4.ferry+=Math.sign(l4.ferryGo-l4.ferry)*sp*dt;if(Math.abs(l4.ferry-l4.ferryGo)<sp*dt){l4.ferry=l4.ferryGo;l4.ferryGo=null;l4.hookT=0;l4.pull=null;
+    if(l4.ferry===1&&scene==="clay"&&s.plat===f&&!l4.ferried){l4.ferried=true;sayToast("The ferry bumps against the far bank. All ashore!")}}}
   l4.hookT=Math.max(0,l4.hookT-dt);
   f.x=FERRY.a+(FERRY.b-FERRY.a)*l4.ferry;f.y=FERRY.y+Math.sin(time*2)*1.5;
   if(scene==="clay"&&s.ground&&s.plat===f){s.x+=f.x-f.px;s.y=f.y-s.h}
@@ -3227,13 +3241,13 @@ function clayFloor(oldFeet){
   l4.onFloor=s.ground&&!s.plat;
 }
 function clayHurt(msg){const sf=l4.safe;s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
-  if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last Save Block. Paper is resilient like that.");return}if(real)sayToast(msg)}
+  if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint. Paper is resilient like that.");return}if(real)sayToast(msg)}
 function ballFloor(x){let fy=floorAt(x);if(fy==null)return null;for(const b of CL_BLOCKS)if(b.h>60&&x>b.x-14&&x<b.x+b.w+14)fy=Math.min(fy,b.y);return fy}
 function updateBalls(dt){
   CL_SPAWN.forEach((sp,i)=>{const inZone=center()>sp.zone[0]&&center()<sp.zone[1]&&scene==="clay";
     if(!inZone){l4.sp[i]=Math.min(l4.sp[i],1.4);return}
     l4.sp[i]-=dt;if(l4.sp[i]<=0){l4.sp[i]=sp.every;l4.balls.push({x:sp.x,y:floorAt(sp.x)??G,dir:sp.dir,speed:sp.speed,rot:0,fall:false,vy:0});shake=Math.max(shake,.12);
-      if(!l4.rumbled[i]){l4.rumbled[i]=true;sayToast(i===0?"Rumble rumble… a clay delivery is coming! Hop up onto a shelter platform and let it roll underneath.":"Here comes another delivery lane. These balls roll DOWN toward you, so hop up onto the shelters!")}}});
+      if(!l4.rumbled[i]){l4.rumbled[i]=true;sayToast(i===0?"Rumble rumble…":"Rumble rumble… from up the hill.")}}});
   const R=32;
   for(const b of l4.balls){b.x+=b.dir*b.speed*dt;b.rot+=b.dir*b.speed*dt/R;
     if(!b.fall){const fy=ballFloor(b.x);if(fy==null){b.fall=true;b.vy=60}else b.y+=(fy-b.y)*Math.min(1,dt*30)}
@@ -3254,7 +3268,7 @@ function updatePots(oldFeet){
 function updateTips(dt){
   for(const p of CL_PLATS){if(!p.tip)continue;const st=tipS(p);
     if(st.down>0){st.down-=dt;if(st.down<=0){st.down=0;st.t=0}continue}
-    if(s.ground&&s.plat===p){st.t+=dt;if(!l4.tipTip&&st.t>.2){l4.tipTip=true;sayToast("Whoa! This shelf tips under your weight. Don't stand still!")}
+    if(s.ground&&s.plat===p){st.t+=dt;if(!l4.tipTip&&st.t>.2){l4.tipTip=true;sayToast("Whoa! This shelf is tipping!")}
       if(st.t>1.05){st.down=2.4;s.plat=null;s.ground=false;s.vy=40;burst(p.x+p.w/2,p.y,10,["#c58a52","#fff"])}}
     else if(st.t>0)st.t=Math.max(0,st.t-dt*.6)}
 }
@@ -3263,21 +3277,34 @@ function updateFoes4(dt,oldFeet){
     f.t+=dt;if(f.flip>0)f.flip-=dt;else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}}
     const top=f.base-34;
     if(s.x+s.w>f.x-24&&s.x<f.x+24&&s.y+s.h>top&&s.y<f.base){
-      if(s.vy>0&&oldFeet<=top+14){if(f.flip>0){killFoe4(f);s.vy=-430}else{s.vy=-430;burst(f.x,top,6,["#fff","#e8a87c"]);if(!l4.flipTip){l4.flipTip=true;sayToast("THUNK! Too firm to stomp. Flip it over with Nib (Q) first!")}}}
+      if(s.vy>0&&oldFeet<=top+14){if(f.flip>0){killFoe4(f);s.vy=-430}else{s.vy=-430;burst(f.x,top,6,["#fff","#e8a87c"]);if(!l4.flipTip){l4.flipTip=true;sayToast("THUNK! Too firm to stomp.")}}}
       else if(!(f.flip>0))hurt3(f.x,"Ouch! A clay creature bumps you. (-1 health)")}}
+}
+function updateGulls4(dt,oldFeet){
+  const near=center()>5380&&center()<6640;
+  for(const f of l4.gulls){if(!f.alive){f.flat=Math.min(1,f.flat+dt*3);continue}f.t+=dt;const hy=f.base-150;
+    if(f.mode==="swoop"){f.st+=dt;const k=f.st/1.4;f.x+=f.sdir*170*dt;f.y=hy+(f.base-30-hy)*Math.sin(Math.min(1,k)*Math.PI);if(k>=1){f.mode="fly";f.cool=3.6+Math.random()*2;f.stole=false}}
+    else{f.x+=f.dir*90*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}f.y=hy+Math.sin(f.t*2)*10;f.cool-=dt;
+      if(near&&f.cool<=0&&Math.abs(center()-f.x)<260&&Math.abs(s.y+s.h-f.base)<70){f.mode="swoop";f.st=0;f.sdir=Math.sign(center()-f.x)||1;f.dir=f.sdir}}
+    if(s.x+s.w>f.x-24&&s.x<f.x+24&&s.y+s.h>f.y-20&&s.y<f.y+8){
+      if(s.vy>0&&oldFeet<=f.y-8){killFoe(f);s.vy=-430;continue}
+      if(f.mode==="swoop"&&!f.stole){f.stole=true;if(coins>0){coins--;f.carry=(f.carry||0)+1;sayToast("SQUAWK! A Gull snatched a coin!")}
+        else if(s.inv<=0){s.inv=1.3;shake=.3;const real=hurtHP();if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint.")}else if(real)sayToast("SQUAWK! Pecked by a Gull! (-1 health)")}}}}
 }
 function killFoe4(f){f.alive=false;l4.dead[f.i]=true;burst(f.x,f.base-20,16,["#c8643c","#e8a87c","#fff",INK]);coins++;gainXP("Clay Creature",f.x,f.base-60)}
 function l4Jab(hx){if(scene!=="clay")return false;let hit=false;
+  for(const f of l4.gulls){if(f.alive&&Math.abs(f.x-hx)<46&&s.y+s.h>f.y-80&&s.y<f.y+20){hit=true;killFoe(f)}}
   for(const f of l4.foes){if(!f.alive)continue;if(Math.abs(f.x-hx)<46&&s.y+s.h>f.base-90&&s.y<f.base+10){hit=true;
     if(!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#e8a87c","#b98ad8"])}else killFoe4(f)}}
   return hit}
 function updateClay(dt,oldFeet){
   if(scene==="nook"){s.x=clamp(s.x,40,W-40-s.w);return}
-  if(s.ground&&(!s.plat||(!s.plat.mover&&!s.plat.tip&&!s.plat.ferry)))l4.safe={x:s.x,y:s.y};
+  if(s.ground&&(!s.plat||(!s.plat.mover&&!s.plat.tip&&!s.plat.ferry&&!s.plat.crack)))l4.safe={x:s.x,y:s.y};
+  CL_CHECKS.forEach(([x,y],i)=>{if(i>l4.cp&&s.ground&&!s.plat&&center()>x&&Math.abs(s.y+s.h-y)<6){l4.cp=i;checkpoint=s.x;checkpointY=s.y;checkpointScene="clay";setTimeout(saveGame,0)}});
   for(const gp of CL_GAPS)if(center()>gp.x0&&center()<gp.x1&&s.y+s.h>gp.y){
     if(gp.kind==="water"){burst(center(),CL_WATER,20,["#7cc6f2","#fff"]);clayHurt("SPLASH! Sarah fishes herself out of the canal. (-1 health)")}
     else clayHurt("Oof! Down into the collection pit. Sarah climbs back out, a little clay-colored. (-1 health)");return}
-  updateTips(dt);updatePots(oldFeet);updateBalls(dt);updateFoes4(dt,oldFeet);
+  updateTips(dt);updateCracks(dt);updatePots(oldFeet);updateBalls(dt);updateFoes4(dt,oldFeet);updateGulls4(dt,oldFeet);
   if(!l4.crossed&&center()>5220)l4.crossed=true;
   CL_COINS.forEach(([x,y],i)=>{if(!l4.coins[i]&&Math.abs(center()-x)<22&&s.y<y+12&&s.y+s.h>y-12){l4.coins[i]=true;coins++;burst(x,y,8,["#f4c84f","#fff"])}});
   // crawl (duck + walk) under the footprint shelter to find the hidden nook
@@ -3288,29 +3315,27 @@ function updateClay(dt,oldFeet){
 function enterNook(){goScene("nook",150);s.face=1;
   if(!l4.nook){l4.nook=true;start([
     ["Narrator","Sarah crawls along the painted footprints, through a low, dusty passage… and pops out in a forgotten little pottery nook."],
-    ["Dab","Somebody used to work in here, a long time ago. Ooh, and I smell a doodle. Try me (Q)!"]])}
+    ["Dab","Somebody used to work in here, a long time ago. Ooh, and I smell a doodle."]])}
   else sayToast("Back in the hidden pottery nook.")}
-function leaveNook(){clayGo(CL_NOOK+50,floorAt(CL_NOOK+50));s.face=1;sayToast("Back out on the delivery road. Watch for rolling clay!")}
+function leaveNook(){clayGo(CL_NOOK+50,floorAt(CL_NOOK+50));s.face=1;sayToast("Back out on the delivery road.")}
 
 // ---- interactions ----
 function clayInteract(){
   if(fish.ph>0||!s.ground)return null;const T=(l,f)=>[l,f,true];
-  if(s.plat===l4.fer&&l4.ferryGo==null)return["Pull the rope handle",ferryRide];
+  if(s.plat===l4.fer&&l4.ferryGo==null)return[hasReel?"Hook the hoop on the "+(l4.ferry<.5?"far":"near")+" bank with Reel":"Look across the canal",ferryRide];
   if(s.plat)return null;
   const c=center();
   if(!l4.doorGone&&near(CL_DOOR,40)&&s.y+s.h>G-4)return["Go back through the door to town",clayToTown];
   if(near(CL_VILL,34))return T("Talk to the Villager",villager);
   if(!l4.lchest&&near(CL_LCHEST,40))return["Open the chest",()=>{l4.lchest=true;coins+=20;addItem("Health Potion");burst(CL_LCHEST,G-40,22,["#f4c84f","#fff","#ff6f9c"]);sayToast("A secret chest behind the landing! 20 coins and a Health Potion!")}];
-  if(near(CL_SIGN,30))return["Read the sign",()=>start(l4.sign?[["Sign","CLAY STORE →  (Deliveries have right of way.)"]]:[["Narrator","The sign at the fork is so faded you can't read a single letter."],["Dab","Faded paint? That's my department. Press Q!"]])];
+  if(near(CL_SIGN,30))return["Read the sign",()=>start(l4.sign?[["Sign","CLAY STORE →"]]:[["Narrator","The sign at the fork is so faded you can't read a single letter."],["Dab","Faded paint? That's my department."]])];
   if(near(CL_PEEK,26))return["Peek through the gap in the wall",()=>{l4.peek=true;start([["Narrator","Through a gap in the bricks, Sarah spots a treasure chest sitting in a little room behind the wall."],["Sarah","There's no door on this side. There must be another way in."]])}];
-  for(const [x,y] of CL_SAVES)if(near(x,30)&&Math.abs(s.y+s.h-y)<4)return["Save at the Save Block",()=>saveL3(x,y)];
   if(c>5440&&c<5560&&l4.ferry>.5&&l4.ferryGo==null)return[hasReel?"Hook the ferry's ring with Reel":"Look at the ferry",hookFerry];
   if(c>6530&&c<6610&&l4.ferry<.5&&l4.ferryGo==null)return[hasReel?"Hook the ferry with Reel":"Look at the ferry",hookFerry];
   if(near(CL_DOCK,40)&&hasReel)return["Cast your line",()=>castLine(canalSpot())];
   if(near(CL_STORE,30)&&!l4.done)return["Go inside the Clay Store",()=>{l4.inStore=true;enterShop("clay")}];
   if(near(CL_STORE,30)&&l4.done)return["Go inside the Clay Store",()=>enterShop("clay")];
   if(l4.keeperOut&&near(CL_KEEPER_OUT,34))return T("Talk to the Shopkeeper",keeperOutside);
-  if(near(CL_KILNS,40))return["Read the sign",()=>start([["Sign","PAST THE KILNS →  (This way is still being drawn. Chapter 2-2 is coming soon! Pencils are moving as fast as they can.)"]])];
   return null;
 }
 function nookInteract(){
@@ -3322,11 +3347,12 @@ function nookInteract(){
 }
 function dabClay(){
   if(scene==="nook"){if(!l4.nookStairs&&center()<760){l4.nookStairs=true;for(const p of NOOK_STAIRS)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#f4c84f"]);start([["Dab","A doodle staircase! Somebody drew a way up to that ledge and then forgot about it."],["Dab","There's a chest up there. Climb!"]]);return true}return false}
-  if(!l4.sign&&Math.abs(center()-CL_SIGN)<260){l4.sign=true;burst(CL_SIGN,G-110,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming!"],["Sign","CLAY STORE →  (Deliveries have right of way.)"],["Sarah","To the right it is. And I'll keep an eye out for deliveries, I guess."]]);return true}
-  if(!l4.stairs&&center()>6620&&center()<7010){l4.stairs=true;for(const p of CL_PLATS)if(p.faded)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#c58a52"]);start([["Dab","Missing steps? I can fix that. A little brown, a little more brown…"],["Narrator","Dab paints the missing steps back in. The staircase is whole again, leading up toward the upper village."]]);return true}
+  if(!l4.sign&&Math.abs(center()-CL_SIGN)<260){l4.sign=true;burst(CL_SIGN,G-110,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming!"],["Sign","CLAY STORE →"],["Sarah","To the right it is."]]);return true}
+  if(!l4.stairs&&center()>6620&&center()<7010){l4.stairs=true;for(const p of CL_PLATS)if(p.faded)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#c58a52"]);start([["Dab","Missing steps? I can fix that. A little brown, a little more brown…"]]);return true}
   return false;
 }
 function clayReelQ(){const c=center();
+  if(s.ground&&s.plat===l4.fer&&l4.ferryGo==null){ferryRide();return true}
   if(s.ground&&!s.plat&&((c>5440&&c<5560&&l4.ferry>.5)||(c>6530&&c<6610&&l4.ferry<.5))&&l4.ferryGo==null){hookFerry();return true}
   if(s.ground&&near(CL_DOCK,40)){castLine(canalSpot());return true}
   return false}
@@ -3334,13 +3360,13 @@ function canalSpot(){s.face=-1;return 6050+Math.random()*170}
 function hookFerry(){
   if(!hasReel){sayToast("The ferry is way over on the other side. You'd need something long to reach it…");return}
   equipped="Reel";l4.hookT=3;const toNear=l4.ferry>.5;l4.ferryGo=toNear?0:1;s.face=toNear?1:-1;
-  if(!l4.hooked){l4.hooked=true;start([["Reel","One ring, one hook, one very strong fishing pole. Watch this!"],["Narrator","Reel's line sails across the canal and catches the big metal ring. Sarah reels the little ferry all the way over."]])}
-  else sayToast("Reel hooks the ferry and reels it over.")}
-function ferryRide(){l4.ferryGo=l4.ferry<.5?1:0;l4.hookT=0;sayToast(l4.ferryGo===1?"Sarah pulls the rope handle. The ferry glides across the quiet canal…":"Sarah pulls the rope handle. Back across the canal we go…")}
+  l4.pull=null;if(!l4.hooked){l4.hooked=true;start([["Reel","One ring, one hook, one very strong fishing pole. Watch this!"],["Narrator","Reel's line sails across the canal and catches the ferry's ring. Sarah reels the little ferry over."]])}}
+function ferryRide(){if(!hasReel){sayToast("The other bank is a long way off. You'd need something long to reach it…");return}
+  equipped="Reel";l4.ferryGo=l4.ferry<.5?1:0;l4.pull=l4.ferryGo;l4.hookT=0;s.face=l4.ferryGo?1:-1;burst(HOOPS[l4.pull].x,HOOPS[l4.pull].y,8,["#fff","#f4c84f"])}
 function villager(){const n=l4.villager++;
   if(n===0){start([
     ["Villager","Oh! A visitor! Welcome to the pottery village."],
-    ["Villager","Heading to the Clay Store? Follow the sign at the fork. And watch the delivery road. Those clay balls don't stop for anybody."],
+    ["Villager","Heading to the Clay Store? It's all the way at the top of the hill."],
     ["Villager","Funny thing: a tall gray fellow in a gray top hat came through this morning. Bought a whole cart of gray clay. Who buys GRAY clay?"],
     ["Dab","…A gray top hat?"]]);return}
   const l=["Deliveries have right of way. It's practically our town motto.","Gray clay. Honestly. Clay is supposed to be clay-colored.","The Clay Store is at the very top of the hill. You can't miss it. Well, you can. But try not to."];
@@ -3350,10 +3376,14 @@ function villager(){const n=l4.villager++;
 function clayKeeper(){
   if(l4.done){const l=["That gray fellow went off past the kilns. I'd hurry, if I were you.","Come back any time. We always have clay. It's kind of our whole thing."];start([["Shopkeeper",l[(l4.kTalk=(l4.kTalk||0)+1)%2]]]);return}
   if(l4.order)return;
-  start([
-    ["Shopkeeper","Welcome to the Clay Store! Mind the dust. Clay is ninety percent dust and ten percent opinions."],
-    ["Sarah","Hi! I'm picking up an order for Mrs. Maple. For Inka's art store, back in town."],
-    ["Shopkeeper","Ah, the town order! Already paid for. Give me one moment while I wrap it up."],
+  const asked=new Set();
+  const OPTS=[["What is the clay for?",[["Shopkeeper","Inka's art store goes through clay like nobody's business. Pots, bowls, little clay frogs. The frogs are very popular."]]],
+    ["Has anyone else been in today?",[["Shopkeeper","Just one other customer. A tall fellow, all in gray, with a gray top hat. Bought every brick of gray clay I had."],["Sarah","Gray clay? Who even wants gray clay?"],["Shopkeeper","That's what I said! He didn't laugh."]]],
+    ["Do you make all of this yourself?",[["Shopkeeper","Every pot on these shelves. My hands haven't been clean since I was six."]]]];
+  const menu=first=>{const left=OPTS.filter(o=>!asked.has(o[0]));const ch=[...left.map(o=>o[0]),"That's everything, thanks!"];
+    start([["Shopkeeper",first?"Ah, the town order! Already paid for. Anything you want to know while you're here?":"Anything else?",ch,k=>{if(k>=left.length){wrap();return}asked.add(left[k][0]);start(left[k][1],()=>menu(false))}]])};
+  const wrap=()=>start([
+    ["Shopkeeper","Give me one moment while I wrap it up."],
     ["Narrator","The shopkeeper bustles around the back, stacking bricks of fresh clay into a sturdy parcel."],
     ["Dab","That's it? No boss? No tentacles? Just… shopping?"],
     ["Nib","I'm a little disappointed. And a little relieved."],
@@ -3361,6 +3391,10 @@ function clayKeeper(){
     ["Narrator","Sarah turns to go. Through the shop window, far down the hill, something gray moves beside the landing where she arrived."],
     ["Sarah","Wait. Is that… a top hat?"]
   ],()=>{l4.order=true;addItem("Clay Order");sayToast("Got the Clay Order! (It's in Key Items.)");setTimeout(montyTakesDoor,0)});
+  start([
+    ["Shopkeeper","Welcome to the Clay Store! Mind the dust. Clay is ninety percent dust and ten percent opinions."],
+    ["Sarah","Hi! I'm picking up an order for Mrs. Maple. For Inka's art store, back in town."]
+  ],()=>menu(true));
 }
 function montyTakesDoor(){
   leaveShop();s.x=9720-s.w/2;s.face=-1;l4.monty=1;l4.keeperOut=true;l4.inStore=false;camY=clamp(s.y-(G-s.h),-640,240);
@@ -3368,7 +3402,7 @@ function montyTakesDoor(){
     ["Narrator","Sarah bursts out of the Clay Store and runs to the edge of the courtyard. Far, far below, at the landing where she arrived…"],
     ["Narrator","…a tall figure in a gray coat and a gray top hat is standing beside the return door."],
     ["Sarah","HEY! That's our door!"],
-    ["Narrator","Monty tips his hat up the hill toward her. Then he grips the edge of the door… and RRRIIIP. He tears it right out of the page."],
+    ["Narrator","The stranger tips his hat up the hill toward her. Then he grips the edge of the door… and RRRIIIP. He tears it right out of the page."],
     ["Narrator","He folds the door up like a letter, tucks it under his arm, and strolls off out of sight."],
     ["Dab","He tore it out. That door was our way home!"],
     ["Nib","So… we're stuck here?"],
@@ -3382,23 +3416,17 @@ function fishCatchCanal(){l4.fishN++;const n=rollFish("canal",fish.bait);l4.last
 
 // ---- objective + hints ----
 function objectiveL4(){
-  if(l4.done)return"Follow Monty past the kilns and get the door back. (Chapter 2-2 is still being drawn!)";
+  if(l4.done)return"Follow the stranger in the gray top hat past the kilns. (Chapter 2-2 is still being drawn!)";
   if(scene==="shop")return"Pick up Mrs. Maple's clay order from the Shopkeeper.";
   if(scene==="nook")return l4.nchest?"Crawl back out (far left) to the delivery road.":l4.nookStairs?"Climb the doodle staircase to the chest.":"Use Dab (Q) to look for a way up to that ledge.";
-  const c=center(),goal="Pick up Mrs. Maple's clay order at the Clay Store. ";
-  if(!l4.sign)return goal+"First, use Dab (Q) on the faded sign at the fork.";
-  if(c<2600)return goal+"Cross the pottery yard. Cracked shelves tip under your weight, so keep moving! Stomp cracked pots or bump them from below.";
-  if(c<3320)return goal+"Get through the narrow passage: flip the clay creatures with Nib (Q), then stomp them.";
-  if(c<5200)return goal+"Wait on a shelter platform while each clay ball rolls by, then dash to the next one.";
-  if(c<6440&&!l4.ferried)return goal+"Stand at the canal's edge and use Reel (Space or Q) to hook the ferry's ring. Then hop aboard and pull the rope handle.";
-  if(!l4.stairs)return goal+"Fish at the little dock if you like, then use Dab (Q) to restore the faded staircase.";
-  if(c<8600)return goal+"Climb up through the upper village. Clay creatures guard the wide landing.";
-  return goal+"Work up the delivery lane between shelters. The Clay Store is at the top.";
+  return"Pick up Mrs. Maple's clay order at the Clay Store.";
 }
-function beatsL4(){return[["Restore the faded sign",l4.sign],["Find the chest behind the landing (secret)",l4.lchest],["Make it down the delivery road",l4.crossed],["Find the hidden pottery nook (secret)",l4.nchest],["Ride the ferry across the canal",l4.ferried],["Restore the faded staircase",l4.stairs],["Pick up the clay order",l4.order],["See where Monty went",l4.done]]}
+function beatsL4(){return[["Restore the faded sign",l4.sign],["Find the chest behind the landing (secret)",l4.lchest],["Make it down the delivery road",l4.crossed],["Find the hidden pottery nook (secret)",l4.nchest],["Ride the ferry across the canal",l4.ferried],["Restore the faded staircase",l4.stairs],["Pick up the clay order",l4.order],["See who was at the door",l4.done]]}
 
 // ---- drawing ----
 const CL_HOUSES=[[0,"#f0c9a0","#c8643c"],[260,"#e8b38a","#b5523a"],[520,"#f3d7b5","#c8643c"],[800,"#e2a77f","#a8483a"],[1060,"#f0c9a0","#b5523a"],[1300,"#e8b38a","#c8643c"]];
+// sign text that always fits inside its board
+function fitText(t,x,y,maxW,size,style="bold "){let z=size;g.font=style+z+"px "+FONT;while(z>8&&g.measureText(t).width>maxW){z--;g.font=style+z+"px "+FONT}g.fillText(t,x,y)}
 function drawClayBody(flipped){
   g.strokeStyle=INK;g.lineWidth=2;
   if(flipped){g.save();g.translate(27,24);g.rotate(Math.PI);g.translate(-27,-24)}
@@ -3420,7 +3448,6 @@ function drawBall(b){const R=32;g.save();g.translate(b.x,b.y-R);
 function drawChute(sp,i){const fy=floorAt(sp.x),x=sp.x-sp.dir*30,warn=l4.sp[i]<.8&&center()>sp.zone[0]&&center()<sp.zone[1];
   cut(()=>{g.beginPath();g.moveTo(x-50,fy-170);g.lineTo(x+50,fy-170);g.lineTo(x+34,fy-80);g.lineTo(x-34,fy-80);g.closePath()},"#8d5a36",{edge:7});
   cut(()=>rr(x-30,fy-80,60,80,4),"#6b4a35",{edge:5});g.fillStyle="#2b2540";rr(x-20,fy-64,40,64,8);g.fill();
-  cut(()=>rr(x-46,fy-206,92,26,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("DELIVERIES",x,fy-188);g.textAlign="left";
   cut(()=>{g.beginPath();g.arc(x+40,fy-150,9,0,7)},warn&&Math.floor(time*8)%2?"#e5463f":"#7a3a2a",{edge:3,shadow:false})}
 function drawFloor4(){
   const bot=camY+H+40;
@@ -3433,7 +3460,7 @@ function drawFloor4(){
     for(const [lw,st] of[[7,"#fff"],[2.5,INK]]){g.lineWidth=lw;g.strokeStyle=st;g.lineCap="round";g.beginPath();for(const [ex0,ey0,ex1,ey1] of edges){g.moveTo(ex0,ey0);g.lineTo(ex1,ey1)}g.stroke()}
     g.fillStyle="rgba(141,90,54,.18)";for(let x=Math.ceil(a/60)*60;x<b;x+=60){const yy=y0+(y1-y0)*(x-x0)/(x1-x0);g.fillRect(x+8,yy+22+(x/60%3)*16,22,5);g.fillRect(x+34,yy+58,14,5)}}
   // pit interiors
-  for(const gp of CL_GAPS){if(gp.kind!=="pit"||gp.x1<camera-40||gp.x0>camera+W+40)continue;const ty=Math.min(floorAt(gp.x0-1),floorAt(gp.x1));
+  for(const gp of CL_GAPS){if(gp.kind!=="pit"||gp.x1<camera-40||gp.x0>camera+W+40)continue;const ty=Math.max(floorAt(gp.x0-1),floorAt(gp.x1));
     g.fillStyle="#3a2a24";g.fillRect(gp.x0,ty+4,gp.x1-gp.x0,bot-ty);for(let i=0;i<4;i++){g.fillStyle="#8d5a36";circle(gp.x0+20+i*((gp.x1-gp.x0-40)/3),ty+150+(i%2)*20,22);g.fill()}}
 }
 function drawCanal(){const x0=5560,x1=6440;if(x1<camera-20||x0>camera+W+20)return;const bot=camY+H+40,wy=CL_WATER;
@@ -3448,12 +3475,17 @@ function drawCanal(){const x0=5560,x1=6440;if(x1<camera-20||x0>camera+W+20)retur
 function drawFerry(){const f=l4.fer,x=f.x,y=f.y;
   cut(()=>{g.beginPath();g.moveTo(x-6,y);g.lineTo(x+f.w+6,y);g.lineTo(x+f.w-14,y+26);g.lineTo(x+14,y+26);g.closePath()},"#a8714a",{edge:6});
   cut(()=>rr(x,y,f.w,12,3),"#c58a52",{edge:5,shadow:false});g.strokeStyle="#8d5a36";g.lineWidth=1.5;for(let k=x+20;k<x+f.w;k+=24){g.beginPath();g.moveTo(k,y+2);g.lineTo(k,y+10);g.stroke()}
-  // rope handle post in the middle, the big metal ring on the front
-  cut(()=>rr(x+f.w/2-4,y-46,8,46,3),"#8d5a36",{edge:4});cut(()=>{g.beginPath();g.arc(x+f.w/2,y-50,9,0,7)},"#e5577b",{edge:4,shadow:false});
-  g.strokeStyle="#8f8aa0";g.lineWidth=5;g.beginPath();g.arc(x-14,y+4,11,0,7);g.stroke();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.arc(x-14,y+4,13.5,0,7);g.stroke();g.beginPath();g.arc(x-14,y+4,8.5,0,7);g.stroke();
-  if(l4.hookT>0&&l4.ferryGo!=null){const [tx,ty]=rodTip();g.strokeStyle="rgba(255,255,255,.95)";g.lineWidth=1.8;g.beginPath();g.moveTo(tx,ty);g.quadraticCurveTo((tx+x-14)/2,Math.min(ty,y)-30,x-14,y+4);g.stroke()}
+  // a metal ring on each end of the ferry
+  for(const rx of[x-14,x+f.w+14]){g.strokeStyle="#8f8aa0";g.lineWidth=5;g.beginPath();g.arc(rx,y+4,11,0,7);g.stroke();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.arc(rx,y+4,13.5,0,7);g.stroke();g.beginPath();g.arc(rx,y+4,8.5,0,7);g.stroke()}
+  if(l4.ferryGo!=null){let ex,ey;if(l4.pull!=null){ex=HOOPS[l4.pull].x;ey=HOOPS[l4.pull].y}else if(l4.hookT>0){ex=center()<x?x-14:x+f.w+14;ey=y+4}
+    if(ex!=null){const [tx,ty]=rodTip();g.strokeStyle="rgba(255,255,255,.95)";g.lineWidth=1.8;g.beginPath();g.moveTo(tx,ty);g.quadraticCurveTo((tx+ex)/2,Math.min(ty,ey)-24,ex,ey);g.stroke()}}
 }
+function drawHoops(){for(const h of HOOPS){if(h.x<camera-60||h.x>camera+W+60)continue;const fy=G+220;
+  cut(()=>rr(h.x-5,h.y+12,10,fy-h.y-12,3),"#8d5a36",{edge:4});g.strokeStyle="#c9a23a";g.lineWidth=6;g.beginPath();g.arc(h.x,h.y,13,0,7);g.stroke();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.arc(h.x,h.y,16,0,7);g.stroke();g.beginPath();g.arc(h.x,h.y,10,0,7);g.stroke()}}
 function drawPlat4(p){
+  if(p.crack){const c=crackS(p);if(c.gone>0&&c.fy>700)return;const sh=c.gone>0?0:c.t>0?Math.sin(time*60)*2.2*c.t/.6:0;g.save();g.translate(sh,c.gone>0?c.fy:0);if(c.gone>0)g.globalAlpha=Math.max(0,1-c.fy/500);
+    cut(()=>rr(p.x,p.y,p.w,14,4),p.plank?"#c58a52":"#e3a878",{edge:5});g.strokeStyle=p.plank?"#8d5a36":"#a8483a";g.lineWidth=1.6;g.beginPath();
+    g.moveTo(p.x+p.w*.28,p.y+1);g.lineTo(p.x+p.w*.36,p.y+8);g.lineTo(p.x+p.w*.3,p.y+13);g.moveTo(p.x+p.w*.7,p.y+1);g.lineTo(p.x+p.w*.64,p.y+7);g.lineTo(p.x+p.w*.72,p.y+13);g.moveTo(p.x+p.w*.5,p.y+2);g.lineTo(p.x+p.w*.54,p.y+10);g.stroke();g.restore();return}
   if(p.faded&&!l4.stairs){g.save();g.globalAlpha=.28+Math.sin(time*2+p.stair)*.08;g.strokeStyle="#fff";g.lineWidth=2;g.setLineDash([6,6]);g.strokeRect(p.x,p.y,p.w,14);g.restore();return}
   if(p.block){g.save();const bot=p.h>60?floorAt(p.x+p.w)+6:p.y+p.h;cut(()=>rr(p.x,p.y,p.w,bot-p.y,3),"#c8643c",{edge:6});g.strokeStyle="#8d4a2a";g.lineWidth=1.5;for(let y=p.y+13;y<bot-2;y+=13){g.beginPath();g.moveTo(p.x+2,y);g.lineTo(p.x+p.w-2,y);g.stroke();for(let x=p.x+((y-p.y)/13%2?12:26);x<p.x+p.w-4;x+=28){g.beginPath();g.moveTo(x,y-13);g.lineTo(x,y);g.stroke()}}g.restore();return}
   if(p.tip){const st=tipS(p);const ang=st.down>0?.75:Math.min(.32,st.t*.3)+(st.t>0?Math.sin(time*40)*.02:0);g.save();g.translate(p.x+4,p.y+7);g.rotate(ang);
@@ -3512,7 +3544,7 @@ function drawClay(){
   for(const px of[556,588,620])drawStack(px,G-52,1,.7);
   // the fork sign
   {const x=CL_SIGN;cut(()=>rr(x-4,G-90,8,90,2),"#a8714a");cut(()=>rr(x-62,G-132,124,48,6),l4.sign?"#fff3d6":"#d8d4cc",{edge:5});
-    if(l4.sign){g.fillStyle="#c8643c";g.font="bold 15px "+FONT;g.textAlign="center";g.fillText("CLAY STORE →",x,G-110);g.fillStyle=INK;g.font="italic 10px "+FONT;g.fillText("Deliveries have right of way",x,G-94);g.textAlign="left"}
+    if(l4.sign){g.fillStyle="#c8643c";g.textAlign="center";fitText("CLAY STORE →",x,G-102,104,17);g.textAlign="left"}
     else{g.fillStyle="rgba(140,130,120,.35)";g.fillRect(x-44,G-116,88,6);g.fillRect(x-36,G-102,72,4)}}
   // the side path: a glimpse of a chest through a gap in a brick wall
   {const x=960;g.fillStyle="#7a4a3a";rr(x+52,G-112,56,44,4);g.fill();drawChest(CL_PEEK-22,G-98,false,"#b9693c");
@@ -3529,40 +3561,38 @@ function drawClay(){
   CL_SPAWN.forEach(drawChute);
   {const fy=floorAt(CL_NOOK);g.fillStyle="#2b2540";g.beginPath();g.moveTo(CL_NOOK-26,fy);g.lineTo(CL_NOOK-26,fy-28);g.quadraticCurveTo(CL_NOOK,fy-48,CL_NOOK+26,fy-28);g.lineTo(CL_NOOK+26,fy);g.closePath();g.fill();
     g.fillStyle="#e5577b";for(let i=0;i<4;i++){const x=CL_NOOK-80+i*22;g.beginPath();g.ellipse(x,floorAt(x)+6+(i%2)*3,4,2.4,0,0,7);g.fill()}}
-  {const x=5060,fy=G+220;cut(()=>rr(x+120,fy-100,8,100,2),"#a8714a");cut(()=>rr(x+80,fy-130,96,32,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("COLLECTION PIT",x+128,fy-110);g.textAlign="left"}
   // canal, ferry, the fishing dock
   drawCanal();
-  {const x=CL_DOCK,fy=G+220;cut(()=>rr(x-44,fy-6,96,10,3),"#c58a52",{edge:4});cut(()=>rr(x+40,fy-70,6,70,2),"#a8714a");cut(()=>rr(x+8,fy-100,74,30,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 10px "+FONT;g.textAlign="center";g.fillText("FISHING DOCK",x+45,fy-81);g.textAlign="left"}
+  {const x=CL_DOCK,fy=G+220;cut(()=>rr(x-44,fy-6,96,10,3),"#c58a52",{edge:4});cut(()=>rr(x+40,fy-34,6,34,2),"#a8714a");cut(()=>rr(x+40,fy-8,6,40,2),"#8d5a36",{edge:3,shadow:false})}
   // far bank: a cottage on the canal-side balcony, upper village cottages, the wide landing tiles
   drawCottage(6660,G+80,100,110,"#f0c9a0","#c8643c",0);
-  drawCottage(7060,G,120,150,"#e8b38a","#b5523a",1);drawCottage(7560,G,110,130,"#f3d7b5","#c8643c",2);
+  drawCottage(7050,G,120,150,"#e8b38a","#b5523a",1);
   {g.fillStyle="rgba(255,255,255,.25)";for(let x=8010;x<8600;x+=40)g.fillRect(x,G-296,30,3)}
   // courtyard: displays, the Clay Store, the kilns and the path onward
   for(const [x,n] of[[9690,2],[9880,3],[9940,2]])drawStack(x,G-620,n);
   {const x=CL_STORE,fy=G-620;g.save();g.translate(0,fy-G);
     cut(()=>rr(x-110,G-190,220,190,8),"#f0c9a0",{edge:8});cut(()=>{g.beginPath();g.moveTo(x-130,G-182);g.lineTo(x,G-250);g.lineTo(x+130,G-182);g.closePath()},"#c8643c",{edge:8});
     cut(()=>rr(x+44,G-262,20,50,2),"#a8483a",{edge:4});for(let i=0;i<3;i++){g.save();g.globalAlpha=.4;g.fillStyle="#fff";circle(x+54+Math.sin(time+i)*6,G-280-i*18-((time*20)%18),8+i*2);g.fill();g.restore()}
-    cut(()=>rr(x-96,G-176,192,26,6),"#fff3d6",{edge:5});g.fillStyle="#c8643c";g.font="bold 16px "+FONT;g.textAlign="center";g.fillText("THE CLAY STORE",x,G-157);g.textAlign="left";
+    cut(()=>rr(x-96,G-176,192,26,6),"#fff3d6",{edge:5});g.fillStyle="#c8643c";g.textAlign="center";fitText("THE CLAY STORE",x,G-157,176,16);g.textAlign="left";
     cut(()=>rr(x-90,G-130,60,46,6),"#a6def5",{edge:5,shadow:false});cut(()=>rr(x+30,G-130,60,46,6),"#a6def5",{edge:5,shadow:false});
     cut(()=>{g.beginPath();g.moveTo(x-22,G);g.lineTo(x-22,G-64);g.arc(x,G-64,22,Math.PI,0);g.lineTo(x+22,G);g.closePath()},"#8d5a36",{edge:5,shadow:false});g.fillStyle="#f4c84f";circle(x+12,G-34,3);g.fill();
     for(const px of[x-80,x+80])drawStack(px,G,2,.8);
     cut(()=>{g.beginPath();g.moveTo(CL_KILNS+40,G);g.lineTo(CL_KILNS+40,G-80);g.quadraticCurveTo(CL_KILNS+80,G-130,CL_KILNS+120,G-80);g.lineTo(CL_KILNS+120,G);g.closePath()},"#b5523a",{edge:6});
-    cut(()=>rr(CL_KILNS-3,G-70,6,70,2),"#a8714a");cut(()=>rr(CL_KILNS-50,G-104,100,36,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("PAST THE KILNS →",CL_KILNS,G-88);g.font="italic 9px "+FONT;g.fillText("(still being drawn)",CL_KILNS,G-76);g.textAlign="left";
     g.restore()}
   // floor and platforms
   drawFloor4();
   for(const b of l4.balls)if(b.x>camera-60&&b.x<camera+W+60)drawBall(b);
   for(const p of CL_PLATS)if(p.x+p.w>camera-40&&p.x<camera+W+40&&!p.block)drawPlat4(p);
   for(const p of CL_BLOCKS)if(p.x+p.w>camera-40&&p.x<camera+W+40)drawPlat4(p);
-  if(l4.fer.x+l4.fer.w>camera-60&&l4.fer.x<camera+W+60)drawFerry();
+  drawHoops();if(l4.fer.x+l4.fer.w>camera-60&&l4.fer.x<camera+W+60)drawFerry();
   CL_POTS.forEach((p,i)=>{if(!l4.pots[i]&&p.x>camera-40&&p.x<camera+W+40)drawPot(p,true)});
   CL_COINS.forEach(([x,y],i)=>{if(!l4.coins[i]&&x>camera-30&&x<camera+W+30)drawCoin(x,y+Math.sin(time*3+i)*3,9)});
-  for(const [x,y] of CL_SAVES){if(x<camera-60||x>camera+W+60)continue;sprite(x,y-10+Math.sin(time*2+x)*3,50,50,drawSaveBody);groundShadow(x,y+2,20)}
   if(CL_VILL>camera-60&&CL_VILL<camera+W+60)npc("Villager",CL_VILL);
   if(l4.keeperOut){groundShadow(CL_KEEPER_OUT,G-618,18);npc("Shopkeeper",CL_KEEPER_OUT,undefined,-620)}
   for(const f of l4.foes){if(f.x<camera-60||f.x>camera+W+60)continue;
     if(!f.alive){if(f.flat<1)sprite(f.x,f.base+2,54,42,()=>drawClayBody(false),{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat});continue}
     groundShadow(f.x,f.base+2,20);sprite(f.x,f.base+2,54,42,()=>drawClayBody(f.flip>0),{sx:f.dir>0?-1:1,sy:1+Math.sin(f.t*8)*.04})}
+  for(const f of l4.gulls)if(f.x>camera-60&&f.x<camera+W+60)drawFoe(f);
   drawParticles();drawSarah();
   if(fish.ph>0)drawFishing(CL_WATER+2,l4.lastCatch);
   g.restore();
@@ -3572,7 +3602,6 @@ function drawNook(){
   wallpaper("#8d6a52","#7d5c46","stripes");floorBlocks("#6b4a35","#5b3a28");
   // the low passage back out
   g.fillStyle="#2b2540";g.beginPath();g.moveTo(50,G);g.lineTo(50,G-40);g.quadraticCurveTo(90,G-70,130,G-40);g.lineTo(130,G);g.closePath();g.fill();
-  cut(()=>rr(40,G-104,100,28,6),"#fff3d6",{edge:5});g.fillStyle=INK;g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("← DELIVERY ROAD",90,G-86);g.textAlign="left";
   // dusty shelves, an old pottery wheel, cobwebs
   for(const y of[170,250]){cut(()=>rr(190,y,250,12,4),"#5b3a28",{edge:5});for(let i=0;i<5;i++)drawStack(215+i*48,y,1,.7)}
   cut(()=>{g.beginPath();g.ellipse(300,G-30,46,12,0,0,7)},"#8d5a36",{edge:5});cut(()=>rr(292,G-30,16,30,3),"#6b4a35",{edge:4});cut(()=>{g.beginPath();g.ellipse(300,G-44,16,10,0,0,7)},"#b9734a",{edge:3,shadow:false});
@@ -3599,7 +3628,7 @@ function cheat4(x,feet){cheatHub();titleMenu=null;dlg.on=false;l2.hubStep=Math.m
   if(x!=null){clayGo(x,feet);checkpoint=s.x;checkpointY=s.y;l4.safe={x:s.x,y:s.y}}}
 SHOPS.clay={name:"THE CLAY STORE",keeper:"Shopkeeper",from:"clay",door:CL_STORE,wall:["#f6e3cf","#efd5bb","stripes"],floor:["#b5713f","#a8653a"],trim:"#c8643c"};
 SHOP_TALK.clay=()=>clayKeeper();
-function afterL4End(){showEndScreen=false;complete=false;sayToast("Monty went off past the kilns, to the right. (Chapter 2-2 is still being drawn!)")}
+function afterL4End(){showEndScreen=false;complete=false;sayToast("The stranger went off past the kilns, to the right. (Chapter 2-2 is still being drawn!)")}
 function lockedDoor(){sayToast("Locked tight. This page is still torn out. Each door opens once the page before it is restored.")}
 function drawFloorDoors(){const fy=FLOOR2.y;
   for(let i=1;i<6;i++){const x=DOOR_SLOTS[i],open=i===1&&l2.door2;if(x<camera-80||x>camera+W+80)continue;
