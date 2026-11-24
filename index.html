@@ -3348,35 +3348,44 @@ function updateWares(dt,oldFeet){
     if(f.gang)moveGang(f,dt);
     else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}
       if(f.kind==="cup"&&f.hop===0&&f.t%2.4<dt)f.hv=-300}
-    if(f.hv||f.hop<0){f.hv+=1450*dt;f.hop+=f.hv*dt;if(f.hop>=0){f.hop=0;f.hv=0}}
+    if(!f.gang&&(f.hv||f.hop<0)){f.hv+=1450*dt;f.hop+=f.hv*dt;if(f.hop>=0){f.hop=0;f.hv=0}}
     const hw=(f.w/2-4)*f.sc,top=f.base+f.hop-f.h*f.sc;
     if(s.x+s.w>f.x-hw&&s.x<f.x+hw&&s.y+s.h>top&&s.y<f.base+f.hop){
       if(s.vy>0&&oldFeet<=top+16){s.vy=-460;hitWare(f)}
       else if(f.inv<=0)hurt3(f.x,f.kind==="pot"?"Ow! Hot teapot! (-1 health)":"Ow! A teacup bonks you. (-1 health)")}}
-  updateSteam(dt);
+  updateSteam(dt);updateWaves(dt);
   if((l4.gang==="fight"||l4.gang==="fight2")&&s.x>9600&&s.y+s.h<=G-600){s.x=clamp(s.x,9680,10420-s.w)}
 }
 // the teapot gang moves around: teacups bounce all over the courtyard, the big teapot paces and blows steam
+// the teapot gang moves like a boss: walk to spots around the courtyard, face where they're going.
+// Teacups: crouch, HIGH jump at Sarah, slam down with a shockwave. Big Teapot: walks, then stops to blow steam.
+const ARENA=[9740,10340];
+function pickSpot(f,away){const sx=center();let x;for(let k=0;k<6;k++){x=ARENA[0]+Math.random()*(ARENA[1]-ARENA[0]);if(Math.abs(x-f.x)>140&&(!away||Math.abs(x-sx)>120))break}return x}
+function gangFall(f,dt){f.hv+=1450*dt;f.hop+=f.hv*dt;if(f.hop>=0){f.hop=0;f.hv=0;return true}return false}
 function moveGang(f,dt){
-  const sx=center();
+  const sx=center();f.st??="walk";f.stT=(f.stT??0)+dt;
   if(f.kind==="cup"){
-    f.next=(f.next??(.4+Math.random()*.6))-dt;
-    if(f.hop===0&&f.next<=0){f.next=.9+Math.random()*.8;const toward=Math.random()<.55?Math.sign(sx-f.x)||1:(Math.random()<.5?-1:1);f.vx=toward*(140+Math.random()*140);f.hv=-(420+Math.random()*200);f.dir=Math.sign(f.vx)}
-    if(f.hop<0||f.hv<0){f.x+=f.vx*dt;if(f.x<f.min||f.x>f.max){f.vx*=-1;f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}}
+    if(f.st==="walk"){f.goal??=pickSpot(f);const d=Math.sign(f.goal-f.x);f.x+=d*150*dt;if(d)f.dir=d;
+      if(Math.abs(f.goal-f.x)<10)f.goal=pickSpot(f);
+      f.slamIn=(f.slamIn??(1.6+Math.random()*1.6))-dt;if(f.slamIn<=0){f.st="crouch";f.stT=0;f.dir=Math.sign(sx-f.x)||f.dir}}
+    else if(f.st==="crouch"){if(f.stT>.45){f.st="leap";f.stT=0;f.hv=-860;const t=2*860/1450;f.vx=clamp((sx-f.x)/t,-420,420);if(Math.abs(f.vx)>10)f.dir=Math.sign(f.vx)}}
+    else if(f.st==="leap"){f.x=clamp(f.x+f.vx*dt,ARENA[0],ARENA[1]);if(gangFall(f,dt)){f.st="slam";f.stT=0;shake=Math.max(shake,.25);l4.waves.push({x:f.x,y:f.base,t:0});burst(f.x,f.base,14,["#fff","#e8dcc8","#cfd8e0"]);
+        if(s.ground&&Math.abs(center()-f.x)<120&&Math.abs(s.y+s.h-f.base)<8)hurt3(f.x,"SLAM! The teacup's shockwave knocks you off your feet. (-1 health)")}}
+    else if(f.st==="slam"){if(f.stT>.6){f.st="walk";f.stT=0;f.goal=pickSpot(f,true);f.slamIn=2.2+Math.random()*1.8}}
     return}
   // big teapot
-  if(f.steam>0){f.steam-=dt;f.dir=f.steamDir;
-    if(f.steam<1.1){const sp=f.x+f.dir*34*f.sc,y0=f.base-f.h*f.sc*.95,x0=f.dir>0?sp:sp-230,x1=f.dir>0?sp+230:sp;
+  if(f.st==="steam"){f.dir=f.steamDir;f.steam=1.7-f.stT;
+    if(f.stT>.6){const sp=f.x+f.dir*34*f.sc,y0=f.base-f.h*f.sc*.95,x0=f.dir>0?sp:sp-230,x1=f.dir>0?sp+230:sp;
       if(Math.random()<dt*30)l4.steamP.push({x:sp,y:y0+Math.random()*10,vx:f.dir*(260+Math.random()*80),vy:-20+Math.random()*30,t:0});
       if(s.x+s.w>x0&&s.x<x1&&s.y<y0+38&&s.y+s.h>y0-26)hurt3(f.x,"HISSSS! A blast of hot steam! (-1 health)")}
-    if(f.steam<=0){f.steam=0;f.cool=2.4+Math.random()*1.6}
+    if(f.stT>1.7){f.st="walk";f.stT=0;f.steam=0;f.goal=pickSpot(f,true);f.cool=2.2+Math.random()*1.4}
     return}
-  f.cool=(f.cool??2)-dt;f.goal??=f.x;
-  if(f.cool<=0&&Math.abs(sx-f.x)<300){f.steam=1.7;f.steamDir=Math.sign(sx-f.x)||1;f.dir=f.steamDir;return}
-  if(Math.abs(f.goal-f.x)<8){f.goal=clamp(sx+(Math.random()<.5?-1:1)*(120+Math.random()*200),f.min+40,f.max-40)}
-  const d=Math.sign(f.goal-f.x);f.dir=d||f.dir;f.x+=d*110*dt;
-  if(f.hop===0&&Math.random()<dt*.4)f.hv=-380;
+  f.steam=0;f.goal??=pickSpot(f);f.cool=(f.cool??2)-dt;
+  const d=Math.sign(f.goal-f.x);f.x+=d*95*dt;if(d)f.dir=d;
+  if(Math.abs(f.goal-f.x)<10){if(f.cool<=0){f.st="steam";f.stT=0;f.steamDir=Math.sign(sx-f.x)||f.dir}else f.goal=pickSpot(f)}
 }
+function updateWaves(dt){l4.waves=(l4.waves||[]).filter(w=>(w.t+=dt)<.45)}
+function drawWaves(){for(const w of l4.waves||[]){const k=w.t/.45;g.save();g.globalAlpha=1-k;g.strokeStyle="#fff";g.lineWidth=5;g.beginPath();g.ellipse(w.x,w.y,30+k*100,8+k*10,0,Math.PI,0);g.stroke();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.ellipse(w.x,w.y,34+k*100,10+k*10,0,Math.PI,0);g.stroke();g.restore()}}
 function updateSteam(dt){if(!l4.steamP)l4.steamP=[];for(const q of l4.steamP){q.t+=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=1-dt*1.5}l4.steamP=l4.steamP.filter(q=>q.t<.8)}
 function drawSteam(){for(const f of l4.gangFoes||[])if(f.alive&&f.steam>1.1){const sp=f.x+f.dir*34*f.sc,y0=f.base-f.h*f.sc*.95;g.save();g.globalAlpha=.7;g.fillStyle="#fff";for(let i=0;i<3;i++){circle(sp+f.dir*(6+i*6),y0-4-i*7+Math.sin(time*20+i)*2,4+i*2);g.fill()}g.restore()}
   for(const q of l4.steamP||[]){g.save();g.globalAlpha=.75*(1-q.t/.8);g.fillStyle="#fff";g.strokeStyle="rgba(150,160,180,.6)";g.lineWidth=2;circle(q.x,q.y,10+q.t*26);g.fill();g.stroke();g.restore()}}
@@ -3403,7 +3412,8 @@ function crackLines(k,L){g.strokeStyle=INK;g.lineWidth=1.6;for(let i=0;i<Math.mi
 function drawWare(f){const sc=f.sc,w=(f.w+8)*sc,h=(f.h+6)*sc,k=f.max-f.hp,body=()=>{g.scale(sc,sc);(f.kind==="pot"?drawPotBody:drawCupBody)(f.gang?k:k*2)};
   if(!f.alive){if(f.flat<1)sprite(f.x,f.base+2,w,h,body,{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat});return}
   groundShadow(f.x,f.base+2,f.w*sc*.4);
-  sprite(f.x,f.base+2+f.hop,w,h,body,{sx:f.dir>0?1:-1})}
+  let bob=0,sy=1,sxs=1;if(f.gang){if(f.st==="walk")bob=-Math.abs(Math.sin(f.t*5))*5;else if(f.st==="crouch"){sy=.82;sxs=1.12}else if(f.st==="slam"&&f.stT<.15){sy=.85;sxs=1.1}}
+  sprite(f.x,f.base+2+f.hop+bob,w,h,body,{sx:(f.dir>0?1:-1)*sxs,sy})}
 // ---- the teapot gang (just before the Clay Store) ----
 function gangTalk(){
   l4.gang="talk";l4.balls=[];const n=l4.pots.filter(Boolean).length;s.face=1;
@@ -3740,7 +3750,7 @@ function drawClay(){
     if(!f.alive){if(f.flat<1)sprite(f.x,f.base+2,54,42,()=>drawClayBody(false),{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat});continue}
     groundShadow(f.x,f.base+2,20);sprite(f.x,f.base+2,54,42,()=>drawClayBody(f.flip>0),{sx:f.dir>0?-1:1,sy:1+Math.sin(f.t*8)*.04})}
   for(const f of allWares())if(f.x>camera-80&&f.x<camera+W+80)drawWare(f);
-  drawSteam();
+  drawSteam();drawWaves();
   if(l4.gang==="talk"||l4.gang==="talk2")GANG_X.forEach((x,i)=>drawWare({...mkWare(i===1?"pot":"cup",x,x,x,G-620,i===1?1.9:1.35,1,0),dir:-1,t:time}));
   for(const f of l4.gulls)if(f.x>camera-60&&f.x<camera+W+60)drawFoe(f);
   drawParticles();drawSarah();
