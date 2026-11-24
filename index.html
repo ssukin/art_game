@@ -3518,14 +3518,14 @@ function hookFerry(){
   l4.pull=null;if(!l4.hooked){l4.hooked=true;start([["Reel","One ring, one hook, one very strong fishing pole. Watch this!"],["Narrator","Reel's line sails across the canal and catches the ferry's ring. Sarah reels the little ferry over."]])}}
 function ferryRide(){if(!hasReel){sayToast("The other bank is a long way off. You'd need something long to reach it…");return}
   equipped="Reel";l4.ferryGo=l4.ferry<.5?1:0;l4.pull=l4.ferryGo;l4.hookT=0;s.face=l4.ferryGo?1:-1;burst(HOOPS[l4.pull].x,HOOPS[l4.pull].y,8,["#fff","#f4c84f"])}
-function villager(){const n=l4.villager++;
-  if(n===0){start([
-    ["Villager","Oh! A visitor! Welcome to the pottery village."],
-    ["Villager","Heading to the Clay Store? It's all the way at the top of the hill."],
-    ["Villager","Funny thing: a tall gray fellow in a gray top hat came through this morning. Bought a whole cart of gray clay. Who buys GRAY clay?"],
-    ["Dab","…A gray top hat?"]]);return}
-  const l=["Deliveries have right of way. It's practically our town motto.","Gray clay. Honestly. Clay is supposed to be clay-colored.","The Clay Store is at the very top of the hill. You can't miss it. Well, you can. But try not to."];
-  start([["Villager",l[(n-1)%3]]]);
+function villager(){const n=l4.villager++;const asked=new Set();
+  const OPTS=[["Where is the Clay Store?",[["Villager","All the way at the top of the hill. Just keep heading right and keep climbing. You can't miss it. Well, you can. But try not to."]]],
+    ["Seen anyone unusual today?",[["Villager","Funny you ask. A tall gray fellow in a gray top hat came through this morning. Bought a whole cart of gray clay. Who buys GRAY clay?"],["Dab","…A gray top hat?"]]],
+    ["Anything fun to find around here?",()=>l4.lchest?[["Villager","You found the chest out past the door already? Well, aren't you quick!"]]:[["Villager","Fun? Hmm. Don't tell anyone, but if you go left, past that door you came through, keep on going."],["Villager","There's a treasure out there that nobody ever bothers to walk to."]]],
+    ["What are you drying?",[["Villager","Pots! Well, they'll be pots. Right now they're mostly hope."]]]];
+  const menu=first=>{const left=OPTS.filter(o=>!asked.has(o[0]));const ch=[...left.map(o=>o[0]),"I'd better get going. Bye!"];
+    start([["Villager",first?(n===0?"Oh! A visitor! Welcome to the pottery village. What can I do for you?":"Back again? What can I do for you?"):"Anything else, dear?",ch,k=>{if(k>=left.length){start([["Villager","Off you go, then! Mind the cracked steps."]]);return}asked.add(left[k][0]);const pg=typeof left[k][1]==="function"?left[k][1]():left[k][1];start(pg,()=>menu(false))}]])};
+  menu(true);
 }
 // ---- the Clay Store (an interior, using the shop system) ----
 function clayKeeper(){
