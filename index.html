@@ -70,6 +70,7 @@
     <button class="button" data-cheat="c21road">2-1: delivery road</button>
     <button class="button" data-cheat="c21canal">2-1: canal ferry</button>
     <button class="button" data-cheat="c21upper">2-1: upper village</button>
+    <button class="button" data-cheat="c21gang">2-1: before the teapot gang</button>
     <button class="button" data-cheat="c21store">2-1: Clay Store courtyard</button>
     <button class="button" data-cheat="l3gems">Give all 3 gems</button>
     <button class="button" data-cheat="shield">Give Shell Shield</button>
@@ -233,7 +234,7 @@ function speakerPos(who){
   if(who==="Reel"&&scene==="beach")return[CHEST_X-camera,WRECK.y-60];
   if(who==="Reel")return[1000-camera,G-70];
   if(who==="The Blot")return[800-camera,DY-150];
-  if(scene==="clay"){const xx={"Villager":CL_VILL,"Shopkeeper":CL_KEEPER_OUT}[who];if(xx!=null)return[xx-camera,floorAt(xx)-92]}
+  if(scene==="clay"){const xx={"Villager":CL_VILL,"Shopkeeper":CL_KEEPER_OUT,"Big Teapot":GANG_X[1],"Teacup":GANG_X[0]}[who];if(xx!=null)return[xx-camera,floorAt(xx)-92]}
   {const sn=SCENE_NPCS[scene];if(sn&&sn[who]!=null)return[sn[who]-camera,who==="Waffles"?G-50:G-92]}
   if(scene==="festival"){
     if(who==="Nib")return[2770-camera,110];
@@ -3152,28 +3153,35 @@ const CL_POTS=[
 const CL_COINS=[[1815,G-272],[1840,G-282],[1865,G-272],[2085,G-335],[2255,G-365],[2425,G-325],[2945,G-150],[3945,shel(3930).y-125],[3975,shel(3930).y-135],
   [6620,G+196],[6665,G+196],[6720,G+196],[7280,G-125],[7435,G-195],[7760,G-235],[8190,G-435]];
 const CL_FOES=[[2000,1990,2230,G],[2350,2280,2520,G],[2700,2640,2880,G],[3000,2960,3230,G],[8120,8040,8250,G-300],[8330,8270,8420,G-300],[8500,8440,8580,G-300]];
-// no Save Blocks in this chapter: Sarah quietly gets a checkpoint (and the game saves) as she reaches each of these spots
+// no Save Blocks in this chapter: Sarah quietly gets a respawn checkpoint at each of these spots (the game does NOT save here)
 const CL_CHECKS=[[3290,G],[5300,G+220],[6790,G+220],[8040,G-300],[9780,G-620]];
 const CL_SPAWN=[{x:3390,dir:1,zone:[3250,5160],every:2.3,speed:520},{x:9630,dir:-1,zone:[8560,9720],every:2.7,speed:400}];
+// teacup and teapot monsters: [kind, x, min, max, base]. First hit cracks them, the second breaks them.
+const CL_WARES=[["cup",2200,2150,2290,G],["pot",3150,3070,3240,G],["cup",5350,5260,5430,G+220],["cup",7100,7020,7180,G],["pot",8250,8170,8400,G-300]];
+const GANG_X=[9960,10060,10160];
 const NOOK_STAIRS=[{x:500,y:G-75,w:74},{x:590,y:G-150,w:74},{x:680,y:G-225,w:74}],NOOK_LEDGE={x:790,y:G-300,w:150},NOOK_CHEST=880;
-const CL_KEEP=["started","sign","lchest","peek","villager","crossed","nook","nookStairs","nchest","hooked","ferried","ferry","stairs","order","monty","doorGone","done","keeperOut","fishN","lastCatch","pots","coins","dead","tipTip","rumbled","flipTip","inStore","cp"];
+const CL_KEEP=["started","sign","lchest","peek","villager","crossed","nook","nookStairs","nchest","hooked","ferried","ferry","stairs","order","monty","doorGone","done","keeperOut","fishN","lastCatch","pots","coins","dead","tipTip","rumbled","flipTip","inStore","cp","wdead","gang"];
 let l4={};
 function resetL4(){
   l4={started:false,sign:false,lchest:false,peek:false,villager:0,crossed:false,nook:false,nookStairs:false,nchest:false,hooked:false,ferried:false,ferry:1,ferryGo:null,hookT:0,
     stairs:false,order:false,monty:0,doorGone:false,done:false,keeperOut:false,fishN:0,lastCatch:"Canal Minnow",pots:CL_POTS.map(()=>false),coins:CL_COINS.map(()=>false),dead:CL_FOES.map(()=>false),
-    tipTip:false,rumbled:[false,false],flipTip:false,inStore:false,cp:-1,balls:[],sp:CL_SPAWN.map(()=>1.2),tips:new Map(),cracks:new Map(),pull:null,tearK:0,safe:{x:CL_START,y:G-s.h},fer:{x:FERRY.b,y:FERRY.y,w:FERRY.w,h:14,mover:1,ferry:1,px:FERRY.b,py:FERRY.y}};
+    tipTip:false,rumbled:[false,false],flipTip:false,inStore:false,cp:-1,wdead:CL_WARES.map(()=>false),gang:null,balls:[],sp:CL_SPAWN.map(()=>1.2),tips:new Map(),cracks:new Map(),pull:null,tearK:0,safe:{x:CL_START,y:G-s.h},fer:{x:FERRY.b,y:FERRY.y,w:FERRY.w,h:14,mover:1,ferry:1,px:FERRY.b,py:FERRY.y}};
   buildFoes4();
 }
 function buildFoes4(){l4.foes=CL_FOES.map(([x,min,max,base],i)=>({x,min,max,base,alive:!l4.dead[i],flat:l4.dead[i]?1:0,t:0,dir:i%2?1:-1,speed:46,flip:0,i}));
   // gulls over the canal (they swoop like the Watercolor Coast gulls)
+  l4.wares=CL_WARES.map(([kind,x,min,max,base],i)=>mkWare(kind,x,min,max,base,1,2,i));if(l4.wdead)l4.wares.forEach((f,i)=>{if(l4.wdead[i]){f.alive=false;f.flat=1}});
+  l4.gangFoes=(l4.gang==="fight"||l4.gang==="fight2")?mkGang():[];
   l4.gulls=[[5700,5600,5900],[6050,5900,6250],[6300,6150,6420]].map(([x,min,max],i)=>({type:"gull",x,min,max,base:G+220,y:G+70,alive:true,flat:0,t:i,dir:i%2?1:-1,mode:"fly",cool:1.5+i*1.4,carry:0}))}
 resetL4();
 Object.assign(LOOKS,{
   "Villager":{skin:"#e9b98f",hair:"#7a4a2a",style:"bun",top:"#d9a066",bottom:"#6b4a35",acc:"apron",apron:"#c98a5a"},
   "Shopkeeper":{skin:"#c98e64",hair:"#e8e4dc",style:"short",top:"#b5713f",bottom:"#4a4060",acc:"apron",apron:"#fff3d6",hat:"cap",hatCol:"#c8643c"}
 });
-Object.assign(speakerColor,{"Villager":"#b5713f","Shopkeeper":"#c8643c"});
-CREATURES.push({name:"Clay Creature",xp:2,where:"Wandering the pottery village (Level 2-1)",tip:"Too firm to stomp! Flip it onto its back with Nib (Q), then stomp its soft underside or jab it again. Touching it from the side costs 1 health.",draw:()=>sprite(0,0,54,42,()=>drawClayBody(false),{shadow:false})});
+Object.assign(speakerColor,{"Villager":"#b5713f","Shopkeeper":"#c8643c","Big Teapot":"#c0628a","Teacup":"#3f7fb5"});
+CREATURES.push({name:"Clay Creature",xp:2,where:"Wandering the pottery village (Level 2-1)",tip:"Stomp it or jab it with Nib. Touching it from the side costs 1 health.",draw:()=>sprite(0,0,54,42,()=>drawClayBody(false),{shadow:false})});
+CREATURES.push({name:"Teacup Monster",xp:1,where:"Hopping around the pottery village (Level 2-1)",tip:"Two hits: the first cracks it, the second breaks it. Stomp it or jab it with Nib.",draw:()=>sprite(0,0,52,42,()=>drawCupBody(0),{shadow:false})},
+  {name:"Teapot Monster",xp:2,where:"Stomping around the pottery village (Level 2-1)",tip:"Two hits: the first cracks it, the second breaks it. The big one near the Clay Store takes five!",draw:()=>sprite(0,0,68,56,()=>drawPotBody(0),{shadow:false})});
 Object.assign(INFO,{
   "Clay Order":["Mrs. Maple's order from the Clay Store: a heavy, neatly wrapped parcel of fresh clay for Inka's art store. Already paid for.",null],
   "Canal Minnow":["A skinny little Canal Minnow from the pottery village canal. Mr. Tally pays 3 coins.","Admire"],
@@ -3244,7 +3252,8 @@ function clayHurt(msg){const sf=l4.safe;s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake
   if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint. Paper is resilient like that.");return}if(real)sayToast(msg)}
 function ballFloor(x){let fy=floorAt(x);if(fy==null)return null;for(const b of CL_BLOCKS)if(b.h>60&&x>b.x-14&&x<b.x+b.w+14)fy=Math.min(fy,b.y);return fy}
 function updateBalls(dt){
-  CL_SPAWN.forEach((sp,i)=>{const inZone=center()>sp.zone[0]&&center()<sp.zone[1]&&scene==="clay";
+  const gangOn=/^(talk|talk2|fight|fight2)$/.test(l4.gang||"");
+  CL_SPAWN.forEach((sp,i)=>{const inZone=center()>sp.zone[0]&&center()<sp.zone[1]&&scene==="clay"&&!(i===1&&gangOn);
     if(!inZone){l4.sp[i]=Math.min(l4.sp[i],1.4);return}
     l4.sp[i]-=dt;if(l4.sp[i]<=0){l4.sp[i]=sp.every;l4.balls.push({x:sp.x,y:floorAt(sp.x)??G,dir:sp.dir,speed:sp.speed,rot:0,fall:false,vy:0});shake=Math.max(shake,.12);
       if(!l4.rumbled[i]){l4.rumbled[i]=true;sayToast(i===0?"Rumble rumble…":"Rumble rumble… from up the hill.")}}});
@@ -3277,8 +3286,8 @@ function updateFoes4(dt,oldFeet){
     f.t+=dt;if(f.flip>0)f.flip-=dt;else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}}
     const top=f.base-34;
     if(s.x+s.w>f.x-24&&s.x<f.x+24&&s.y+s.h>top&&s.y<f.base){
-      if(s.vy>0&&oldFeet<=top+14){if(f.flip>0){killFoe4(f);s.vy=-430}else{s.vy=-430;burst(f.x,top,6,["#fff","#e8a87c"]);if(!l4.flipTip){l4.flipTip=true;sayToast("THUNK! Too firm to stomp.")}}}
-      else if(!(f.flip>0))hurt3(f.x,"Ouch! A clay creature bumps you. (-1 health)")}}
+      if(s.vy>0&&oldFeet<=top+14){killFoe4(f);s.vy=-430}
+      else hurt3(f.x,"Ouch! A clay creature bumps you. (-1 health)")}}
 }
 function updateGulls4(dt,oldFeet){
   const near=center()>5380&&center()<6640;
@@ -3291,20 +3300,100 @@ function updateGulls4(dt,oldFeet){
       if(f.mode==="swoop"&&!f.stole){f.stole=true;if(coins>0){coins--;f.carry=(f.carry||0)+1;sayToast("SQUAWK! A Gull snatched a coin!")}
         else if(s.inv<=0){s.inv=1.3;shake=.3;const real=hurtHP();if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint.")}else if(real)sayToast("SQUAWK! Pecked by a Gull! (-1 health)")}}}}
 }
+function mkWare(kind,x,min,max,base,sc,hp,i){return{kind,x,min,max,base,sc,hp,max:hp,i,alive:true,flat:0,t:i*.7,dir:i%2?1:-1,inv:0,hop:0,hv:0,w:kind==="pot"?60:44,h:kind==="pot"?50:36,speed:kind==="pot"?40:60}}
+function mkGang(){const b=G-620;return[mkWare("pot",GANG_X[1],9700,10380,b,1.9,5,-1),mkWare("cup",GANG_X[0],9700,10380,b,1.35,3,-2),mkWare("cup",GANG_X[2],9700,10380,b,1.35,3,-3)].map(f=>({...f,gang:1}))}
+const allWares=()=>[...(l4.wares||[]),...(l4.gangFoes||[])];
+function hitWare(f){if(f.inv>0||!f.alive)return;f.hp--;f.inv=.45;shake=Math.max(shake,.15);const top=f.base-f.h*f.sc;
+  if(f.hp>0){burst(f.x,top+10,8,["#fff","#cfd8e0",INK]);return}
+  f.alive=false;burst(f.x,f.base-f.h*f.sc/2,22,["#fff","#f4f1ea","#6aa6d8","#e8b0c8",INK]);
+  if(f.gang){coins+=f.kind==="pot"?5:2}else{l4.wdead[f.i]=true;coins++}
+  gainXP(f.kind==="pot"?"Teapot Monster":"Teacup Monster",f.x,top-20);
+  if(f.gang&&l4.gangFoes.every(g=>!g.alive))setTimeout(gangBeaten,700)}
+function updateWares(dt,oldFeet){
+  for(const f of allWares()){if(!f.alive){f.flat=Math.min(1,f.flat+dt*3);continue}
+    f.t+=dt;f.inv=Math.max(0,f.inv-dt);
+    if(f.gang){f.dir=Math.sign(center()-f.x)||f.dir;f.x+=f.dir*f.speed*(f.kind==="pot"?1.3:1.6)*dt;f.x=clamp(f.x,f.min,f.max);
+      if(f.kind==="cup"&&f.hop===0&&f.t%1.6<dt){f.hv=-420}}
+    else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}
+      if(f.kind==="cup"&&f.hop===0&&f.t%2.4<dt)f.hv=-300}
+    if(f.hv||f.hop<0){f.hv+=1450*dt;f.hop+=f.hv*dt;if(f.hop>=0){f.hop=0;f.hv=0}}
+    const hw=(f.w/2-4)*f.sc,top=f.base+f.hop-f.h*f.sc;
+    if(s.x+s.w>f.x-hw&&s.x<f.x+hw&&s.y+s.h>top&&s.y<f.base+f.hop){
+      if(s.vy>0&&oldFeet<=top+16){s.vy=-460;hitWare(f)}
+      else if(f.inv<=0)hurt3(f.x,f.kind==="pot"?"Ow! Hot teapot! (-1 health)":"Ow! A teacup bonks you. (-1 health)")}}
+  if((l4.gang==="fight"||l4.gang==="fight2")&&s.x>9600&&s.y+s.h<=G-600){s.x=clamp(s.x,9680,10420-s.w)}
+}
+function drawCupBody(k){
+  g.save();g.translate(4,2);
+  g.fillStyle="#f4f1ea";g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.moveTo(2,4);g.lineTo(40,4);g.quadraticCurveTo(38,30,28,33);g.lineTo(14,33);g.quadraticCurveTo(4,30,2,4);g.closePath();g.fill();g.stroke();
+  g.lineWidth=4;g.beginPath();g.arc(40,15,7,-1.3,1.4);g.stroke();g.strokeStyle="#f4f1ea";g.lineWidth=2;g.beginPath();g.arc(40,15,7,-1.3,1.4);g.stroke();
+  g.fillStyle="#6aa6d8";g.fillRect(3,6,36,4);g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.ellipse(21,4,19,3,0,0,7);g.stroke();
+  g.fillStyle="#fff";circle(14,17,4.5);g.fill();g.stroke();circle(28,17,4.5);g.fill();g.stroke();g.fillStyle=INK;circle(15,18,2);g.fill();circle(27,18,2);g.fill();
+  g.lineWidth=2.5;g.beginPath();g.moveTo(9,10);g.lineTo(18,13);g.moveTo(33,10);g.lineTo(24,13);g.stroke();
+  g.fillStyle="#cfe3f2";g.beginPath();g.ellipse(21,35,15,3.5,0,0,7);g.fill();g.stroke();
+  crackLines(k,[[8,22,14,28,10,32],[30,8,26,16,32,24],[18,26,23,31,20,34]]);g.restore()}
+function drawPotBody(k){
+  g.save();g.translate(4,2);g.strokeStyle=INK;g.lineWidth=2.5;
+  g.fillStyle="#e8b0c8";g.beginPath();g.moveTo(46,26);g.quadraticCurveTo(58,22,60,8);g.lineTo(55,8);g.quadraticCurveTo(54,18,46,20);g.closePath();g.fill();g.stroke();
+  g.lineWidth=4;g.beginPath();g.arc(6,26,9,1.8,4.6);g.stroke();
+  g.lineWidth=2.5;g.fillStyle="#e8b0c8";g.beginPath();g.ellipse(26,28,22,18,0,0,7);g.fill();g.stroke();
+  g.fillStyle="#d48aa8";g.beginPath();g.ellipse(26,11,12,4,0,0,7);g.fill();g.stroke();g.beginPath();circle(26,6,3.5);g.fill();g.stroke();
+  g.fillStyle="#fff";g.fillRect(8,30,36,3);
+  g.fillStyle="#fff";circle(19,23,5);g.fill();g.stroke();circle(33,23,5);g.fill();g.stroke();g.fillStyle=INK;circle(20,24,2.2);g.fill();circle(32,24,2.2);g.fill();
+  g.lineWidth=2.5;g.beginPath();g.moveTo(13,15);g.lineTo(23,19);g.moveTo(39,15);g.lineTo(29,19);g.moveTo(20,36);g.quadraticCurveTo(26,32,32,36);g.stroke();
+  crackLines(k,[[10,26,16,32,12,38],[38,30,34,36,40,42],[24,40,28,44,25,46],[30,12,34,16,31,19],[6,20,12,22,8,28]]);g.restore()}
+function crackLines(k,L){g.strokeStyle=INK;g.lineWidth=1.6;for(let i=0;i<Math.min(k,L.length);i++){const c=L[i];g.beginPath();g.moveTo(c[0],c[1]);g.lineTo(c[2],c[3]);g.lineTo(c[4],c[5]);g.stroke()}}
+function drawWare(f){const sc=f.sc,w=(f.w+8)*sc,h=(f.h+6)*sc,k=f.max-f.hp,body=()=>{g.scale(sc,sc);(f.kind==="pot"?drawPotBody:drawCupBody)(f.gang?k:k*2)};
+  if(!f.alive){if(f.flat<1)sprite(f.x,f.base+2,w,h,body,{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat});return}
+  groundShadow(f.x,f.base+2,f.w*sc*.4);if(f.inv>0&&Math.floor(f.inv*20)%2)return;
+  sprite(f.x,f.base+2+f.hop,w,h,body,{sx:f.dir>0?1:-1,sy:1+Math.sin(f.t*8)*.03})}
+// ---- the teapot gang (just before the Clay Store) ----
+function gangTalk(){
+  l4.gang="talk";l4.balls=[];const n=l4.pots.filter(Boolean).length;s.face=1;
+  const fight=()=>start([["Big Teapot","Then you know what happens next. Teacups, GET HER!"]],()=>{l4.gang="fight";l4.gangFoes=mkGang()});
+  const ask3=()=>start([["Big Teapot","Then WHO was it?!",["A clay ball did it!","It was the person at the beginning of the floor!","…Fine. It was me."],k=>{if(k===1)later();else if(k===0)start([["Big Teapot","A CLAY BALL? Nice try."]],fight);else fight()}]]);
+  const ask2=()=>start([["Teacup","You've got pot crumbs on your shoes!",["Nope. Not me.","Okay, okay. It was me."],k=>{if(k===0)ask3();else fight()}]]);
+  const later=()=>start([
+    ["Big Teapot","The villager by the drying rack?! I KNEW she had a shifty look."],
+    ["Teacup","Let's go have a word with her."],
+    ["Big Teapot","And YOU. If we find out you fibbed, we'll be back."],
+    ["Narrator","The teapot gang clatters off down the hill."],
+    ["Dab","…Sarah."],["Sarah","I know. I know."]],()=>{l4.gang="later"});
+  start([
+    ["Narrator","A rattle of china. A big teapot and two teacups march out from behind the kilns and block the way to the Clay Store."],
+    ["Big Teapot","HALT! You're the one who's been breaking pots all the way up the hill!"],
+    ["Teacup",n?n+" of our cousins! "+(n===1?"Smashed!":"All smashed!"):"We heard the crashing from up here!"],
+    ["Big Teapot","We're here for REVENGE.",["That wasn't me!","Yes, it was me. Sorry!"],k=>{if(k===0)ask2();else fight()}]]);
+}
+function gangBeaten(){
+  if(l4.gang==="fight"){l4.gang="won";start([["Big Teapot","Okay! Okay! We give up. Go do your shopping."],["Teacup","We're going to go lie down in a cupboard."]],()=>sayToast("The teapot gang is broken up!"));return}
+  if(l4.gang==="fight2"){l4.gang="won2";start([["Narrator","The last teacup topples over with a sad little clink."],["Sarah","Now. Where were we? Oh right. Our door."]],()=>finishL4())}}
+function gangReturns(){
+  l4.gang="talk2";l4.balls=[];s.face=1;
+  start([
+    ["Narrator","A rattle of china, coming back up the hill. The teapot gang is back, and they look even crankier."],
+    ["Big Teapot","We asked the villager. She's been at her drying rack all day!"],
+    ["Teacup","You FIBBED."],
+    ["Sarah","…Okay. That was me. I'm sorry about your cousins."],
+    ["Big Teapot","Too late for sorry! Teacups, GET HER!"]],()=>{l4.gang="fight2";l4.gangFoes=mkGang()});
+}
+function finishL4(){l4.done=true;flash=.4;setTimeout(()=>{complete=true;showEndScreen=true;endT=0},500)}
 function killFoe4(f){f.alive=false;l4.dead[f.i]=true;burst(f.x,f.base-20,16,["#c8643c","#e8a87c","#fff",INK]);coins++;gainXP("Clay Creature",f.x,f.base-60)}
 function l4Jab(hx){if(scene!=="clay")return false;let hit=false;
   for(const f of l4.gulls){if(f.alive&&Math.abs(f.x-hx)<46&&s.y+s.h>f.y-80&&s.y<f.y+20){hit=true;killFoe(f)}}
   for(const f of l4.foes){if(!f.alive)continue;if(Math.abs(f.x-hx)<46&&s.y+s.h>f.base-90&&s.y<f.base+10){hit=true;
-    if(!(f.flip>0)){f.flip=3.2;burst(f.x,f.base-20,10,["#fff","#e8a87c","#b98ad8"])}else killFoe4(f)}}
+    killFoe4(f)}}
+  for(const f of allWares())if(f.alive&&Math.abs(f.x-hx)<24*f.sc+22&&s.y+s.h>f.base-f.h*f.sc-60&&s.y<f.base+10){hit=true;hitWare(f)}
   return hit}
 function updateClay(dt,oldFeet){
   if(scene==="nook"){s.x=clamp(s.x,40,W-40-s.w);return}
   if(s.ground&&(!s.plat||(!s.plat.mover&&!s.plat.tip&&!s.plat.ferry&&!s.plat.crack)))l4.safe={x:s.x,y:s.y};
-  CL_CHECKS.forEach(([x,y],i)=>{if(i>l4.cp&&s.ground&&!s.plat&&center()>x&&Math.abs(s.y+s.h-y)<6){l4.cp=i;checkpoint=s.x;checkpointY=s.y;checkpointScene="clay";setTimeout(saveGame,0)}});
+  CL_CHECKS.forEach(([x,y],i)=>{if(i>l4.cp&&s.ground&&!s.plat&&center()>x&&Math.abs(s.y+s.h-y)<6){l4.cp=i;checkpoint=s.x;checkpointY=s.y;checkpointScene="clay"}});
   for(const gp of CL_GAPS)if(center()>gp.x0&&center()<gp.x1&&s.y+s.h>gp.y){
     if(gp.kind==="water"){burst(center(),CL_WATER,20,["#7cc6f2","#fff"]);clayHurt("SPLASH! Sarah fishes herself out of the canal. (-1 health)")}
     else clayHurt("Oof! Down into the collection pit. Sarah climbs back out, a little clay-colored. (-1 health)");return}
-  updateTips(dt);updateCracks(dt);updatePots(oldFeet);updateBalls(dt);updateFoes4(dt,oldFeet);updateGulls4(dt,oldFeet);
+  updateTips(dt);updateCracks(dt);updatePots(oldFeet);updateBalls(dt);updateFoes4(dt,oldFeet);updateWares(dt,oldFeet);updateGulls4(dt,oldFeet);
+  if(l4.gang==null&&!l4.order&&s.ground&&center()>9700&&scene==="clay"){gangTalk();return}
   if(!l4.crossed&&center()>5220)l4.crossed=true;
   CL_COINS.forEach(([x,y],i)=>{if(!l4.coins[i]&&Math.abs(center()-x)<22&&s.y<y+12&&s.y+s.h>y-12){l4.coins[i]=true;coins++;burst(x,y,8,["#f4c84f","#fff"])}});
   // crawl (duck + walk) under the footprint shelter to find the hidden nook
@@ -3333,7 +3422,7 @@ function clayInteract(){
   if(c>5440&&c<5560&&l4.ferry>.5&&l4.ferryGo==null)return[hasReel?"Hook the ferry's ring with Reel":"Look at the ferry",hookFerry];
   if(c>6530&&c<6610&&l4.ferry<.5&&l4.ferryGo==null)return[hasReel?"Hook the ferry with Reel":"Look at the ferry",hookFerry];
   if(near(CL_DOCK,40)&&hasReel)return["Cast your line",()=>castLine(canalSpot())];
-  if(near(CL_STORE,30)&&!l4.done)return["Go inside the Clay Store",()=>{l4.inStore=true;enterShop("clay")}];
+  if(near(CL_STORE,30)&&!l4.done&&l4.gang!=="fight"&&l4.gang!=="fight2"&&l4.gang!=="talk2"&&!l4.order)return["Go inside the Clay Store",()=>{l4.inStore=true;enterShop("clay")}];
   if(near(CL_STORE,30)&&l4.done)return["Go inside the Clay Store",()=>enterShop("clay")];
   if(l4.keeperOut&&near(CL_KEEPER_OUT,34))return T("Talk to the Shopkeeper",keeperOutside);
   return null;
@@ -3408,7 +3497,7 @@ function montyTakesDoor(){
     ["Nib","So… we're stuck here?"],
     ["Shopkeeper","That's the fellow who bought all my gray clay this morning! He went off that way, past the kilns."],
     ["Sarah","Then that's where we're going. We're getting our door back."]
-  ],()=>{l4.monty=2;l4.doorGone=true;l4.done=true;flash=.4;setTimeout(()=>{complete=true;showEndScreen=true;endT=0},500)});
+  ],()=>{l4.monty=2;l4.doorGone=true;if(l4.gang==="later")setTimeout(gangReturns,300);else finishL4()});
 }
 function keeperOutside(){start([["Shopkeeper","He went off past the kilns, that way. To the right! Good luck, dear. And don't drop that clay."]])}
 function fishCatchCanal(){l4.fishN++;const n=rollFish("canal",fish.bait);l4.lastCatch=n;addItem(n);burst(fish.bx,CL_WATER+6,18,["#7cc6f2","#fff","#f4c84f"]);
@@ -3419,9 +3508,11 @@ function objectiveL4(){
   if(l4.done)return"Follow the stranger in the gray top hat past the kilns. (Chapter 2-2 is still being drawn!)";
   if(scene==="shop")return"Pick up Mrs. Maple's clay order from the Shopkeeper.";
   if(scene==="nook")return l4.nchest?"Crawl back out (far left) to the delivery road.":l4.nookStairs?"Climb the doodle staircase to the chest.":"Use Dab (Q) to look for a way up to that ledge.";
+  if(l4.gang==="fight"||l4.gang==="fight2")return"Break up the teapot gang!";
+  if(l4.order)return"See who's down by the door.";
   return"Pick up Mrs. Maple's clay order at the Clay Store.";
 }
-function beatsL4(){return[["Restore the faded sign",l4.sign],["Find the chest behind the landing (secret)",l4.lchest],["Make it down the delivery road",l4.crossed],["Find the hidden pottery nook (secret)",l4.nchest],["Ride the ferry across the canal",l4.ferried],["Restore the faded staircase",l4.stairs],["Pick up the clay order",l4.order],["See who was at the door",l4.done]]}
+function beatsL4(){return[["Restore the faded sign",l4.sign],["Find the chest behind the landing (secret)",l4.lchest],["Make it down the delivery road",l4.crossed],["Find the hidden pottery nook (secret)",l4.nchest],["Ride the ferry across the canal",l4.ferried],["Restore the faded staircase",l4.stairs],["Deal with the teapot gang",l4.gang==="won"||l4.gang==="won2"],["Pick up the clay order",l4.order],["See who was at the door",l4.done]]}
 
 // ---- drawing ----
 const CL_HOUSES=[[0,"#f0c9a0","#c8643c"],[260,"#e8b38a","#b5523a"],[520,"#f3d7b5","#c8643c"],[800,"#e2a77f","#a8483a"],[1060,"#f0c9a0","#b5523a"],[1300,"#e8b38a","#c8643c"]];
@@ -3592,6 +3683,8 @@ function drawClay(){
   for(const f of l4.foes){if(f.x<camera-60||f.x>camera+W+60)continue;
     if(!f.alive){if(f.flat<1)sprite(f.x,f.base+2,54,42,()=>drawClayBody(false),{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat});continue}
     groundShadow(f.x,f.base+2,20);sprite(f.x,f.base+2,54,42,()=>drawClayBody(f.flip>0),{sx:f.dir>0?-1:1,sy:1+Math.sin(f.t*8)*.04})}
+  for(const f of allWares())if(f.x>camera-80&&f.x<camera+W+80)drawWare(f);
+  if(l4.gang==="talk"||l4.gang==="talk2")GANG_X.forEach((x,i)=>drawWare({...mkWare(i===1?"pot":"cup",x,x,x,G-620,i===1?1.9:1.35,1,0),dir:-1,t:time}));
   for(const f of l4.gulls)if(f.x>camera-60&&f.x<camera+W+60)drawFoe(f);
   drawParticles();drawSarah();
   if(fish.ph>0)drawFishing(CL_WATER+2,l4.lastCatch);
@@ -3658,6 +3751,7 @@ const CHEATS={
   c21road:()=>{cheat4(3220,G);l4.sign=true},
   c21canal:()=>{cheat4(5480,G+220);l4.sign=l4.crossed=true},
   c21upper:()=>{cheat4(7040,G);l4.sign=l4.crossed=l4.hooked=l4.ferried=l4.stairs=true;l4.ferry=1},
+  c21gang:()=>{cheat4(9560,floorAt(9560));l4.sign=l4.crossed=l4.hooked=l4.ferried=l4.stairs=true;l4.ferry=1},
   c21store:()=>{cheat4(9760,G-620);l4.sign=l4.crossed=l4.hooked=l4.ferried=l4.stairs=true;l4.ferry=1},
   l3replay:()=>{cheatHub();dlg.on=false;startLevel3(true);dlg.on=false},
   l3wreck:()=>{cheat3();l3.dock=true;cheatBeach(CHEST_X+50,WRECK.y)},
