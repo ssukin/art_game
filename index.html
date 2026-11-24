@@ -3287,7 +3287,7 @@ function updateGulls4(dt,oldFeet){
 function mkWare(kind,x,min,max,base,sc,hp,i){return{kind,x,min,max,base,sc,hp,max:hp,i,alive:true,flat:0,t:i*.7,dir:i%2?1:-1,inv:0,hop:0,hv:0,w:kind==="pot"?60:44,h:kind==="pot"?50:36,speed:kind==="pot"?40:60}}
 function mkGang(){const b=G-620;return[mkWare("pot",GANG_X[1],9700,10380,b,1.9,5,-1),mkWare("cup",GANG_X[0],9700,10380,b,1.35,3,-2),mkWare("cup",GANG_X[2],9700,10380,b,1.35,3,-3)].map(f=>({...f,gang:1}))}
 const allWares=()=>[...(l4.wares||[]),...(l4.gangFoes||[])];
-function hitWare(f){if(f.inv>0||!f.alive)return;f.hp--;f.inv=.45;shake=Math.max(shake,.15);const top=f.base-f.h*f.sc;
+function hitWare(f){if(f.inv>0||!f.alive)return;f.hp--;f.inv=.45;const top=f.base-f.h*f.sc;
   if(f.hp>0){burst(f.x,top+10,8,["#fff","#cfd8e0",INK]);return}
   f.alive=false;burst(f.x,f.base-f.h*f.sc/2,22,["#fff","#f4f1ea","#6aa6d8","#e8b0c8",INK]);
   if(f.gang){coins+=f.kind==="pot"?5:2}else{l4.wdead[f.i]=true;coins++}
@@ -3329,8 +3329,8 @@ function drawPotBody(k){
 function crackLines(k,L){g.strokeStyle=INK;g.lineWidth=1.6;for(let i=0;i<Math.min(k,L.length);i++){const c=L[i];g.beginPath();g.moveTo(c[0],c[1]);g.lineTo(c[2],c[3]);g.lineTo(c[4],c[5]);g.stroke()}}
 function drawWare(f){const sc=f.sc,w=(f.w+8)*sc,h=(f.h+6)*sc,k=f.max-f.hp,body=()=>{g.scale(sc,sc);(f.kind==="pot"?drawPotBody:drawCupBody)(f.gang?k:k*2)};
   if(!f.alive){if(f.flat<1)sprite(f.x,f.base+2,w,h,body,{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat});return}
-  groundShadow(f.x,f.base+2,f.w*sc*.4);if(f.inv>0&&Math.floor(f.inv*20)%2)return;
-  sprite(f.x,f.base+2+f.hop,w,h,body,{sx:f.dir>0?1:-1,sy:1+Math.sin(f.t*8)*.03})}
+  groundShadow(f.x,f.base+2,f.w*sc*.4);
+  sprite(f.x,f.base+2+f.hop,w,h,body,{sx:f.dir>0?1:-1})}
 // ---- the teapot gang (just before the Clay Store) ----
 function gangTalk(){
   l4.gang="talk";l4.balls=[];const n=l4.pots.filter(Boolean).length;s.face=1;
