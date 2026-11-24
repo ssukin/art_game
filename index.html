@@ -3472,7 +3472,7 @@ function updateClay(dt,oldFeet){
   if(!l4.crossed&&center()>5220)l4.crossed=true;
   CL_COINS.forEach(([x,y],i)=>{if(!l4.coins[i]&&Math.abs(center()-x)<22&&s.y<y+12&&s.y+s.h>y-12){l4.coins[i]=true;coins++;burst(x,y,8,["#f4c84f","#fff"])}});
   // crawl (duck + walk) under the footprint shelter to find the hidden nook
-  if(s.duck&&s.ground&&!s.plat&&Math.abs(center()-CL_NOOK)<26&&(keys.has("a")||keys.has("d")||keys.has("ArrowLeft")||keys.has("ArrowRight"))){enterNook();return}
+  if(s.duck&&s.ground&&!s.plat&&Math.abs(center()-CL_NOOK)<40&&(keys.has("a")||keys.has("d")||keys.has("ArrowLeft")||keys.has("ArrowRight"))){enterNook();return}
   if(s.x<=CL_MIN+1&&(keys.has("a")||keys.has("ArrowLeft"))&&!l4.edgeTip){l4.edgeTip=true;sayToast("Just a railing and a long drop to the rooftops. Nothing more back this way.")}
   if(s.x+s.w>=CL_W-1&&l4.done&&!l4.endTip){l4.endTip=true;sayToast("The path past the kilns is still being drawn. (Chapter 2-2 is coming soon!)")}
 }
@@ -3511,10 +3511,10 @@ function nookInteract(){
 }
 function dabClay(){
   if(scene==="nook"){if(!l4.nookStairs&&center()<760){l4.nookStairs=true;for(const p of NOOK_STAIRS)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#f4c84f"]);start([["Dab","A doodle staircase! Somebody drew a way up to that ledge and then forgot about it."],["Dab","There's a chest up there. Climb!"]]);return true}return false}
-  if(!l4.sign&&Math.abs(center()-CL_SIGN)<260){l4.sign=true;burst(CL_SIGN,G-110,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming!"],["Sign","CLAY STORE →"],["Sarah","To the right it is."]]);return true}
-  if(Math.abs(center()-CL_NOOK)<220&&s.y+s.h>floorAt(CL_NOOK)-60){burst(CL_NOOK,floorAt(CL_NOOK)-8,14,["#ff8fb3","#fff","#f4c84f"]);
+  if(!l4.sign&&Math.abs(center()-CL_SIGN)<340){l4.sign=true;burst(CL_SIGN,G-110,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming!"],["Sign","CLAY STORE →"],["Sarah","To the right it is."]]);return true}
+  if(Math.abs(center()-CL_NOOK)<340){burst(CL_NOOK,floorAt(CL_NOOK)-8,14,["#ff8fb3","#fff","#f4c84f"]);
     start([["Dab","Look! Little pink footprints, going right under that shelter."],["Dab","Sarah, you could crouch down and crawl through there!"]]);return true}
-  if(!l4.stairs&&center()>6620&&center()<7010){l4.stairs=true;for(const p of CL_PLATS)if(p.faded)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#c58a52"]);start([["Dab","Missing steps? I can fix that. A little brown, a little more brown…"]]);return true}
+  if(!l4.stairs&&center()>6540&&center()<7090){l4.stairs=true;for(const p of CL_PLATS)if(p.faded)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#c58a52"]);start([["Dab","Missing steps? I can fix that. A little brown, a little more brown…"]]);return true}
   return false;
 }
 function clayReelQ(){const c=center();
