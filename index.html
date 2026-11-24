@@ -655,6 +655,7 @@ window.addEventListener("keydown",e=>{
   if(mini){if((k===" "||k==="Enter")&&!e.repeat)miniPress();return}
   if(book){if((k===" "||k==="Enter"||k==="Escape")&&!e.repeat&&book.t>.4)closeBook();return}
   if(lvlUp){if((k===" "||k==="Enter")&&!e.repeat)closeLvl();return}
+  if(deadT>0){if(deadT>1&&(k===" "||k==="Enter")&&!e.repeat)finishCrumple();return}
   if(showEndScreen){if(endT>1&&(k===" "||k==="Enter")&&!e.repeat){if(level===1)startLevel2();else if(level===2)startLevel3();else if(level===3)returnHome();else if(level===4)afterL4End()}return}
   if(dlg.on){const p=dlg.pages[dlg.page];if(p[2]&&dlg.chars>=p[1].length){const n=p[2].length;if(k==="ArrowUp"||k==="w")dlg.choice=(dlg.choice+n-1)%n;if(k==="ArrowDown"||k==="s")dlg.choice=(dlg.choice+1)%n}
     if((k===" "||k==="Enter")&&!e.repeat)advance();return}
@@ -690,6 +691,7 @@ const onLadder=()=>scene==="resident"&&ladderGiven&&Math.abs(center()-478)<34;
 // ---------------------------------------------------------------------------
 function update(dt){
   if(titleMenu)return;
+  if(deadT>0){deadT+=dt;if(deadT>3)finishCrumple();return}
   for(const p of xpPops)p.t+=dt;xpPops=xpPops.filter(p=>p.t<1.4);
   if(mini){updateMini(dt);return}
   if(book){book.t+=dt;return}
@@ -753,7 +755,7 @@ function update(dt){
       const top=G-32;if(s.x+s.w>m.x-20&&s.x<m.x+20&&s.y+s.h>top&&s.y<G){
         if(s.vy>0&&oldFeet<=top+14){m.alive=false;s.vy=-430;burst(m.x,top,14,[INK,"#5b5277","#fff"]);spill(m.x,top-6,"coin",null,m.dir*70);gainXP("Smudge",m.x,top-40);if(!firstStomp){firstStomp=true;sayToast("Stomped a Smudge! It's flat now — and a coin pops out!")}}
         else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;
-          if(health<=0){health=maxHealth;s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}
+          if(health<=0){crumple()}else sayToast("Ouch! Smudged! (-1 health)")}}
     }
   }
   if(scene==="festival"){if(festIntroCheck()){updateAction();return}
@@ -1450,7 +1452,7 @@ function updateFestival(dt,oldFeet){
     m.x+=m.dir*m.speed*dt;if(m.x<m.min||m.x>m.max){m.dir*=-1;m.x=clamp(m.x,m.min,m.max)}
     const top=m.base-32;if(s.x+s.w>m.x-20&&s.x<m.x+20&&s.y+s.h>top&&s.y<m.base){
       if(s.vy>0&&oldFeet<=top+14){m.alive=false;s.vy=-430;burst(m.x,top,14,[INK,"#5b5277","#fff"]);coins+=3;gainXP("Smudge",m.x,top-40);sayToast("Stomped the sky Smudge! +3 coins.")}
-      else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;if(health<=0){health=maxHealth;scene=checkpointScene;s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0;sayToast("Sarah crumples… then uncrumples at the Save Block.")}else sayToast("Ouch! Smudged! (-1 health)")}}}}
+      else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;if(health<=0){crumple()}else sayToast("Ouch! Smudged! (-1 health)")}}}}
   if(l2.doorY!=null&&l2.doorY<FLOOR2.y){l2.doorY=Math.min(FLOOR2.y,l2.doorY+dt*900);if(l2.doorY>=FLOOR2.y){shake=.6;burst(DOOR_X,FLOOR2.y-10,20,["#5b5277","#fff","#b98ad8"])}}
   if(!l2.cardTaken&&Math.abs(center()-640)<26){l2.cardTaken=true;addItem("Recipe Card");burst(640,G-64,16,["#f4c84f","#fff","#e5577b"]);sayToast("Found a Recipe Card: Turnip-Butter Tonic! (Turnip + Butter Pat → Health Potion.) Chef Crumb can cook it.")}
   if(l2.trail&&!l2.nibMet&&Math.abs(center()-2770)<40&&s.y+s.h<=170&&s.y+s.h>40){meetNib();return}
@@ -1465,7 +1467,7 @@ function updateFestival(dt,oldFeet){
   }
   if(!l2.spikeDown&&!l2.results){
     const wall=SPIKE_X-30;if(s.x+s.w>wall){s.x=wall-s.w;if(s.inv<=0){health--;s.inv=1.3;s.vy=-300;s.x-=40;shake=.35;burst(wall,s.y+30,10,["#7a5c99","#fff"]);
-      if(health<=0){health=maxHealth;s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0;sayToast("Sarah crumples… then uncrumples at the Save Block.")}else sayToast("OUCH! Prickles is all spikes. (-1 health)")}}
+      if(health<=0){crumple()}else sayToast("OUCH! Prickles is all spikes. (-1 health)")}}
     if(center()<SPIKE_X-200)l2.spikeTalk=0;
     if(!l2.spikeTalk&&center()>SPIKE_X-150&&onFloor()){l2.spikeTalk=1;spikeChat();return}
   }
@@ -1484,7 +1486,7 @@ function updateFestival(dt,oldFeet){
       const top=G-32;if(s.x+s.w>m.x-20&&s.x<m.x+20&&s.y+s.h>top&&s.y<G){
         if(s.vy>0&&oldFeet<=top+14){m.alive=false;s.vy=-430;burst(m.x,top,14,[INK,"#5b5277","#fff"]);spill(m.x,top-6,"coin",null,m.dir*70);gainXP("Smudge",m.x,top-40);if(m.key)dropDoorKey(m)}
         else if(s.inv<=0){health--;s.inv=1.3;s.vy=-320;s.x+=center()<m.x?-50:50;shake=.3;
-          if(health<=0){health=maxHealth;s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0;sayToast("Sarah crumples up… then uncrumples at the Save Block. Paper is resilient like that.")}else sayToast("Ouch! Smudged! (-1 health)")}}}
+          if(health<=0){crumple()}else sayToast("Ouch! Smudged! (-1 health)")}}}
     l2.drain=Math.min(.9,l2.drain+alive*.03*dt);
     if(!alive){l2.fightDone=true;start([["Nib","Pointy justice!"],["Dab","Look — the painting's getting its color back!"]],()=>{l2.maple=camera-60;l2.dogGone=true;l2.dogXfer=0})}
   }
@@ -2075,7 +2077,7 @@ function updateFishing(dt){
 function updateLake(){
   LAKE_COINS.forEach(([x,y],i)=>{if(!l2.lakeCoins[i]&&Math.abs(center()-x)<22&&s.y<y+10&&s.y+s.h>y-10){l2.lakeCoins[i]=1;coins++;burst(x,y,8,["#f4c84f","#fff"]);if(l2.lakeCoins.every(Boolean))sayToast("Got all 5 coins from the lakeside tree!")}});
   if(s.y>G+40){burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=DOCK.x+DOCK.w-120;s.y=G-s.h;s.vy=0;shake=.3;health--;
-    if(health<=0){health=maxHealth;sayToast("SPLASH! Sarah crumples… soggily… then uncrumples back on the dock.")}
+    if(health<=0){crumple()}
     else sayToast("SPLASH! Sarah fishes herself out of the lake. (-1 health) 0/10, would not recommend.")}
 }
 function drawLake(){
@@ -2274,10 +2276,18 @@ function startLevel3(replay){
     l3.dig[DIGS.findIndex(d=>d.item==="Heart Necklace")]=2;hasReel=true}
 }
 function saveL3(x,y){setTimeout(saveGame,0);checkpoint=x-s.w/2;checkpointY=y-s.h;checkpointScene=scene;health=maxHealth;burst(x,y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back to this Save Block.")}
+// Sarah runs out of health: show a notice, then load the last save made at a Save Block (no other saves exist)
+let deadT=0;
+function crumple(){if(deadT>0)return;deadT=.001;health=0;s.vx=0;s.vy=0;dlg.on=false;invOpen=false}
+function finishCrumple(){deadT=0;const d=readSave();
+  if(d){applySave(d);sayToast("Back at your last Save Block.")}else{health=maxHealth;if(level===3||level===4)goScene(checkpointScene,checkpoint+s.w/2,checkpointY??G-s.h);else{scene=checkpointScene;s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0}}}
+function drawCrumple(){const a=Math.min(1,deadT*3);g.save();g.globalAlpha=a*.55;g.fillStyle="#2b2540";g.fillRect(0,0,W,H);g.globalAlpha=a;g.translate(W/2,H/2);
+  cut(()=>rr(-250,-80,500,160,18),"#fffdf6",{edge:5});g.textAlign="center";g.fillStyle="#e5577b";g.font="bold 30px "+FONT;g.fillText("Sarah crumpled up!",0,-22);
+  g.fillStyle=INK;g.font="18px "+FONT;g.fillText("Back to your last Save Block…",0,14);if(deadT>1){g.font="14px "+FONT;g.fillStyle="#8a7f9a";g.fillText("Press Space",0,48)}g.restore()}
 function respawnL3(){health=maxHealth;goScene(checkpointScene,checkpoint+s.w/2,checkpointY??G-s.h);if(l3.boss&&!l3.bossDone){l3.boss=null}}
 function hurtHP(n=1){if(shield>0){shield--;burst(center(),s.y+30,16,["#7cc6f2","#fff","#b98ad8"]);sayToast(shield===0?"CRACK! The Shell Shield breaks away. It did its best!":"The Shell Shield blocks the hit! (1 more hit left)");return false}health=Math.max(0,health-n);return true}
 function hurt3(fromX,msg,n=1){if(s.inv>0)return;s.inv=1.3;s.vy=-320;s.x+=center()<fromX?-46:46;shake=.3;const real=hurtHP(n);
-  if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint. Paper is resilient like that.");return}if(real&&msg)sayToast(msg)}
+  if(health<=0){crumple();return}if(real&&msg)sayToast(msg)}
 function l3Plats(){if(scene==="beach")return l3.dock?BEACH_SOLID:BEACH_SOLID.filter(p=>!p.hidden);return[{x:-50,y:G,w:1100,h:100},...LH_STATIC.filter(p=>!(p.crumble&&crState(p).gone>0)),...l3.movers]}
 function onPlat(y){return s.ground&&Math.abs(s.y+s.h-y)<4}
 function fishSpot(){if(scene!=="beach")return null;
@@ -2522,7 +2532,7 @@ function updateTide(){
   if(s.ground&&s.plat){if(center()<=TIDE.x0)l3.tideSafe={x:TIDE.x0-60,y:G-s.h};else if(center()>=TIDE.x1)l3.tideSafe={x:TIDE.x1+30,y:G-s.h};else if(s.plat.tide)l3.tideSafe={x:s.plat.x+s.plat.w/2-s.w/2,y:s.plat.y-s.h}}
   
     if(onFlat&&tideLevel()>.55&&s.y+s.h>tideY()+6){const sf=l3.tideSafe||{x:TIDE.x0-60,y:G-s.h};burst(center(),tideY(),22,["#7cc6f2","#fff"]);s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
-    if(health<=0){respawnL3();sayToast("The tide sweeps Sarah away… she uncrumples back at your last checkpoint.")}else if(real)sayToast("WHOOSH! Swept back by the tide. (-1 health)")}
+    if(health<=0){crumple();}else if(real)sayToast("WHOOSH! Swept back by the tide. (-1 health)")}
 }
 function crState(p){if(!l3.cr)l3.cr=new Map();if(!l3.cr.has(p))l3.cr.set(p,{t:0,gone:0});return l3.cr.get(p)}
 function updateGreenTricks(dt){
@@ -2597,7 +2607,7 @@ function updateL3(dt,oldFeet){
     if(updateHook3(dt))return;
     updateTide();
     if(s.y+s.h>G+34){const pit=center()>PIT3.x0&&center()<PIT3.x1;l3.flyVx=0;if(!pit)burst(center(),G+10,20,["#7cc6f2","#fff"]);s.x=l3.safe.x;s.y=l3.safe.y;s.vy=0;shake=.3;const real=hurtHP();
-      if(health<=0){respawnL3();sayToast(pit?"Sarah crumples… then uncrumples back at your last checkpoint.":"SPLASH! Sarah crumples… soggily… then uncrumples back at your last checkpoint.")}else if(real)sayToast(pit?"Oof! Down into the pit. Sarah climbs back out, sandy. (-1 health)":"SPLASH! Sarah fishes herself out of the sea. (-1 health)")}
+      if(health<=0){crumple();}else if(real)sayToast(pit?"Oof! Down into the pit. Sarah climbs back out, sandy. (-1 health)":"SPLASH! Sarah fishes herself out of the sea. (-1 health)")}
     if(s.x<=0&&(keys.has("a")||keys.has("ArrowLeft"))&&!l3.edgeTip){l3.edgeTip=true;sayToast("Nothing back that way but wet paint and the inky dark. Onward →")}
   }
   if(scene==="lighthouse"){
@@ -3190,7 +3200,7 @@ const CL_FOES=[[2000,1990,2230,G],[2350,2280,2520,G],[2700,2640,2880,G],[3000,29
 const CL_CHECKS=[[3290,G],[5300,G+220],[6790,G+220],[8040,G-300],[9780,G-620]];
 const CL_SPAWN=[{x:3390,dir:1,zone:[3250,5160],every:2.3,speed:520},{x:9630,dir:-1,zone:[8560,9720],every:2.7,speed:400}];
 // teacup and teapot monsters: [kind, x, min, max, base]. First hit cracks them, the second breaks them.
-const CL_WARES=[["cup",2200,2150,2290,G],["pot",3150,3070,3240,G],["cup",5350,5260,5430,G+220],["cup",7100,7020,7180,G],["pot",8250,8170,8400,G-300]];
+const CL_WARES=[["cup",2200,2150,2290,G],["cup",3150,3070,3240,G],["cup",5350,5260,5430,G+220],["cup",7100,7020,7180,G],["cup",8250,8170,8400,G-300]];
 const GANG_X=[9960,10060,10160];
 const NOOK_STAIRS=[{x:500,y:G-75,w:74},{x:590,y:G-150,w:74},{x:680,y:G-225,w:74}],NOOK_LEDGE={x:790,y:G-300,w:150},NOOK_CHEST=880;
 const CL_KEEP=["started","sign","lchest","peek","villager","crossed","nook","nookStairs","nchest","hooked","ferried","ferry","stairs","order","monty","doorGone","done","keeperOut","fishN","lastCatch","pots","coins","dead","tipTip","rumbled","flipTip","inStore","cp","wdead","gang"];
@@ -3282,7 +3292,7 @@ function clayFloor(oldFeet){
   l4.onFloor=s.ground&&!s.plat;
 }
 function clayHurt(msg){const sf=l4.safe;s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
-  if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint. Paper is resilient like that.");return}if(real)sayToast(msg)}
+  if(health<=0){crumple();return}if(real)sayToast(msg)}
 function ballFloor(x){let fy=floorAt(x);if(fy==null)return null;for(const b of CL_BLOCKS)if(b.h>60&&x>b.x-14&&x<b.x+b.w+14)fy=Math.min(fy,b.y);return fy}
 function updateBalls(dt){
   const gangOn=/^(talk|talk2|fight|fight2)$/.test(l4.gang||"");
@@ -3331,17 +3341,13 @@ function updateGulls4(dt,oldFeet){
     if(s.x+s.w>f.x-24&&s.x<f.x+24&&s.y+s.h>f.y-20&&s.y<f.y+8){
       if(s.vy>0&&oldFeet<=f.y-8){killFoe(f);s.vy=-430;continue}
       if(f.mode==="swoop"&&!f.stole){f.stole=true;if(coins>0){coins--;f.carry=(f.carry||0)+1;sayToast("SQUAWK! A Gull snatched a coin!")}
-        else if(s.inv<=0){s.inv=1.3;shake=.3;const real=hurtHP();if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint.")}else if(real)sayToast("SQUAWK! Pecked by a Gull! (-1 health)")}}}}
+        else if(s.inv<=0){s.inv=1.3;shake=.3;const real=hurtHP();if(health<=0){crumple();}else if(real)sayToast("SQUAWK! Pecked by a Gull! (-1 health)")}}}}
 }
-function mkWare(kind,x,min,max,base,sc,hp,i){return{kind,x,min,max,base,sc,hp,max:hp,i,alive:true,flat:0,t:i*.7,dir:i%2?1:-1,inv:0,hop:0,hv:0,w:kind==="pot"?60:44,h:kind==="pot"?50:36,speed:kind==="pot"?40:60}}
+function mkWare(kind,x,min,max,base,sc,hp,i){return{kind,x,min,max,base,sc,hp,hpMax:hp,i,alive:true,flat:0,t:i*.7,dir:i%2?1:-1,inv:0,hop:0,hv:0,w:kind==="pot"?60:44,h:kind==="pot"?50:36,speed:kind==="pot"?40:60}}
 function mkGang(){const b=G-620;return[mkWare("pot",GANG_X[1],9700,10380,b,1.9,7,-1),mkWare("cup",GANG_X[0],9700,10380,b,1.35,5,-2),mkWare("cup",GANG_X[2],9700,10380,b,1.35,5,-3)].map(f=>({...f,gang:1}))}
 const allWares=()=>[...(l4.wares||[]),...(l4.gangFoes||[])];
 function hitWare(f){if(f.inv>0||!f.alive||f.beaten)return;f.hp--;f.inv=.45;const top=f.base-f.h*f.sc;
   if(f.hp>0){burst(f.x,top+10,8,["#fff","#cfd8e0",INK]);return}
-  if(f.gang){// beaten gang members don't shatter: they stay standing, all cracked, until they storm off
-    f.beaten=true;f.st="beaten";f.hop=0;f.hv=0;f.steam=0;f.t=0;burst(f.x,top+10,16,["#fff","#cfd8e0",INK]);
-    coins+=f.kind==="pot"?5:2;gainXP(f.kind==="pot"?"Teapot Monster":"Teacup Monster",f.x,top-20);
-    if(l4.gangFoes.every(g=>g.beaten))setTimeout(gangBeaten,700);return}
   f.alive=false;burst(f.x,f.base-f.h*f.sc/2,22,["#fff","#f4f1ea","#6aa6d8","#e8b0c8",INK]);
   if(f.gang){coins+=f.kind==="pot"?5:2}else{l4.wdead[f.i]=true;coins++}
   gainXP(f.kind==="pot"?"Teapot Monster":"Teacup Monster",f.x,top-20);
@@ -3349,18 +3355,14 @@ function hitWare(f){if(f.inv>0||!f.alive||f.beaten)return;f.hp--;f.inv=.45;const
 function updateWares(dt,oldFeet){
   for(const f of allWares()){if(!f.alive){f.flat=Math.min(1,f.flat+dt*3);continue}
     f.t+=dt;f.inv=Math.max(0,f.inv-dt);
-    if(f.beaten){if(f.leave){f.dir=-1;f.st="walk";f.x-=(f.kind==="pot"?200:240)*dt;const fl=floorAt(f.x);if(fl!=null)f.base=fl;
-        if(f.x<camera-160||f.x<9000){f.alive=false;f.flat=1;f.gone=true}}continue}
     if(f.gang)moveGang(f,dt);
-    else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}
-      if(f.kind==="cup"&&f.hop===0&&f.t%2.4<dt)f.hv=-300}
+    else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}}
     if(!f.gang&&(f.hv||f.hop<0)){f.hv+=1450*dt;f.hop+=f.hv*dt;if(f.hop>=0){f.hop=0;f.hv=0}}
     const hw=(f.w/2-4)*f.sc,top=f.base+f.hop-f.h*f.sc;
     if(s.x+s.w>f.x-hw&&s.x<f.x+hw&&s.y+s.h>top&&s.y<f.base+f.hop){
       if(s.vy>0&&oldFeet<=top+16){s.vy=-460;hitWare(f)}
       else if(f.inv<=0)hurt3(f.x,f.kind==="pot"?"Ow! Hot teapot! (-1 health)":"Ow! A teacup bonks you. (-1 health)")}}
   updateSteam(dt);updateWaves(dt);
-  if(l4.afterLeave&&l4.gangFoes.length&&l4.gangFoes.every(g=>g.gone)){const cb=l4.afterLeave;l4.afterLeave=null;l4.gangFoes=[];cb()}
   if((l4.gang==="fight"||l4.gang==="fight2")&&s.x>9600&&s.y+s.h<=G-600){s.x=clamp(s.x,9680,10420-s.w)}
 }
 // the teapot gang moves around: teacups bounce all over the courtyard, the big teapot paces and blows steam
@@ -3416,10 +3418,10 @@ function drawPotBody(k){
   g.lineWidth=2.5;g.beginPath();g.moveTo(13,15);g.lineTo(23,19);g.moveTo(39,15);g.lineTo(29,19);g.moveTo(20,36);g.quadraticCurveTo(26,32,32,36);g.stroke();
   crackLines(k,[[10,26,16,32,12,38],[38,30,34,36,40,42],[24,40,28,44,25,46],[30,12,34,16,31,19],[6,20,12,22,8,28]]);g.restore()}
 function crackLines(k,L){g.strokeStyle=INK;g.lineWidth=1.6;for(let i=0;i<Math.min(k,L.length);i++){const c=L[i];g.beginPath();g.moveTo(c[0],c[1]);g.lineTo(c[2],c[3]);g.lineTo(c[4],c[5]);g.stroke()}}
-function drawWare(f){const sc=f.sc,w=(f.w+8)*sc,h=(f.h+6)*sc,k=f.max-f.hp,body=()=>{g.scale(sc,sc);(f.kind==="pot"?drawPotBody:drawCupBody)(f.gang?Math.ceil(k*(f.kind==="pot"?5:3)/f.max):k*2)};
+function drawWare(f){const sc=f.sc,w=(f.w+8)*sc,h=(f.h+6)*sc,k=f.hpMax-f.hp,body=()=>{g.scale(sc,sc);(f.kind==="pot"?drawPotBody:drawCupBody)(f.gang?Math.ceil(k*(f.kind==="pot"?5:3)/f.hpMax):k*2)};
   if(!f.alive){if(f.flat<1)sprite(f.x,f.base+2,w,h,body,{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat});return}
   groundShadow(f.x,f.base+2,f.w*sc*.4);
-  let bob=0,sy=1,sxs=1;if(f.gang){if(f.st==="walk")bob=-Math.abs(Math.sin(f.t*5))*5;else if(f.st==="crouch"){sy=.82;sxs=1.12}else if(f.st==="slam"&&f.stT<.15){sy=.85;sxs=1.1}else if(f.st==="beaten"){sy=.93;sxs=1.04;bob=Math.sin(f.t*3)*1.5}}
+  let bob=0,sy=1,sxs=1;if(f.gang){if(f.st==="walk")bob=-Math.abs(Math.sin(f.t*5))*5;else if(f.st==="crouch"){sy=.82;sxs=1.12}else if(f.st==="slam"&&f.stT<.15){sy=.85;sxs=1.1}}
   sprite(f.x,f.base+2+f.hop+bob,w,h,body,{sx:(f.dir>0?1:-1)*sxs,sy})}
 // ---- the teapot gang (just before the Clay Store) ----
 function gangTalk(){
@@ -3440,13 +3442,8 @@ function gangTalk(){
   start([["Narrator","The big teapot and the two teacups standing in front of the Clay Store turn around with a rattle of china. They've been waiting for Sarah."]],()=>ask1(false));
 }
 function gangBeaten(){
-  const tattle=[["Narrator","The teapot gang wobbles to a stop, cracked all over."],
-    ["Teacup","Ow! Ow ow ow! That's it. I'm telling MOM!"],
-    ["Teacup","Yeah! We're telling Mom! You are in SO much trouble!"],
-    ["Big Teapot","She is going to be SO mad at you. Come on, teacups!"]];
-  const leave=done=>{for(const f of l4.gangFoes)f.leave=true;l4.afterLeave=done};
-  if(l4.gang==="fight"){l4.gang="won";start(tattle,()=>leave(()=>start([["Dab","…They have a MOM?"],["Sarah","Let's just get the clay."]])));return}
-  if(l4.gang==="fight2"){l4.gang="won2";start(tattle,()=>leave(()=>start([["Dab","…They have a MOM?"],["Sarah","Now. Where were we? Oh right. Our door."]],()=>finishL4())))}}
+  if(l4.gang==="fight"){l4.gang="won";sayToast("The teapot gang is broken up!");return}
+  if(l4.gang==="fight2"){l4.gang="won2";finishL4()}}
 function gangReturns(){
   l4.gang="talk2";l4.balls=[];s.face=1;
   start([
@@ -3515,6 +3512,8 @@ function nookInteract(){
 function dabClay(){
   if(scene==="nook"){if(!l4.nookStairs&&center()<760){l4.nookStairs=true;for(const p of NOOK_STAIRS)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#f4c84f"]);start([["Dab","A doodle staircase! Somebody drew a way up to that ledge and then forgot about it."],["Dab","There's a chest up there. Climb!"]]);return true}return false}
   if(!l4.sign&&Math.abs(center()-CL_SIGN)<260){l4.sign=true;burst(CL_SIGN,G-110,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming!"],["Sign","CLAY STORE →"],["Sarah","To the right it is."]]);return true}
+  if(Math.abs(center()-CL_NOOK)<220&&s.y+s.h>floorAt(CL_NOOK)-60){burst(CL_NOOK,floorAt(CL_NOOK)-8,14,["#ff8fb3","#fff","#f4c84f"]);
+    start([["Dab","Look! Little pink footprints, going right under that shelter."],["Dab","Sarah, you could crouch down and crawl through there!"]]);return true}
   if(!l4.stairs&&center()>6620&&center()<7010){l4.stairs=true;for(const p of CL_PLATS)if(p.faded)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#c58a52"]);start([["Dab","Missing steps? I can fix that. A little brown, a little more brown…"]]);return true}
   return false;
 }
@@ -3865,7 +3864,7 @@ function frame(t){const dt=Math.min((t-(last||t))/1000,.033);last=t;update(dt);
   g.restore();
   g.save();g.fillStyle=grain;g.fillRect(0,0,W,H);g.restore();
   if(flash>0){g.fillStyle=`rgba(255,255,255,${Math.min(.95,flash)})`;g.fillRect(0,0,W,H)}
-  if(!titleMenu){drawHud();if(chapterCard)drawChapterCard();if(invOpen)drawInventory();drawDialogue()}if(mini)drawMini();if(book)drawBook();if(lvlUp)drawLevelUp();if(showEndScreen)drawEndScreen();if(titleMenu)drawTitleMenu();
+  if(!titleMenu){drawHud();if(chapterCard)drawChapterCard();if(invOpen)drawInventory();drawDialogue()}if(mini)drawMini();if(book)drawBook();if(lvlUp)drawLevelUp();if(deadT>0)drawCrumple();if(showEndScreen)drawEndScreen();if(titleMenu)drawTitleMenu();
   requestAnimationFrame(frame)}
 
 start([
@@ -3877,7 +3876,7 @@ start([
   ["Narrator","(So many things.)"]
 ],()=>sayToast("Walk to the wardrobe and press Space to open it."));
 requestAnimationFrame(frame);
-window.__game={get titleMenu(){return titleMenu},saveGame,readSave,applySave,rollFish,tally,polly,get coins(){return coins},get items(){return items},count:n=>count(n),get scene(){return scene},get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},get l3(){return l3},get mini(){return mini},get book(){return book},returnHome:()=>returnHome(),endL2:()=>{level=2;l2.done=true;complete=true;showEndScreen=true;endT=2},get LH(){return LH_STATIC},spawnInklet:x=>spawnInklet(x),get shield(){return shield},get camY(){return camY},get l4(){return l4},floorAt:x=>floorAt(x),gainXP:(n)=>gainXP(n,center(),s.y)};
+window.__game={crumple:()=>crumple(),get deadT(){return deadT},get titleMenu(){return titleMenu},saveGame,readSave,applySave,rollFish,tally,polly,get coins(){return coins},get items(){return items},count:n=>count(n),get scene(){return scene},get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},get l3(){return l3},get mini(){return mini},get book(){return book},returnHome:()=>returnHome(),endL2:()=>{level=2;l2.done=true;complete=true;showEndScreen=true;endT=2},get LH(){return LH_STATIC},spawnInklet:x=>spawnInklet(x),get shield(){return shield},get camY(){return camY},get l4(){return l4},floorAt:x=>floorAt(x),gainXP:(n)=>gainXP(n,center(),s.y)};
 })();
 </script>
 </body>
