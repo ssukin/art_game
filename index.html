@@ -52,6 +52,7 @@
     <button class="button" data-cheat="nib">L0-2: after the chase (Nib trail)</button>
     <button class="button" data-cheat="results">L0-2: contest results</button>
     <button class="button" data-cheat="fight">L0-2: Smudge fight</button>
+    <button class="button" data-cheat="homeL1">Return home from Chapter 1 (plays the scene)</button>
     <button class="button" data-cheat="hub">Hub: back in town after Level 1</button>
     <button class="button" data-cheat="shop">Hub: general store (fish + bait)</button>
     <button class="button" data-cheat="clearsave">Clear saved game</button>
@@ -66,6 +67,12 @@
     <button class="button" data-cheat="l3land">L1: lighthouse landing (Green Gem detour)</button>
     <button class="button" data-cheat="l3top">L1: top of lighthouse (before boss)</button>
     <button class="button" data-cheat="l3boss">L1: boss fight (The Blot)</button>
+    <button class="button" data-cheat="c21">Start Chapter 2-1 (clay pickup)</button>
+    <button class="button" data-cheat="c21road">2-1: delivery road</button>
+    <button class="button" data-cheat="c21canal">2-1: canal ferry</button>
+    <button class="button" data-cheat="c21upper">2-1: upper village</button>
+    <button class="button" data-cheat="c21gang">2-1: before the teapot gang</button>
+    <button class="button" data-cheat="c21store">2-1: Clay Store courtyard</button>
     <button class="button" data-cheat="l3gems">Give all 3 gems</button>
     <button class="button" data-cheat="shield">Give Shell Shield</button>
     <button class="button" data-cheat="coins">+20 coins</button>
@@ -167,6 +174,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const center=()=>s.x+s.w/2;
 const near=(x,d=68)=>Math.abs(center()-x)<d;
 const onFloor=()=>s.y+s.h>=G-1;
+const fishScene=()=>scene==="lake"||scene==="beach"||scene==="clay";
 const counts={};
 const has=n=>items.includes(n);
 const count=n=>has(n)?(counts[n]||1):0;
@@ -227,6 +235,7 @@ function speakerPos(who){
   if(who==="Reel"&&scene==="beach")return[CHEST_X-camera,WRECK.y-60];
   if(who==="Reel")return[1000-camera,G-70];
   if(who==="The Blot")return[800-camera,DY-150];
+  if(scene==="clay"){const xx={"Villager":CL_VILL,"Shopkeeper":CL_KEEPER_OUT,"Big Teapot":GANG_X[1],"Teacup":GANG_X[0]}[who];if(xx!=null)return[xx-camera,floorAt(xx)-92]}
   {const sn=SCENE_NPCS[scene];if(sn&&sn[who]!=null)return[sn[who]-camera,who==="Waffles"?G-50:G-92]}
   if(scene==="festival"){
     if(who==="Nib")return[2770-camera,110];
@@ -247,7 +256,7 @@ function drawDialogue(){
   if(!dlg.on)return;const [who,text]=dlg.pages[dlg.page];const shown=text.slice(0,Math.floor(dlg.chars));
   const narr=who==="Narrator"||who==="Letter";const bw=720,bx=(W-bw)/2,by=22;
   const lines=wrap(text,bw-64,"bold 21px "+FONT),bh=40+lines.length*29;
-  const pos=narr?null:speakerPos(who);if(pos&&(scene==="festival"||scene==="lighthouse"))pos[1]-=camY;
+  const pos=narr?null:speakerPos(who);if(pos&&(scene==="festival"||scene==="lighthouse"||scene==="clay"))pos[1]-=camY;
   g.save();
   if(narr){
     cut(()=>rr(bx,by,bw,bh,10),who==="Letter"?"#fffaf0":"#2f2a4a",{edge:8});
@@ -274,6 +283,7 @@ function drawDialogue(){
 // Story: what can Sarah activate right now?
 // ---------------------------------------------------------------------------
 function objective(){
+  if(level===4)return objectiveL4();
   if(level===3)return objectiveL3();
   if(level===2&&l2.hub)return objectiveHub();
   if(level===2)return objectiveL2();
@@ -296,6 +306,8 @@ function getInteract(){
   if(scene==="lake")return lakeInteract();
   if(scene==="under")return underInteract();
   if(scene==="shop")return shopInteract();
+  if(scene==="clay")return clayInteract();
+  if(scene==="nook")return nookInteract();
   if(scene==="bedroom"){
     if(near(645,50)&&!closetOpen)return["Open the wardrobe",()=>{closetOpen=true;burst(645,360,10);sayToast("The wardrobe creaks open. A potion and a tiny key try to look casual.")}];
     if(near(527,26))return["Admire your painting",easel];
@@ -431,6 +443,7 @@ function dabPower(){
   if(!hasDab)return;pulse=1;
   if(scene==="beach"&&dabBeach())return;
   if(scene==="lighthouse"&&dabLH())return;
+  if((scene==="clay"||scene==="nook")&&dabClay())return;
   if(scene==="festival"&&!l2.holeSign&&Math.abs(center()-(-578))<300){l2.holeSign=true;burst(-578,G-84,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming! That poor sign was grayer than a rainy Tuesday."],["Sarah","\"Dig crew entry here\"… with an arrow pointing straight down. Into the hole."],["Dab","So we're supposed to jump IN? I love a sign with commitment."]]);return}
   if(scene==="festival"&&!l2.trail&&Math.abs(center()-2560)<380){
     if(!l2.catFreed){sayToast("Dab: \"I smell a doodle trail up there… but I can't concentrate with that cat yowling. Somebody help him!\"");return}
@@ -530,6 +543,11 @@ function drawIcon(n,x,y,scale=1){
 }
 function iconArt(n){
   g.strokeStyle=INK;g.lineWidth=2.5;
+  if(n==="Canal Minnow"){g.filter="hue-rotate(160deg) saturate(.7) brightness(1.1)";g.scale(.75,.8);iconArt("Lake Perch");g.filter="none";return}
+  if(n==="Reed Pike"){g.filter="hue-rotate(40deg) saturate(1.2)";g.scale(1.25,.75);iconArt("Lake Perch");g.filter="none";return}
+  if(n==="Clay Carp"){g.filter="hue-rotate(-120deg) saturate(1.5) brightness(.95)";iconArt("Lake Perch");g.filter="none";return}
+  if(n==="Rainbow Trout"){iconArt("Lake Perch");g.save();g.globalAlpha=.6;["#e5577b","#f4c84f","#7cc6f2","#b98ad8"].forEach((c,i)=>{g.fillStyle=c;g.fillRect(-12+i*6,-6,5,12)});g.restore();return}
+  if(n==="Clay Order"){g.fillStyle="#b9734a";rr(-18,-12,36,28,4);g.fill();g.stroke();g.strokeStyle="#fff3d6";g.lineWidth=3;g.beginPath();g.moveTo(0,-12);g.lineTo(0,16);g.moveTo(-18,2);g.lineTo(18,2);g.stroke();g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.ellipse(-5,-16,6,4,-.4,0,7);g.moveTo(11,-16);g.ellipse(5,-16,6,4,.4,0,7);g.stroke();return}
   if(n==="Sunfish"){g.filter="hue-rotate(-70deg) saturate(1.8) brightness(1.15)";g.scale(.85,1.15);iconArt("Lake Perch");g.filter="none";return}
   if(n==="Catfish"){g.filter="hue-rotate(-100deg) saturate(.5) brightness(.8)";iconArt("Lake Perch");g.filter="none";g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(16,2);g.quadraticCurveTo(24,6,26,14);g.moveTo(16,2);g.quadraticCurveTo(26,0,28,6);g.stroke();return}
   if(n==="Golden Koi"){g.filter="hue-rotate(-80deg) saturate(2.4) brightness(1.3)";iconArt("Lake Perch");g.filter="none";g.fillStyle="#fff";for(const [x,y] of[[-18,-14],[14,-14],[0,15]]){g.beginPath();g.moveTo(x,y-5);g.lineTo(x+2,y);g.lineTo(x,y+5);g.lineTo(x-2,y);g.closePath();g.fill()}return}
@@ -609,7 +627,7 @@ function drawHints(px,py,pw,ph){
   g.strokeStyle="#f2a1b5";g.beginPath();g.moveTo(nx+60,ny+6);g.lineTo(nx+60,ny+nh-6);g.stroke();
   g.fillStyle="#e5577b";g.font="bold 19px "+FONT;g.fillText("Right now:",nx+74,ny+40);
   g.fillStyle=INK;wrap(objective(),nw-110,"bold 17px "+FONT).forEach((l,i)=>g.fillText(l,nx+74,ny+68+i*28));
-  const beats=level===3?beatsL3():level===2&&l2.hub?beatsHub():level===2?[["Register for the festival",l2.festReg],["Arrive at the festival",l2.intro],["Enter the art contest (optional)",l2.clayEntered],["Free Mr. Biscuits",l2.catFreed],["Survive the butter sculptor",l2.chaseDone],["Find Nib",hasNib],["Hear the contest results",l2.results],["Defeat the festival Smudges",l2.fightDone],["Open the door from the sky",l2.doorOpen]]:[["Raid the wardrobe",potionCollected&&roadChestKeyCollected],["Investigate the overnight gate",homeIntroSeen],["Unlock the road chest",firstChestOpen],["Ride the upside-down fountain",fountainKeyCollected],["Fetch Mrs. Maple a ladder",ladderGiven],["Open Grandma's chest",grandChestOpen],["Bring color back to the flower",flowerRestored],["Unlock the town gate",gateOpen]];
+  const beats=level===4?beatsL4():level===3?beatsL3():level===2&&l2.hub?beatsHub():level===2?[["Register for the festival",l2.festReg],["Arrive at the festival",l2.intro],["Enter the art contest (optional)",l2.clayEntered],["Free Mr. Biscuits",l2.catFreed],["Survive the butter sculptor",l2.chaseDone],["Find Nib",hasNib],["Hear the contest results",l2.results],["Defeat the festival Smudges",l2.fightDone],["Open the door from the sky",l2.doorOpen]]:[["Raid the wardrobe",potionCollected&&roadChestKeyCollected],["Investigate the overnight gate",homeIntroSeen],["Unlock the road chest",firstChestOpen],["Ride the upside-down fountain",fountainKeyCollected],["Fetch Mrs. Maple a ladder",ladderGiven],["Open Grandma's chest",grandChestOpen],["Bring color back to the flower",flowerRestored],["Unlock the town gate",gateOpen]];
   const done=beats.filter(b=>b[1]);g.fillStyle="#17a398";g.font="bold 17px "+FONT;g.fillText("Done so far ("+done.length+"/"+beats.length+")"+(level===1&&roofItemCollected?"  ★ Roof secret found!":""),nx+74,ny+156);
   g.font="16px "+FONT;done.slice(-4).forEach((b,i)=>{g.fillStyle="#17a398";g.fillText("✔",nx+78,ny+184+i*28);g.fillStyle=INK;g.fillText(b[0],nx+102,ny+184+i*28)});
   if(!done.length){g.fillStyle="#8d8578";g.fillText("Nothing yet. The day is young.",nx+78,ny+184)}
@@ -624,10 +642,10 @@ function invClick(mx,my){
 // Input
 // ---------------------------------------------------------------------------
 function toggleInv(){if(dlg.on||showEndScreen)return;invOpen=!invOpen;if(invOpen){inv.sel=0}}
-actionBtn.onclick=()=>{actionBtn.blur();if(titleMenu){titlePick(titleMenu.sel);return}if((scene==="lake"||scene==="beach")&&fish.ph>0){fishSpace();return}if(mini){miniPress();return}if(book){if(book.t>.4)closeBook();return}if(lvlUp){closeLvl();return}if(dlg.on)advance();else{const it=getInteract();if(it&&!invOpen)it[1]()}};
+actionBtn.onclick=()=>{actionBtn.blur();if(titleMenu){titlePick(titleMenu.sel);return}if(fishScene()&&fish.ph>0){fishSpace();return}if(mini){miniPress();return}if(book){if(book.t>.4)closeBook();return}if(lvlUp){closeLvl();return}if(dlg.on)advance();else{const it=getInteract();if(it&&!invOpen)it[1]()}};
 invBtn.onclick=()=>{invBtn.blur();toggleInv()};
 c.addEventListener("click",e=>{if(titleMenu){const r=c.getBoundingClientRect(),my=(e.clientY-r.top)*H/r.height-H/2;if(my>-30&&my<16)titlePick(0);else if(my>28&&my<74)titlePick(1);return}if(mini){miniPress();return}if(book){if(book.t>.4)closeBook();return}if(lvlUp){closeLvl();return}const r=c.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height;
-  if(showEndScreen){if(endT>1){if(level===1)startLevel2();else if(level===2)startLevel3();else if(level===3)returnHome()}return}
+  if(showEndScreen){if(endT>1){if(level===1)startLevel2();else if(level===2)startLevel3();else if(level===3)returnHome();else if(level===4)afterL4End()}return}
   if(dlg.on){const hit=dlg.rects.findIndex(([x,y,w,h])=>mx>x&&mx<x+w&&my>y&&my<y+h);if(dlg.rects.length&&hit<0)return;if(hit>=0)dlg.choice=hit;advance();return}if(invOpen)invClick(mx,my)});
 const key=k=>k.length===1?k.toLowerCase():k;
 window.addEventListener("keydown",e=>{
@@ -636,7 +654,7 @@ window.addEventListener("keydown",e=>{
   if(mini){if((k===" "||k==="Enter")&&!e.repeat)miniPress();return}
   if(book){if((k===" "||k==="Enter"||k==="Escape")&&!e.repeat&&book.t>.4)closeBook();return}
   if(lvlUp){if((k===" "||k==="Enter")&&!e.repeat)closeLvl();return}
-  if(showEndScreen){if(endT>1&&(k===" "||k==="Enter")&&!e.repeat){if(level===1)startLevel2();else if(level===2)startLevel3();else if(level===3)returnHome()}return}
+  if(showEndScreen){if(endT>1&&(k===" "||k==="Enter")&&!e.repeat){if(level===1)startLevel2();else if(level===2)startLevel3();else if(level===3)returnHome();else if(level===4)afterL4End()}return}
   if(dlg.on){const p=dlg.pages[dlg.page];if(p[2]&&dlg.chars>=p[1].length){const n=p[2].length;if(k==="ArrowUp"||k==="w")dlg.choice=(dlg.choice+n-1)%n;if(k==="ArrowDown"||k==="s")dlg.choice=(dlg.choice+1)%n}
     if((k===" "||k==="Enter")&&!e.repeat)advance();return}
   if(k==="i"&&!e.repeat){toggleInv();return}
@@ -651,19 +669,19 @@ window.addEventListener("keydown",e=>{
     else if(k==="ArrowUp"||k==="w")inv.sel=Math.max(0,inv.sel-SLOT.cols);
     else if(k===" "||k==="Enter")useSelected();
     return}
-  if(k===" "&&!e.repeat&&(scene==="lake"||scene==="beach")&&fish.ph>0){fishSpace();return}
+  if(k===" "&&!e.repeat&&fishScene()&&fish.ph>0){fishSpace();return}
   if(k===" "&&!e.repeat){const it=getInteract();if(it)it[1]();else sayToast("Nothing to activate here. You activate your imagination instead.");return}
   if((k==="ArrowUp"||k==="w")&&s.ground&&!e.repeat&&!onLadder()){
     if(dogOn){l2.rising=true;s.vy=-240}else if(balloonOn){s.vy=-834;balloonOn=false;balloonsAway.push({scene,x:center()+8,y:s.y-40,t:0});sayToast("WHOOSH! The balloon yanks you sky-high… then drifts off to a better life.")}else s.vy=-590;s.ground=false}
-  if(k==="q"&&!e.repeat){if(!hasDab)sayToast("You don't have a little buddy yet. You wave at nobody. Nobody waves back.");else if(equipped==="Nib"&&hasNib)nibJab();else if(equipped==="Reel"&&hasReel){if(scene==="beach"&&fishSpot()!=null&&fish.ph===0)castLine(fishSpot());else if(scene==="lake"&&near(DOCK.x+DOCK.w-40,50)&&fish.ph===0)castLine();else sayToast("Reel: \"No water here. I'm a fishing pole, not a miracle worker.\"")}else dabPower()}
+  if(k==="q"&&!e.repeat){if(!hasDab)sayToast("You don't have a little buddy yet. You wave at nobody. Nobody waves back.");else if(equipped==="Nib"&&hasNib)nibJab();else if(equipped==="Reel"&&hasReel){if(scene==="beach"&&fishSpot()!=null&&fish.ph===0)castLine(fishSpot());else if(scene==="lake"&&near(DOCK.x+DOCK.w-40,50)&&fish.ph===0)castLine();else if(scene==="clay"&&fish.ph===0&&clayReelQ()){}else sayToast("Reel: \"No water here. I'm a fishing pole, not a miracle worker.\"")}else dabPower()}
   if(k==="e"&&!e.repeat&&(hasNib||hasReel)){const b=[hasDab&&"Dab",hasNib&&"Nib",hasReel&&"Reel"].filter(Boolean);equipped=b[(b.indexOf(equipped)+1)%b.length];sayToast(equipped+" equipped! "+buddyBlurb(equipped))}
-  if(k==="r"&&!e.repeat&&level===3){respawnL3();sayToast("Whoosh! Back to your last checkpoint.")}
+  if(k==="r"&&!e.repeat&&(level===3||level===4)){respawnL3();sayToast("Whoosh! Back to your last checkpoint.")}
   else if(k==="r"&&!e.repeat&&l2.chase!==1){scene=checkpointScene;s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0;health=maxHealth;camera=clamp(s.x-350,0,worldW()-W);sayToast("Whoosh! Back at the Save Block.")}
   keys.add(k);
 });
 window.addEventListener("keyup",e=>keys.delete(key(e.key)));window.addEventListener("blur",()=>keys.clear());
 const buddyBlurb=n=>n==="Dab"?"Q sniffs out hidden doodles and buried treasure.":n==="Nib"?"Q jabs enemies.":"Stand at a fishing spot and press Space or Q to cast.";
-const worldW=()=>scene==="beach"?BEACH_W:scene==="lighthouse"?W:scene==="outside"?WORLD:scene==="festival"?FEST_W:scene==="orchard"?ORCH_W:scene==="lake"?LAKE_W:scene==="under"?UNDER_W:W;
+const worldW=()=>scene==="clay"?CL_W:scene==="beach"?BEACH_W:scene==="lighthouse"?W:scene==="outside"?WORLD:scene==="festival"?FEST_W:scene==="orchard"?ORCH_W:scene==="lake"?LAKE_W:scene==="under"?UNDER_W:W;
 const onLadder=()=>scene==="resident"&&ladderGiven&&Math.abs(center()-478)<34;
 
 // ---------------------------------------------------------------------------
@@ -693,26 +711,30 @@ function update(dt){
   if(level===2&&l2.results){if(!l2.curtain&&dlg.on&&dlg.pages[dlg.page]&&/^The cloth/.test(dlg.pages[dlg.page][1]))l2.curtain=.001;
     if(l2.curtain>0)l2.curtain=Math.min(1,l2.curtain+dt/1.8);if(l2.finale)l2.curtain=1}
   if(dlg.on||invOpen||complete){updateAction();return}
-  if((scene==="lake"||scene==="beach")&&fish.ph>0){updateFishing(dt);updateAction();return}
+  if(fishScene()&&fish.ph>0){updateFishing(dt);updateAction();return}
   let dir=(keys.has("ArrowRight")||keys.has("d")?1:0)-(keys.has("ArrowLeft")||keys.has("a")?1:0);
-  s.duck=(keys.has("s")||keys.has("ArrowDown"))&&s.ground&&!onLadder();if(s.duck)dir=0;
+  s.duck=(keys.has("s")||keys.has("ArrowDown"))&&s.ground&&!onLadder();if(s.duck)dir=scene==="clay"?dir*.35:0;
   const oldX=s.x;s.x+=dir*245*dt;s.x=clamp(s.x,worldMin(),worldW()-s.w);if(scene==="shop")s.x=clamp(s.x,30,COUNTER.x-6-s.w);
-  if(scene==="festival")for(const b of CRATES){if(s.x+s.w>b.x&&s.x<b.x+b.w&&s.y+s.h>b.y+6&&s.y<b.y+b.h){if(oldX+s.w<=b.x+1)s.x=b.x-s.w;else if(oldX>=b.x+b.w-1)s.x=b.x+b.w}}if(dir)s.face=dir;s.walk=dir&&s.ground?s.walk+dt*14:0;
+  if(scene==="festival")for(const b of CRATES){if(s.x+s.w>b.x&&s.x<b.x+b.w&&s.y+s.h>b.y+6&&s.y<b.y+b.h){if(oldX+s.w<=b.x+1)s.x=b.x-s.w;else if(oldX>=b.x+b.w-1)s.x=b.x+b.w}}if(dir)s.face=Math.sign(dir);s.walk=dir&&s.ground?s.walk+dt*14:0;
+  if(scene==="clay")clayWalls(oldX);
   s.inv=Math.max(0,s.inv-dt);
   if(level===3)l3Pre(dt);
+  if(level===4)l4Pre(dt);
   if(dogOn&&l2.rising){s.vy=-240;if(s.y+s.h<=FLOOR2.y-26)l2.rising=false}
   const oldFeet=s.y+s.h;s.vy+=1450*(dogOn?.42:1)*dt;s.y+=s.vy*dt;s.wasGround=s.ground;s.ground=false;s.plat=null;
-  const ps=scene==="beach"||scene==="lighthouse"?[...l3Plats()]:scene==="festival"?[{x:FEST_MIN-100,y:G,w:HOLE.x-FEST_MIN+100,h:100},{x:HOLE.x+HOLE.w,y:G,w:99999,h:100}]:scene==="lake"?[{x:-50,y:G,w:930,h:100},{x:DOCK.x,y:G,w:DOCK.w,h:100}]:[{x:-50,y:G,w:99999,h:100}];
+  const ps=scene==="beach"||scene==="lighthouse"?[...l3Plats()]:scene==="clay"?clayPlats():scene==="festival"?[{x:FEST_MIN-100,y:G,w:HOLE.x-FEST_MIN+100,h:100},{x:HOLE.x+HOLE.w,y:G,w:99999,h:100}]:scene==="lake"?[{x:-50,y:G,w:930,h:100},{x:DOCK.x,y:G,w:DOCK.w,h:100}]:[{x:-50,y:G,w:99999,h:100}];
   if(scene==="bedroom")ps.push({x:105,y:346,w:280,h:18,bed:true});
   if(scene==="resident"&&ladderGiven)ps.push({x:400,y:280,w:540,h:22});
   if(scene==="outside")ps.push(...platforms);
   if(scene==="under")ps.push({...TRAMP_U,tramp:-1150});
+  if(scene==="nook")ps.push(...nookPlats());
   if(scene==="festival"&&s.y+s.h<=FLOOR2.y+2&&s.vy>=0&&!dogOn)s.x=clamp(s.x,FLOOR2.x+8,FLOOR2.x+FLOOR2.w-s.w-8);
   if(scene==="festival"){ps.push(...CRATES,LIB_ROOF,...CLOUDS,...BARS,FLOOR2);if(l2.tramp)ps.push({...TRAMP_F,tramp:-900});if(l2.trail)ps.push(...TRAIL)}
   for(const p of ps){if(s.vy>=0&&s.x+s.w>p.x&&s.x<p.x+p.w&&oldFeet<=(p.mover?Math.max(p.y,p.py)+2:p.y+1)&&s.y+s.h>=p.y){
     if(p.tramp){s.y=p.y-s.h;s.vy=p.tramp;s.squash=.7;burst(center(),p.y,6,["#3bb6c4","#fff"]);continue}
     if(p.bed&&s.vy>420){s.y=p.y-s.h;s.vy=-Math.min(760,s.vy*1.08);s.squash=.7;if(!bedBounced){bedBounced=true;sayToast("BOING! Your bed is 40% mattress, 60% trampoline.")}continue}
     s.y=p.y-s.h;if(s.vy>300)s.squash=.82;s.vy=0;s.ground=true;s.plat=p}}
+  if(scene==="clay")clayFloor(oldFeet);
   if(scene==="bedroom"&&closetOpen){
     if(!potionCollected&&s.x+s.w>620&&s.x<648&&s.y+s.h>382&&s.y<414){potionCollected=true;addItem("Health Potion");burst(635,395,10);sayToast("Got a Health Potion! Tastes like strawberries and courage.")}
     if(!roadChestKeyCollected&&s.x+s.w>653&&s.x<682&&s.y+s.h>382&&s.y<414){roadChestKeyCollected=true;addItem("Road Chest Key");burst(667,395,10);sayToast("Got the Road Chest Key! It's small, but it has big plans.")}
@@ -740,12 +762,13 @@ function update(dt){
   if(scene==="lake"){updateLake();if(dlg.on){updateAction();return}}
   if(scene==="under"){updateUnder();if(dlg.on){updateAction();return}}
   if(scene==="beach"||scene==="lighthouse"){updateL3(dt,oldFeet);if(dlg.on){updateAction();return}}
+  if(scene==="clay"||scene==="nook"){updateClay(dt,oldFeet);if(dlg.on){updateAction();return}}
   for(const l of loot){if(l.got||l.scene!==scene)continue;l.wait=Math.max(0,(l.wait||0)-dt);l.vy+=1450*dt;l.x+=l.vx*dt;l.y+=l.vy*dt;if(l.y>G-14){l.y=G-14;l.vy=-l.vy*.35;if(Math.abs(l.vy)<60)l.vy=0;l.vx*=.85}
     if(l.wait<=0&&Math.abs(center()-l.x)<28&&l.y>s.y-10&&l.y<s.y+s.h+10){l.got=true;burst(l.x,l.y,6,["#f4c84f","#fff"]);if(l.type==="coin")coins++;else{addItem(l.name);sayToast(l.name==="Turnip"?"Got a Turnip! Why was it locked up? You're afraid to ask.":"Got "+l.name+"!")}}}
   if(!s.wasGround&&s.ground&&s.squash>.95)s.squash=.9;
-  if(s.y>H+40){if(scene==="festival"&&center()>HOLE.x-30&&center()<HOLE.x+HOLE.w+30){goScene("under",300,-90);sayToast("Wheeee— down the hole!")}else{s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0}}
+  if(s.y>H+40&&scene!=="clay"){if(scene==="festival"&&center()>HOLE.x-30&&center()<HOLE.x+HOLE.w+30){goScene("under",300,-90);sayToast("Wheeee— down the hole!")}else{s.x=checkpoint;s.y=checkpointY??G-s.h;s.vy=0}}
   camera=worldW()>W?clamp(s.x-350,worldMin(),worldW()-W):0;
-  const ty=scene==="festival"?clamp(s.y-150,FLOOR2.y-250,0):scene==="lighthouse"?(l3.boss?DY-420:clamp(s.y-300,DY-420,0)):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
+  const ty=scene==="clay"?clamp(s.y-(G-s.h),-640,240):scene==="festival"?clamp(s.y-150,FLOOR2.y-250,0):scene==="lighthouse"?(l3.boss?DY-420:clamp(s.y-300,DY-420,0)):0;camY+=(ty-camY)*Math.min(1,dt*6);if(Math.abs(camY)<.5&&ty===0)camY=0;
   updateAction();
 }
 function updateParticles(dt){for(const p of parts){p.vy+=600*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.98;p.rot+=p.vr*dt;p.life-=dt}parts=parts.filter(p=>p.life>0)}
@@ -852,13 +875,13 @@ function drawSarah(){
   for(const b of balloonsAway){if(b.scene!==scene)continue;if(b.dog){drawBalloonDog(b.x+Math.sin(b.t*3)*10,b.y,.75);continue}cut(()=>{g.beginPath();g.ellipse(b.x+Math.sin(b.t*3)*10,b.y,15,19,0,0,7)},"#7cc6f2",{edge:5,shadow:false})}
   if(hasNib&&equipped==="Nib"){if(jabT>0){const ext=Math.sin((1-jabT/.32)*Math.PI);sprite(center()+s.face*(32+ext*42),s.y+40,24,58,drawNibBody,{rot:-s.face*Math.PI/2,sx:.9,sy:.9});g.save();g.globalAlpha=ext*.8;g.strokeStyle="#fff";g.lineWidth=3;for(const dy of[-8,0,8]){g.beginPath();g.moveTo(center()+s.face*(40+ext*30),s.y+40+dy);g.lineTo(center()+s.face*(20+ext*20),s.y+40+dy);g.stroke()}g.restore()}
     else sprite(dab.x,dab.y+28,24,58,drawNibBody,{rot:Math.sin(time*2.6)*.15,sx:.85,sy:.85})}
-  else if(hasReel&&equipped==="Reel"){if((scene==="lake"||scene==="beach")&&fish.ph>0)sprite(center()+18*s.face,s.y+52,30,62,drawReelBody,{rot:.75*s.face,sx:.9*s.face,sy:.9});else sprite(dab.x,dab.y+30,30,62,drawReelBody,{rot:Math.sin(time*2.6)*.15,sx:.8,sy:.8})}
+  else if(hasReel&&equipped==="Reel"){if(fishScene()&&fish.ph>0)sprite(center()+18*s.face,s.y+52,30,62,drawReelBody,{rot:.75*s.face,sx:.9*s.face,sy:.9});else sprite(dab.x,dab.y+30,30,62,drawReelBody,{rot:Math.sin(time*2.6)*.15,sx:.8,sy:.8})}
   else if(hasDab)sprite(dab.x,dab.y+28,30,56,drawDabBody,{rot:Math.sin(time*2.6)*.18-.15*s.face,sx:.85*(s.face>0?1:-1),sy:.85});
   drawShieldBubble();
   // "!" bubble when something can be activated
   if(!dlg.on&&!invOpen&&getInteract()?.[2]){const bx=center(),by=s.y-30+Math.sin(time*7)*3;cut(()=>{g.beginPath();g.ellipse(bx,by,14,16,0,0,7)},"#e5577b",{edge:6});g.fillStyle="#fff";g.font="bold 20px "+FONT;g.textAlign="center";g.fillText("!",bx,by+7);g.textAlign="left"}
 }
-function groundUnder(){if(scene==="beach"||scene==="lighthouse")return l3GroundUnder();if(scene==="bedroom"&&s.x+s.w>105&&s.x<385&&s.y+s.h<=350)return 346;if(scene==="resident"&&ladderGiven&&s.x+s.w>400&&s.y+s.h<=284)return 280;if(scene==="outside")for(const p of platforms)if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;if(scene==="festival"){for(const p of CRATES.concat(l2.trail?TRAIL:[],[LIB_ROOF],CLOUDS,BARS,[FLOOR2]))if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y}return G}
+function groundUnder(){if(scene==="beach"||scene==="lighthouse")return l3GroundUnder();if(scene==="clay")return clayGroundUnder();if(scene==="nook")for(const p of nookPlats())if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;if(scene==="bedroom"&&s.x+s.w>105&&s.x<385&&s.y+s.h<=350)return 346;if(scene==="resident"&&ladderGiven&&s.x+s.w>400&&s.y+s.h<=284)return 280;if(scene==="outside")for(const p of platforms)if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y;if(scene==="festival"){for(const p of CRATES.concat(l2.trail?TRAIL:[],[LIB_ROOF],CLOUDS,BARS,[FLOOR2]))if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4)return p.y}return G}
 function drawFlowers(){for(const f of flowers){if(f.x<camera-80||f.x>camera+W+80)continue;const gray=f.kind==="gray"&&stormDone&&!flowerRestored;groundShadow(f.x,G+2,18);
   sprite(f.x,G+4,56,86,()=>drawFlowerBody(gray,gray,f.kind==="gray"&&flowerRestored),{rot:Math.sin(time*2+f.x)*.04+Math.sin(time*18)*f.wig*.12,sy:1-f.wig*.06})}}
 
@@ -1081,10 +1104,10 @@ function drawEndScreen(){
   const k=Math.min(1,endT*2),sc=.6+.4*(1-Math.pow(1-k,3));g.save();g.translate(W/2,H/2);g.scale(sc,sc);g.rotate(-.02);
   cut(()=>rr(-350,-125,700,250,30),"#fff3d6",{edge:12});
   for(let i=0;i<14;i++){g.fillStyle=["#e5577b","#f4c84f","#17a398","#7cc6f2"][i%4];g.beginPath();g.moveTo(-320+i*48,-125);g.lineTo(-296+i*48,-125);g.lineTo(-308+i*48,-100);g.fill()}
-  g.fillStyle=INK;g.textAlign="center";g.font="bold 36px "+FONT;g.fillText(level===1?"Level 0 — Part 1 complete!":level===2?"Level 0 — Part 2 complete!":"Level 1 complete!",0,-10);
+  g.fillStyle=INK;g.textAlign="center";g.font="bold 36px "+FONT;g.fillText(level===1?"Level 0 — Part 1 complete!":level===2?"Level 0 — Part 2 complete!":level===4?"Chapter 2-1 complete!":"Level 1 complete!",0,-10);
   g.fillStyle="#17a398";g.font="bold 26px "+FONT;
   if(level<3){if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText("Press Space (or click) to continue to "+(level===1?"Part 2":"Level 1")+" →",0,40);g.globalAlpha=1}}
-  else if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText("Press Space (or click) to head home to town →",0,40);g.globalAlpha=1}
+  else if(endT>1){g.globalAlpha=.6+Math.sin(time*4)*.4;g.fillText(level===4?"Press Space (or click) to keep going →":"Press Space (or click) to head home to town →",0,40);g.globalAlpha=1}
   g.fillStyle="#7a7088";g.font="italic 16px "+FONT;g.fillText("Coins collected: "+coins+"  ·  Sarah is Lv "+plv+(level===1?(roofItemCollected?"  ·  Roof secret: found!":"  ·  Roof secret: still up there…"):(l2.clayEntered?"  ·  \""+l2.entry+"\": tried, and rewarded":"")),0,86);
   g.restore();g.textAlign="left";
   if(Math.random()<.3)parts.push({scene,x:camera+Math.random()*W,y:-10,vx:(Math.random()-.5)*60,vy:60,life:3,rot:0,vr:(Math.random()-.5)*8,color:["#e5577b","#f4c84f","#17a398","#7cc6f2"][Math.floor(Math.random()*4)]});
@@ -1156,6 +1179,7 @@ function startLevel2(){
 function festInteract(){
   if(l2.hub){const h=hubInteract();if(h)return h}
   if(l2.chase===1||(l2.finale&&!l2.fightDone)||(l2.done&&!l2.hub))return null;
+  if(!l2.hub&&onF2())for(let i=1;i<6;i++)if(near(DOOR_SLOTS[i],44))return["Try the door",lockedDoor];
   if(!l2.roofChest&&near(2150,40)&&Math.abs(s.y+s.h-LIB_ROOF.y)<3)return["Open the rooftop chest",roofChest];
   if(near(SAVE_DOOR,30)&&s.ground&&s.y+s.h<=FLOOR2.y+2)return["Save at the Save Block",()=>{setTimeout(saveGame,0);checkpoint=SAVE_DOOR-s.w/2;checkpointY=FLOOR2.y-s.h;checkpointScene="festival";health=maxHealth;burst(SAVE_DOOR,FLOOR2.y-70,12,["#f4c84f","#fff"]);sayToast("Saved! Health restored. Press R any time to come back here.")}];
   if(l2.doorY!=null&&l2.doorY>=FLOOR2.y&&!l2.doorOpen&&near(DOOR_X,44)&&s.y+s.h<=FLOOR2.y+2)return[has("Smudgy Key")?"Unlock the sky door":"Inspect the sky door",skyDoor];
@@ -1410,7 +1434,7 @@ function hitSpike(){
 function defeatSpike(){l2.spikeDown=true;gainXP("Prickles",SPIKE_X,G-190);burst(SPIKE_X,G-30,30,["#7a5c99","#fff","#f4c84f","#e5577b"]);for(let i=0;i<3;i++)spill(SPIKE_X,G-50,"coin",null,(i-1)*90);
   start([["Nib","Got him! Pointy beats spiky. Every time."],["Announcer","The stage is clear!"+(l2.catFreed?" Everybody to the stage — Mr. Biscuits, take your seat!":" Now we just need our judge…")]],()=>{l2.pendRes=l2.catFreed&&l2.chaseDone;if(l2.pendRes)sayToast("Everyone heads over to the stage…")})}
 function nibJab(){
-  if(jabT>0)return;jabT=.32;if(level===3&&l3Jab(center()+s.face*55))return;if(scene==="festival"&&!l2.spikeDown&&Math.abs(SPIKE_X-(center()+s.face*55))<60&&onFloor()){jabT=.32;hitSpike();return}
+  if(jabT>0)return;jabT=.32;if(level===3&&l3Jab(center()+s.face*55))return;if(level===4&&l4Jab(center()+s.face*55))return;if(scene==="festival"&&!l2.spikeDown&&Math.abs(SPIKE_X-(center()+s.face*55))<60&&onFloor()){jabT=.32;hitSpike();return}
   const hx=center()+s.face*55,list=scene==="festival"?fsm.concat(l2.foe?[l2.foe]:[]):scene==="outside"?smudges:[];let hit=0;
   for(const m of list){if(!m.alive)continue;const base=m.base??G;if(Math.abs(m.x-hx)<44&&s.y+s.h>base-80&&s.y<base){m.alive=false;hit++;gainXP("Smudge",m.x,base-70);if(m.key)dropDoorKey(m);burst(m.x,G-20,14,[INK,"#5b5277","#fff"]);spill(m.x,G-40,"coin",null,s.face*80)}}
   if(hit&&!l2.nibCheer){l2.nibCheer=true;sayToast("JAB! Nib pokes the Smudge into confetti — and a coin pops out!")}
@@ -1755,7 +1779,7 @@ function drawFestival(){
   if(!l2.hub){drawSwan(1300);drawSculptures();drawJungleGym(1565)}
   for(const b of CRATES)drawCrate(b);
   booth(2470,120,"ART SUPPLIES","#b98ad8",()=>npc("Inka",2470,undefined,-26));
-  drawTrail();if(!l2.hub)drawStage();drawBars();drawSkyDoor();drawHubFestival();
+  drawTrail();if(!l2.hub)drawStage();drawBars();drawSkyDoor();drawFloorDoors();drawHubFestival();
   if(!l2.hub)for(const n of["Mr. Umber","Pippa","Lou","Announcer","Juniper"])npc(n,npcX(n));
   const bx=l2.brieX;if(l2.hub){}else if(l2.chase===1){const hop=Math.abs(Math.sin(time*12))*6;groundShadow(bx,G+2,18);sprite(bx,G+3-hop,50,78,()=>drawPersonBody(LOOKS.Brie),{sx:l2.brieFace});
     g.font="bold 22px "+FONT;g.fillStyle=l2.confused>0?"#3b8fd6":"#e5577b";g.textAlign="center";g.fillText(l2.confused>0?"?":"!!",bx,G-92);g.textAlign="left"}
@@ -1855,7 +1879,7 @@ const SCENE_NPCS={beach:{"Marina":330},orchard:{"Registrar":1250},lake:{"Waffles
 let pinWorn=false,hasReel=false,dogOn=false;
 const fish={ph:0,t:0,bx:1360,need:0,n:0,next:0,dip:0,wait:0};
 function resetL2Extra(){Object.assign(l2,{lakeFrom:"orchard",lakeCoins:[0,0,0,0,0],holeSign:false,festReg:false,orchCoins:[0,0,0,0,0],orchMsg:false,mapTaken:false,underIntro:false,dogUsed:false,tramp:false,on2F:false,dogGone:false,wafflesTalk:0,bouncerTalk:0,barTalk:0,reelMet:false,fishCaught:0});fish.ph=0}
-const worldMin=()=>scene==="festival"?FEST_MIN:0;
+const worldMin=()=>scene==="festival"?FEST_MIN:scene==="clay"?CL_MIN:0;
 function goScene(name,x,y){scene=name;s.x=x-s.w/2;s.y=y??G-s.h;s.vy=0;fish.ph=0;camY=0;camera=clamp(s.x-350,worldMin(),Math.max(worldMin(),worldW()-W));dab.x=center()-30;dab.y=s.y+20}
 
 // ---- orchard ----
@@ -2033,6 +2057,7 @@ function castLine(bx){equipped="Reel";fish.bait=false;if(has("Bait")){useOne("Ba
 function rodTip(){return[center()+36*s.face,s.y+4]}
 function fishSpace(){
   if(fish.ph===4&&scene==="beach"){fish.ph=5;fish.t=0;fishCatchBeach();return}
+  if(fish.ph===4&&scene==="clay"){fish.ph=5;fish.t=0;fishCatchCanal();return}
   if(fish.ph===4){fish.ph=5;fish.t=0;const n=rollFish("lake",fish.bait);fish.last=n;addItem(n);l2.fishCaught++;burst(fish.bx,G+14,18,["#7cc6f2","#fff","#f4c84f"]);
     sayToast(l2.fishCaught===1?"You caught a "+n+"! Reel: \"Our first fish! I'm going to cry. Do fishing poles cry?\"":"You caught a "+fishLine(n)+" (That's "+count(n)+" now.)");return}
   if(fish.ph===1)return;
@@ -2782,7 +2807,7 @@ function gatherSave(){
     cp:{scene:checkpointScene,x:checkpoint,y:checkpointY},coins,maxHealth,xp,plv,journal,items:[...items],counts:{...counts},
     buddies:{hasDab,hasNib,hasReel,equipped,pinWorn,shield},
     l1:{doorOpen,closetOpen,potionCollected,roadChestKeyCollected,homeIntroSeen,residentDoorOpen,residentTalked,ladderCollected,ladderGiven,firstChestOpen,grandChestOpen,roofItemCollected,bedBounced,stormStarted,stormDone,flowerTalked,firstFlowerTalked,bonusFlowerTalked,flowerRestored,fountainKeyCollected,gateKey,gateOpen,saveTalked,mailRead,gateAnim,tearT,firstStomp,catTalk,easelTalk},
-    doodles:doodles.map(d=>d.found),smudges,l2:JSON.parse(JSON.stringify(l2)),l3:Object.fromEntries(L3_KEEP.map(k=>[k,l3[k]]))};
+    doodles:doodles.map(d=>d.found),smudges,l2:JSON.parse(JSON.stringify(l2)),l3:Object.fromEntries(L3_KEEP.map(k=>[k,l3[k]])),l4:Object.fromEntries(CL_KEEP.map(k=>[k,l4[k]]))};
 }
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(gatherSave()))}catch(e){}}
 function readSave(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");return d&&d.v===1?d:null}catch(e){return null}}
@@ -2795,16 +2820,17 @@ function applySave(d){
   ({hasDab,hasNib,hasReel,equipped,pinWorn,shield}=Object.assign({hasDab,hasNib,hasReel,equipped,pinWorn,shield},d.buddies));
   resetL2();resetL2Extra();Object.assign(l2,d.l2);fsm=[];if(l2.chase===1)l2.chase=0;
   resetL3();Object.assign(l3,d.l3||{});l3.boss=null;
+  resetL4();Object.assign(l4,d.l4||{});l4.ferryGo=null;buildFoes4();
   checkpointScene=d.cp.scene;checkpoint=d.cp.x;checkpointY=d.cp.y;
   dogOn=false;balloonOn=false;complete=false;showEndScreen=false;invOpen=false;dlg.on=false;fish.ph=0;loot=[];parts=[];mini=null;book=null;lvlUp=null;
   goScene(d.scene,d.x,d.feet-s.h);
-  camY=scene==="festival"?clamp(s.y-150,FLOOR2.y-250,0):scene==="lighthouse"?clamp(s.y-300,DY-420,0):0;
+  camY=scene==="clay"?clamp(s.y-(G-s.h),-640,240):scene==="festival"?clamp(s.y-150,FLOOR2.y-250,0):scene==="lighthouse"?clamp(s.y-300,DY-420,0):0;if(scene==="clay")l4.safe={x:s.x,y:s.y};
   sayToast("Welcome back! You're at your last Save Block.");
 }
 function newGameFromTitle(){titleMenu=null}
 function drawTitleMenu(){g.fillStyle="rgba(43,37,64,.72)";g.fillRect(0,0,W,H);g.save();g.translate(W/2,H/2);
   cut(()=>rr(-230,-130,460,250,26),"#fff3d6",{edge:10});g.textAlign="center";g.fillStyle=INK;g.font="bold 28px "+FONT;g.fillText("Sarah and the Fading World",0,-80);
-  const d=titleMenu.save;g.font="13px "+FONT;g.fillStyle="#7a7088";g.fillText("Saved game: "+(d.level===3?"Level 1":"Level 0")+" · Lv "+d.plv+" · "+d.coins+" coins",0,-52);
+  const d=titleMenu.save;g.font="13px "+FONT;g.fillStyle="#7a7088";g.fillText("Saved game: "+(d.level===4?"Chapter 2-1":d.level===3?"Level 1":"Level 0")+" · Lv "+d.plv+" · "+d.coins+" coins",0,-52);
   ["Continue","New Game"].forEach((o,i)=>{const sel=titleMenu.sel===i,y=-6+i*58;cut(()=>rr(-120,y-24,240,44,14),sel?"#17a398":"#fffdf6",{edge:5,shadow:false});g.fillStyle=sel?"#fff":INK;g.font="bold 20px "+FONT;g.fillText(o,0,y+5)});
   g.fillStyle="#7a7088";g.font="12px "+FONT;g.fillText("↑ ↓ to choose · Space to start",0,108);g.restore();g.textAlign="left"}
 function titlePick(i){if(i===0)applySave(titleMenu.save);else{titleMenu=null;try{localStorage.removeItem(SAVE_KEY)}catch(e){}}titleMenu=null}
@@ -2823,7 +2849,7 @@ const SHOPS={
 const SHOP_TALK={pet:()=>polly(),odds:()=>tally(),lost:()=>pocket(),arcade:()=>pixel(),alch:()=>fizz()};
 let shopId=null;
 function enterShop(id){shopId=id;SCENE_NPCS.shop={[SHOPS[id].keeper]:SHOPK_X};goScene("shop",SHOP_DOOR_X+70,G-s.h);s.face=1}
-function leaveShop(){const sh=SHOPS[shopId];goScene(sh.from,sh.door,G-s.h);s.face=1;camY=0;shopId=null}
+function leaveShop(){const sh=SHOPS[shopId];goScene(sh.from,sh.door,(sh.from==="clay"?floorAt(sh.door):G)-s.h);s.face=1;camY=sh.from==="clay"?clamp(s.y-(G-s.h),-640,240):0;shopId=null}
 function shopInteract(){
   if(!onFloor()||!shopId)return null;const sh=SHOPS[shopId];
   if(near(SHOP_DOOR_X,46))return["Leave the shop",leaveShop];
@@ -2874,6 +2900,7 @@ function drawShop(){const sh=SHOPS[shopId];if(!sh)return;
     g.fillStyle="#7cc488";g.beginPath();g.ellipse(360,G-36,56,10,0,0,7);g.fill();
     for(let i=0;i<3;i++){const t=(time*.8+i/3)%1;g.save();g.globalAlpha=1-t;g.fillStyle="#b9f0c6";circle(340+i*20,G-46-t*80,6+t*6);g.fill();g.restore()}
     g.fillStyle="#f08a3c";for(const x of[330,360,390]){g.beginPath();g.moveTo(x-8,G);g.quadraticCurveTo(x,G-24-Math.sin(time*9+x)*6,x+8,G);g.fill()}}
+  if(shopId==="clay")drawClayShopDecor();
   // shopkeeper behind the counter, then the counter in front
   npc(sh.keeper,SHOPK_X,-1,-54);
   cut(()=>rr(COUNTER.x,G-50,COUNTER.w,50,6),dark?"#5b4a6e":"#c98a5a",{edge:8});cut(()=>rr(COUNTER.x-8,G-58,COUNTER.w+16,12,5),sh.trim,{edge:6});
@@ -2906,26 +2933,30 @@ function returnHome(){
   const land=()=>{goScene("festival",1115,G-s.h);s.face=1;camY=0;checkpoint=700-s.w/2;checkpointY=null;checkpointScene="festival"};
   if(l2.hub&&l2.hubStep!=null){level=2;complete=false;showEndScreen=false;invOpen=false;dogOn=false;balloonOn=false;fish.ph=0;health=maxHealth;parts=[];loot=[];land();
     start([["Narrator","The beam carries Sarah up through the inky dark and out the page door on the second floor. The elevator is waiting with its doors open. Ding! Ground floor."]]);return}
-  finishL2State();level=2;l2.hub=true;l2.hubStep=1;complete=false;showEndScreen=false;invOpen=false;dogOn=false;balloonOn=false;fish.ph=0;
-  l2.maple=2980;l2.doorOpen=true;l2.doorY=FLOOR2.y;health=maxHealth;parts=[];loot=[];land();
+  finishL2State();level=2;l2.hub=true;l2.hubStep=2;l2.door2=true;complete=false;showEndScreen=false;invOpen=false;dogOn=false;balloonOn=false;fish.ph=0;
+  l2.maple=1290;l2.doorOpen=true;l2.doorY=FLOOR2.y;health=maxHealth;parts=[];loot=[];land();
   start([
     ["Narrator","The beam carries Sarah up and up, through the inky dark, and straight out through the page door she fell in by, onto the second floor."],
     ["Narrator","Right beside her, the old elevator gives a cheerful DING. Its lights are on. Someone fixed it! Down it goes, all the way to the ground floor."],
-    ["Gus","Welcome back! Told you I'd get her running. Up and down, smooth as butter. Fresh butter, not swan butter."],
+    ["Gus","Welcome home, Sarah! Told you I'd get her running. Up and down, smooth as butter. Fresh butter, not swan butter."],
     ["Narrator","Sarah steps out into town. The festival is over: the booths, the stage and the sculptures are all packed away, and the streets feel quiet and roomy."],
     ["Gus","And now that the festival's done, some of the shops have opened back up. The pet store, the new general store by the entrance, and the shops down in Undertown. Chef Crumb and Inka kept their booths open too. Everyone else is on vacation."],
+    ["Gus","Oh, and is that a new fishing pole? Take it down to the lake! Those fish have been bored all festival."],
     ["Sarah","We made it! The coast is colorful again, and we're… home."],
-    ["Dab","Sarah. That man in the rowboat. Gray coat, gray hat, gray everything. I know him."],
-    ["Dab","His name is Professor Monochrome. A long time ago, he painted with me. And with your Grandma."],
-    ["Sarah","With GRANDMA?!"],
-    ["Dab","Mrs. Maple knows the whole story. She's at the far right end of town, waving like a windmill."]
-  ],()=>{chapterCard={t:0,title:"Level 0",sub:"Back in Town"}});
+    ["Narrator","Mrs. Maple comes hurrying over, waving."],
+    ["Mrs. Maple","Sarah! You're back! And you smell like the seaside."],
+    ["Mrs. Maple","I have a little favor to ask, whenever you're ready. Inka's art store ran clean out of clay during the festival, and she has a big order waiting at the Clay Store."],
+    ["Mrs. Maple","The Clay Store is through the second door, up on the walkway. The order's already paid for. You only need to pick up the delivery."],
+    ["Sarah","A clay pickup? Easy! I'll be back before you know it."],
+    ["Mrs. Maple","No rush, dear. Enjoy town first! Gus's elevator will take you up to the walkway when you're ready."]
+  ],()=>{l2.clayErrand=true;chapterCard={t:0,title:"Level 0",sub:"Back in Town"}});
 }
 function hubInteract(){
   if(onF2()){
     if(near(1050,40))return["Ride the elevator down",()=>{l2.hubStep=Math.max(l2.hubStep,1);goScene("festival",1050,G-s.h);camY=0;sayToast("Ding! Ground floor.")}];
     if(near(DOOR_X,44))return["Go back to the Watercolor Coast",()=>startLevel3(true)];
-    if(l2.door2&&near(DOOR2_X,44))return["Read the sign on the door",()=>start([["Sign","COMING SOON. This page is still being drawn by the game's developers. (That's us again. Pencils are moving as fast as they can.)"]])];
+    if(near(DOOR2_X,44))return l2.clayErrand?["Go through the second door",startLevel4]:["Try the second door",()=>start([["Narrator","The second door is unlocked now that the Watercolor Coast is restored. Its handle is cool and a little dusty."],["Dab","Mrs. Maple said she had a favor to ask. Let's find her before we go anywhere!"]])];
+    for(let i=2;i<6;i++)if(near(DOOR_SLOTS[i],44))return["Try the door",lockedDoor];
     return null;
   }
   if(!onFloor())return null;const T=(l,f)=>[l,f,true];
@@ -2937,21 +2968,8 @@ function hubInteract(){
   return null;
 }
 function hubMaple(){
-  if(l2.hubStep>=2){const l=["Every page you bring back, the closer you get to your Grandma. I just know it.","Quill at the library will show you the Great Sketchbook, dear.","Your Grandma used to say: \"Gray is just color that's waiting.\""];start([["Mrs. Maple",l[(l2.mapleTalk=(l2.mapleTalk||0)+1)%3]]]);return}
-  start([
-    ["Mrs. Maple","Sarah! You came back through the door! And you smell like the seaside."],
-    ["Sarah","Mrs. Maple, Dab says you know about Grandma… and someone called Professor Monochrome?"],
-    ["Mrs. Maple","Oh, dear. Sit down. Well — stand. There's nowhere to sit, it's a festival."],
-    ["Mrs. Maple","Long ago, your Grandma and a young painter named Monty were the best of friends. With little Dab, they kept this whole world colorful."],
-    ["Mrs. Maple","You see, the world is one enormous sketchbook. Every place is a page. And the three of them painted every single one."],
-    ["Mrs. Maple","Then Monty entered the Town Art Festival… and a certain cat gave his painting a very, VERY bad review."],
-    ["Narrator","Somewhere nearby, Mr. Biscuits sneezes. He is not sorry."],
-    ["Mrs. Maple","Monty decided color was messy. Cheating, even. He went gray, called himself Professor Monochrome, and started ripping pages out of the world."],
-    ["Mrs. Maple","Your Grandma went after him to bring the pages back. That was years ago. She never came home."],
-    ["Sarah","Grandma's… missing?"],
-    ["Dab","Every torn-out page makes a door. Every page we stitch back in brings us closer to her. I'm sure of it."],
-    ["Mrs. Maple","Quill keeps the Great Sketchbook in the library. Go see how many pages are still missing, dear."]
-  ],()=>{l2.hubStep=Math.max(l2.hubStep,2)});
+  if(!l2.clayErrand){l2.clayErrand=true;start([["Mrs. Maple","Sarah! Could you pick up a delivery for me? Inka's clay order is waiting at the Clay Store, through the second door. It's already paid for."]]);return}
+  const l=["The Clay Store is through the second door, dear. Already paid for!","No rush, dear. Inka can wait a little. Clay doesn't go anywhere.","Every page you bring back makes the world a little brighter, dear."];start([["Mrs. Maple",l[(l2.mapleTalk=(l2.mapleTalk||0)+1)%3]]]);
 }
 function quill(){
   if(l2.hubStep<2){start([["Quill","Shhh. …Sorry. Habit. The library's closed for the festival, but I'm guarding something important. Come back later."]]);return}
@@ -2963,11 +2981,10 @@ function quill(){
 }
 function closeBook(){const first=book&&book.first;book=null;
   if(first){l2.hubStep=3;start([
-    ["Quill","One page back. Five still missing. Every one of them is a door waiting to be opened."],
-    ["Narrator","THUD. Somewhere far overhead, another door lands on the festival's second floor."],
-    ["Dab","The next page! …It's not finished, though. I can tell. Its edges are still all sketchy."],
-    ["Quill","Then we wait. In the meantime, the town could use some help. The pet store's open again, and the shops downstairs too."]
-  ],()=>{l2.door2=true;shake=.5})}}
+    ["Quill","One page back. Five still missing. Every one of them is a door up on the walkway."],
+    ["Dab","And the second door is unlocked now! I can feel it from here."],
+    ["Quill","In the meantime, the town could use some help. The pet store's open again, and the shops downstairs too."]
+  ],()=>{l2.door2=true})}}
 function polly(){
   const dog=!has("Dog Food")&&!l2.wafflesFed;
   const opts=[...(dog?["Buy Dog Food (4 coins)"]:[]),"Buy Bait ×3 (5 coins)","Just looking"];
@@ -3013,7 +3030,7 @@ function pixel(){
     coins--;mini={t:0,round:0,hits:0,pos:0,dir:1,speed:260,res:null,resT:0,zone:120+Math.random()*200,done:false}}]]);
 }
 function fizz(){
-  const fishName=["Lake Perch","Sea Perch","Sunfish","Sea Bass","Pufferfish","Catfish","Swordfish","Golden Koi"].find(n=>has(n))||null;
+  const fishName=["Lake Perch","Sea Perch","Canal Minnow","Sunfish","Sea Bass","Reed Pike","Pufferfish","Clay Carp","Catfish","Swordfish","Rainbow Trout","Golden Koi"].find(n=>has(n))||null;
   start([["Madame Fizz","Welcome, welcome! Madame Fizz brews the finest potions under the town. Bring me one fish and one seashell — or 3 coins instead of the shell — and I'll brew you a Health Potion.",["Brew a Health Potion","Just browsing"],k=>{
     if(k!==0){start([["Madame Fizz","Browse away. Please don't sniff the purple one. It sniffs back."]]);return}
     if(!fishName){start([["Madame Fizz","No fish, no potion! Reel could help with that, I suspect."]]);return}
@@ -3060,19 +3077,666 @@ function drawHubFestival(){
   // a sign hung on the Level 1 door
   const fy=FLOOR2.y;g.save();g.translate(DOOR_X,fy-78);g.rotate(Math.sin(time*1.4)*.04);g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.moveTo(-14,-14);g.lineTo(0,-26);g.lineTo(14,-14);g.stroke();
   cut(()=>rr(-30,-14,60,30,4),"#fff3d6",{edge:4,shadow:false});g.fillStyle="#2f9a4a";g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("✓ LEVEL 1",0,5);g.restore();g.textAlign="left";
-  if(l2.door2){const x=DOOR2_X;cut(()=>rr(x-38,fy-150,76,150,8),"#2f2a4a",{edge:9});cut(()=>rr(x-28,fy-140,56,140,5),"#7a8a9a",{edge:0,line:2,shadow:false});
-    g.save();g.setLineDash([5,5]);g.strokeStyle="#fff";g.lineWidth=1.5;g.strokeRect(x-22,fy-132,44,124);g.restore();
-    g.save();g.translate(x,fy-90);g.rotate(-.05);cut(()=>rr(-32,-14,64,30,4),"#fff3d6",{edge:4,shadow:false});g.fillStyle="#3b8fd6";g.font="bold 11px "+FONT;g.textAlign="center";g.fillText("COMING",0,0);g.fillText("SOON",0,12);g.restore();g.textAlign="left"}
 }
 function drawHubUnder(){}
 function objectiveHub(){
   if(l2.hubStep===0)return"Take Gus's elevator down. It's at the far left end of the second floor.";
-  if(l2.hubStep===1)return"Find Mrs. Maple at the far right end of town.";
-  if(l2.hubStep===2)return"Visit Quill outside the library to see the Great Sketchbook.";
-  return"The next door is still being drawn. Explore town: the pet store is open again, the shops in Undertown are open, and Reel can fish at the lake.";
+  if(!l2.clayErrand)return"Talk to Mrs. Maple.";
+  return"Pick up Mrs. Maple's clay order: ride Gus's elevator up to the walkway and go through the second door.";
 }
-function beatsHub(){return[["Come home from Level 1",true],["Ride Gus's elevator down",l2.hubStep>=1],["Hear Mrs. Maple's story",l2.hubStep>=2],["See the Great Sketchbook",l2.hubStep>=3],["Bring Waffles some dog food (optional)",!!l2.wafflesFed],["Visit the Lost & Found (optional)",!!l2.sketchGot]]}
+function beatsHub(){return[["Come home from Level 1",true],["Get Mrs. Maple's clay errand",!!l2.clayErrand],["See the Great Sketchbook (optional)",l2.hubStep>=3],["Bring Waffles some dog food (optional)",!!l2.wafflesFed],["Visit the Lost & Found (optional)",!!l2.sketchGot]]}
+// play the real return-home scene after Chapter 1 (Gus + Mrs. Maple), for testing
+function cheatHomeL1(){cheat3();for(const n of["Heart Necklace","Blue Gem","Green Gem"])removeItem(n);hasReel=true;l3.lit=true;l2.hub=false;l2.hubStep=null;l2.clayErrand=false;titleMenu=null;returnHome()}
 function cheatHub(){cheat3();for(const n of["Heart Necklace","Blue Gem","Green Gem"])removeItem(n);hasReel=true;l3.lit=true;returnHome();dlg.on=false;chapterCard=null}
+
+// ===========================================================================
+// CHAPTER 2-1 — The Road to the Clay Store (level 4)
+// Scene "clay" is the long pottery-village page. Scene "nook" is the hidden pottery nook.
+// The ground here has slopes and drops, so it comes from CL_FLOOR (floorAt) instead of G.
+// ===========================================================================
+const CL_MIN=-900,CL_W=10500,CL_START=190,CL_DOOR=110,CL_SIGN=720,CL_LCHEST=-640,CL_PEEK=1040,CL_VILL=470,CL_STORE=10050,CL_KEEPER_OUT=10150,CL_KILNS=10370,CL_DOCK=6480,CL_NOOK=4255;
+const CL_FLOOR=[[CL_MIN-100,G,3350,G],[3350,G,5000,G+220],[5200,G+220,5560,G+220],[6440,G+220,7000,G+220],[7000,G,7200,G],[8000,G-300,8600,G-300],[8690,G-300,9650,G-620],[9650,G-620,CL_W+100,G-620]];
+const CL_GAPS=[{x0:5000,x1:5200,kind:"pit",y:G+330},{x0:5560,x1:6440,kind:"water",y:G+250},{x0:7200,x1:8000,kind:"pit",y:G+110},{x0:8600,x1:8690,kind:"pit",y:G-170}];
+const CL_WATER=G+238,FERRY={w:160,a:5562,b:6278,y:G+222};
+// hoops on posts at each bank: from the ferry, Reel hooks the hoop on the other bank and pulls Sarah across
+const HOOPS=[{x:5532,y:G+130},{x:6462,y:G+130}];
+function floorAt(x){for(const [x0,y0,x1,y1] of CL_FLOOR)if(x>=x0&&x<x1)return y0+(y1-y0)*(x-x0)/(x1-x0);return null}
+const shel=(x,w=84)=>({x,y:Math.min(floorAt(x),floorAt(x+w-1))-95,w,shelter:1});
+const CL_PLATS=[
+  // the pottery yard (tip:1 shelves tip under Sarah's weight)
+  {x:1250,y:G-40,w:70,h:40,block:1},{x:1320,y:G-80,w:70,h:80,block:1},
+  {x:1460,y:G-70,w:130,table:1},{x:1640,y:G-140,w:110},{x:1790,y:G-240,w:100},
+  {x:1960,y:G-160,w:100,tip:1},{x:2130,y:G-210,w:100,tip:1},{x:2300,y:G-150,w:100,tip:1},{x:2450,y:G-100,w:100,tip:1},
+  {x:2045,y:G-300,w:80,tip:1},{x:2215,y:G-330,w:80,tip:1},{x:2385,y:G-290,w:80,tip:1},
+  // the narrow passage
+  {x:2700,y:G-95,w:70,crack:1},{x:2910,y:G-115,w:70,crack:1},{x:3120,y:G-95,w:70,crack:1},
+  // the rolling clay road (shelter platforms, a detour ledge, a low brick stack, the footbridge over the collection pit)
+  shel(3480),shel(3700),shel(3930),{x:3930,y:shel(3930).y-95,w:74,detour:1},shel(4200,110),shel(4560),shel(4860),
+  {x:4380,y:floorAt(4426)-38,w:46,h:70,block:1},
+  {x:4990,y:G+220,w:66,plank:1,crack:1},{x:5072,y:G+220,w:60,plank:1,crack:1},{x:5148,y:G+220,w:62,plank:1,crack:1},
+  // far bank: canal-side steps, then the partly faded staircase (steps 2-5 are missing until Dab paints them back)
+  {x:6600,y:G+140,w:44,stone:1},{x:6644,y:G+110,w:44,stone:1},{x:6688,y:G+80,w:70,stone:1},
+  ...[0,1,2,3,4,5,6].map(i=>({x:6830+i*25,y:G+190-i*30,w:34,stair:i,faded:i>=2&&i<=5})),
+  // the uphill route: staggered landings and drying racks, then perches above the wide landing
+  {x:7230,y:G-90,w:100,crack:1},{x:7390,y:G-160,w:90,crack:1},{x:7540,y:G-235,w:120,rack:1},{x:7715,y:G-200,w:90,crack:1},{x:7855,y:G-265,w:105,rack:1},
+  {x:8150,y:G-400,w:80},{x:8420,y:G-400,w:80},
+  // the uphill delivery lane
+  {x:8606,y:G-300,w:78,plank:1,crack:1},
+  shel(8800),shel(9040),shel(9290),shel(9520)
+];
+const CL_BLOCKS=CL_PLATS.filter(p=>p.block);
+// cracked pots: stomp them or bump them from below (hang:1 pots hang from a hook). coin = coins inside.
+const CL_POTS=[
+  {x:1700,y:G-34,coin:1},{x:1680,y:G-174,coin:1},{x:1585,y:G-200,hang:1,coin:1},{x:2050,y:G-34,coin:0},{x:2400,y:G-34,coin:1},
+  {x:2790,y:G-34,coin:1},{x:2990,y:G-34,coin:0},{x:3050,y:G-200,hang:1,coin:1},
+  {x:3742,y:shel(3700).y-34,coin:1},{x:4600,y:shel(4560).y-34,coin:1},{x:3990,y:shel(3930).y-129,coin:2},
+  {x:6635,y:G+186,coin:1},{x:6705,y:G+186,coin:0},
+  {x:7600,y:G-269,coin:1},{x:7905,y:G-299,coin:1},{x:7450,y:G-330,hang:1,coin:1},
+  {x:8100,y:G-334,coin:1},{x:8460,y:G-434,coin:1}
+];
+const CL_COINS=[[1815,G-272],[1840,G-282],[1865,G-272],[2085,G-335],[2255,G-365],[2425,G-325],[2945,G-150],[3945,shel(3930).y-125],[3975,shel(3930).y-135],
+  [6620,G+196],[6665,G+196],[6720,G+196],[7280,G-125],[7435,G-195],[7760,G-235],[8190,G-435]];
+const CL_FOES=[[2000,1990,2230,G],[2350,2280,2520,G],[2700,2640,2880,G],[3000,2960,3230,G],[8120,8040,8250,G-300],[8330,8270,8420,G-300],[8500,8440,8580,G-300]];
+// no Save Blocks in this chapter: Sarah quietly gets a respawn checkpoint at each of these spots (the game does NOT save here)
+const CL_CHECKS=[[3290,G],[5300,G+220],[6790,G+220],[8040,G-300],[9780,G-620]];
+const CL_SPAWN=[{x:3390,dir:1,zone:[3250,5160],every:2.3,speed:520},{x:9630,dir:-1,zone:[8560,9720],every:2.7,speed:400}];
+// teacup and teapot monsters: [kind, x, min, max, base]. First hit cracks them, the second breaks them.
+const CL_WARES=[["cup",2200,2150,2290,G],["pot",3150,3070,3240,G],["cup",5350,5260,5430,G+220],["cup",7100,7020,7180,G],["pot",8250,8170,8400,G-300]];
+const GANG_X=[9960,10060,10160];
+const NOOK_STAIRS=[{x:500,y:G-75,w:74},{x:590,y:G-150,w:74},{x:680,y:G-225,w:74}],NOOK_LEDGE={x:790,y:G-300,w:150},NOOK_CHEST=880;
+const CL_KEEP=["started","sign","lchest","peek","villager","crossed","nook","nookStairs","nchest","hooked","ferried","ferry","stairs","order","monty","doorGone","done","keeperOut","fishN","lastCatch","pots","coins","dead","tipTip","rumbled","flipTip","inStore","cp","wdead","gang"];
+let l4={};
+function resetL4(){
+  l4={started:false,sign:false,lchest:false,peek:false,villager:0,crossed:false,nook:false,nookStairs:false,nchest:false,hooked:false,ferried:false,ferry:1,ferryGo:null,hookT:0,
+    stairs:false,order:false,monty:0,doorGone:false,done:false,keeperOut:false,fishN:0,lastCatch:"Canal Minnow",pots:CL_POTS.map(()=>false),coins:CL_COINS.map(()=>false),dead:CL_FOES.map(()=>false),
+    tipTip:false,rumbled:[false,false],flipTip:false,inStore:false,cp:-1,wdead:CL_WARES.map(()=>false),gang:null,balls:[],sp:CL_SPAWN.map(()=>1.2),tips:new Map(),cracks:new Map(),pull:null,tearK:0,safe:{x:CL_START,y:G-s.h},fer:{x:FERRY.b,y:FERRY.y,w:FERRY.w,h:14,mover:1,ferry:1,px:FERRY.b,py:FERRY.y}};
+  buildFoes4();
+}
+function buildFoes4(){l4.foes=CL_FOES.map(([x,min,max,base],i)=>({x,min,max,base,alive:!l4.dead[i],flat:l4.dead[i]?1:0,t:0,dir:i%2?1:-1,speed:46,flip:0,i}));
+  // gulls over the canal (they swoop like the Watercolor Coast gulls)
+  l4.wares=CL_WARES.map(([kind,x,min,max,base],i)=>mkWare(kind,x,min,max,base,1,2,i));if(l4.wdead)l4.wares.forEach((f,i)=>{if(l4.wdead[i]){f.alive=false;f.flat=1}});
+  l4.gangFoes=(l4.gang==="fight"||l4.gang==="fight2")?mkGang():[];l4.steamP=[];
+  l4.gulls=[[5700,5600,5900],[6050,5900,6250],[6300,6150,6420]].map(([x,min,max],i)=>({type:"gull",x,min,max,base:G+220,y:G+70,alive:true,flat:0,t:i,dir:i%2?1:-1,mode:"fly",cool:1.5+i*1.4,carry:0}))}
+resetL4();
+Object.assign(LOOKS,{
+  "Villager":{skin:"#e9b98f",hair:"#7a4a2a",style:"bun",top:"#d9a066",bottom:"#6b4a35",acc:"apron",apron:"#c98a5a"},
+  "Shopkeeper":{skin:"#c98e64",hair:"#e8e4dc",style:"short",top:"#b5713f",bottom:"#4a4060",acc:"apron",apron:"#fff3d6",hat:"cap",hatCol:"#c8643c"}
+});
+Object.assign(speakerColor,{"Villager":"#b5713f","Shopkeeper":"#c8643c","Big Teapot":"#c0628a","Teacup":"#3f7fb5"});
+CREATURES.push({name:"Clay Creature",xp:2,where:"Wandering the pottery village (Level 2-1)",tip:"Stomp it or jab it with Nib. Touching it from the side costs 1 health.",draw:()=>sprite(0,0,54,42,()=>drawClayBody(false),{shadow:false})});
+CREATURES.push({name:"Teacup Monster",xp:1,where:"Hopping around the pottery village (Level 2-1)",tip:"Two hits: the first cracks it, the second breaks it. Stomp it or jab it with Nib.",draw:()=>sprite(0,0,52,42,()=>drawCupBody(0),{shadow:false})},
+  {name:"Teapot Monster",xp:2,where:"Stomping around the pottery village (Level 2-1)",tip:"Two hits: the first cracks it, the second breaks it. The big one near the Clay Store takes five!",draw:()=>sprite(0,0,68,56,()=>drawPotBody(0),{shadow:false})});
+Object.assign(INFO,{
+  "Clay Order":["Mrs. Maple's order from the Clay Store: a heavy, neatly wrapped parcel of fresh clay for Inka's art store. Already paid for.",null],
+  "Canal Minnow":["A skinny little Canal Minnow from the pottery village canal. Mr. Tally pays 3 coins.","Admire"],
+  "Reed Pike":["A long, pointy Reed Pike that hides in the canal reeds. Mr. Tally pays 7 coins.","Admire"],
+  "Clay Carp":["A Clay Carp, the exact color of a flowerpot. It's been in this canal so long it matches. Mr. Tally pays 12 coins.","Admire"],
+  "Rainbow Trout":["A RAINBOW TROUT. Rare! Every color at once, which Dab finds very inspiring. Mr. Tally pays 25 coins.","Admire"]
+});
+KEY_ITEMS.push("Clay Order");
+FISH.canal=[["Canal Minnow",55],["Reed Pike",26],["Clay Carp",15],["Rainbow Trout",4]];
+FISH_NAMES.push(...FISH.canal.map(f=>f[0]));
+Object.assign(SELL,{"Canal Minnow":3,"Reed Pike":7,"Clay Carp":12,"Rainbow Trout":25});
+const fishLine4=n=>({"Canal Minnow":"Canal Minnow. Small, but it tried its best.","Reed Pike":"Reed Pike! Long and pointy. Nib approves.","Clay Carp":"Clay Carp! It's the color of a flowerpot.","Rainbow Trout":"RAINBOW TROUT! Dab is speechless. Dab is never speechless."})[n]||n;
+
+// ---- entering and leaving the chapter ----
+function clayGo(x,feet){goScene("clay",x,feet-s.h);camY=clamp(s.y-(G-s.h),-640,240)}
+function startLevel4(){
+  level=4;dogOn=false;balloonOn=false;fish.ph=0;showEndScreen=false;complete=false;invOpen=false;parts=[];loot=[];hasDab=true;health=maxHealth;
+  const first=!l4.started;if(first){resetL4();l4.started=true}
+  clayGo(CL_START,G);s.face=1;s.flip=1;checkpointScene="clay";checkpoint=CL_START-s.w/2;checkpointY=G-s.h;l4.safe={x:s.x,y:s.y};
+  if(!first){start([["Narrator","Sarah steps back through the second door, onto the landing above the pottery village."]]);return}
+  start([
+    ["Narrator","Sarah steps through the second door. Inky dark, the smell of fresh paint… and then, for once, she lands on her feet."],
+    ["Narrator","She's standing on a landing above a pottery village: clay rooftops, crooked chimneys, drying racks, and a canal winding off into the distance."],
+    ["Sarah","A whole village made of pottery! Okay. One clay order, coming right up."],
+    ["Dab","The Clay Store has to be around here somewhere."],
+    ["Reel","Is that a canal? I'm not saying we should fish. I'm just saying it's a canal."]
+  ],()=>{chapterCard={t:0,title:"Chapter 2-1",sub:"The Road to the Clay Store"}});
+}
+function clayToTown(){
+  level=2;fish.ph=0;health=maxHealth;parts=[];loot=[];goScene("festival",DOOR2_X,FLOOR2.y-s.h);s.face=-1;camY=clamp(s.y-150,FLOOR2.y-250,0);
+  checkpoint=700-s.w/2;checkpointY=null;checkpointScene="festival";
+  start([["Narrator","Sarah steps back through the second door, out onto the sky walkway above town. Gus's elevator is waiting at the far left end."]]);
+}
+
+// ---- per-frame ----
+function clayPlats(){return[...CL_PLATS.filter(p=>!(p.tip&&tipS(p).down>0)&&!(p.crack&&crackS(p).gone>0)&&!(p.faded&&!l4.stairs)),l4.fer]}
+function crackS(p){if(!l4.cracks)l4.cracks=new Map();if(!l4.cracks.has(p))l4.cracks.set(p,{t:0,gone:0,fy:0,vy:0});return l4.cracks.get(p)}
+function updateCracks(dt){
+  for(const p of CL_PLATS){if(!p.crack)continue;const c=crackS(p);
+    if(c.gone>0){c.gone-=dt;c.vy+=1400*dt;c.fy+=c.vy*dt;if(c.gone<=0){c.gone=0;c.t=0;c.fy=0;c.vy=0;burst(p.x+p.w/2,p.y,8,["#d9a86a","#fff"])}continue}
+    if(s.ground&&s.plat===p){c.t+=dt;if(c.t>.6){c.gone=3;c.fy=0;c.vy=0;s.plat=null;s.ground=false;s.vy=40;burst(p.x+p.w/2,p.y+6,16,["#c8643c","#e8a87c","#fff"])}}
+    else if(c.t>0)c.t=Math.max(0,c.t-dt*.4)}
+}
+function nookPlats(){return[...(l4.nookStairs?NOOK_STAIRS:[]),NOOK_LEDGE]}
+function tipS(p){if(!l4.tips.has(p))l4.tips.set(p,{t:0,down:0});return l4.tips.get(p)}
+function clayGroundUnder(){let best=floorAt(center());if(best!=null&&best<s.y+s.h-4)best=null;for(const p of clayPlats())if(s.x+s.w>p.x&&s.x<p.x+p.w&&s.y+s.h<=p.y+4&&(best==null||p.y<best))best=p.y;return best??s.y+s.h+400}
+function l4Pre(dt){
+  const f=l4.fer;f.px=f.x;f.py=f.y;
+  if(l4.ferryGo!=null){const sp=l4.pull!=null?.22:.42;l4.ferry+=Math.sign(l4.ferryGo-l4.ferry)*sp*dt;if(Math.abs(l4.ferry-l4.ferryGo)<sp*dt){l4.ferry=l4.ferryGo;l4.ferryGo=null;l4.hookT=0;l4.pull=null;
+    if(l4.ferry===1&&scene==="clay"&&s.plat===f&&!l4.ferried){l4.ferried=true;sayToast("The ferry bumps against the far bank. All ashore!")}}}
+  l4.hookT=Math.max(0,l4.hookT-dt);
+  f.x=FERRY.a+(FERRY.b-FERRY.a)*l4.ferry;f.y=FERRY.y+Math.sin(time*2)*1.5;
+  if(scene==="clay"&&s.ground&&s.plat===f){s.x+=f.x-f.px;s.y=f.y-s.h}
+}
+function clayWalls(oldX){
+  for(const b of CL_BLOCKS){if(s.x+s.w>b.x&&s.x<b.x+b.w&&s.y+s.h>b.y+6&&s.y<b.y+b.h){if(oldX+s.w<=b.x+1)s.x=b.x-s.w;else if(oldX>=b.x+b.w-1)s.x=b.x+b.w}}
+  const mv=s.x-oldX;if(!mv)return;const lead=mv>0?s.x+s.w-4:s.x+4,fy=floorAt(lead);
+  if(fy!=null&&s.y+s.h-fy>24)s.x=oldX;
+}
+function clayFloor(oldFeet){
+  const fy=floorAt(center());if(fy==null){l4.onFloor=false;return}
+  const feet=s.y+s.h;
+  if(s.vy>=0&&feet>=fy&&oldFeet<=fy+26){s.y=fy-s.h;if(s.vy>300)s.squash=.82;s.vy=0;s.ground=true;s.plat=null;l4.onFloor=true;return}
+  if(s.vy>=0&&!s.ground&&l4.onFloor&&feet<fy&&fy-feet<26){s.y=fy-s.h;s.vy=0;s.ground=true;s.plat=null;return}
+  l4.onFloor=s.ground&&!s.plat;
+}
+function clayHurt(msg){const sf=l4.safe;s.x=sf.x;s.y=sf.y;s.vy=0;s.inv=1.2;shake=.3;const real=hurtHP();
+  if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint. Paper is resilient like that.");return}if(real)sayToast(msg)}
+function ballFloor(x){let fy=floorAt(x);if(fy==null)return null;for(const b of CL_BLOCKS)if(b.h>60&&x>b.x-14&&x<b.x+b.w+14)fy=Math.min(fy,b.y);return fy}
+function updateBalls(dt){
+  const gangOn=/^(talk|talk2|fight|fight2)$/.test(l4.gang||"");
+  CL_SPAWN.forEach((sp,i)=>{const inZone=center()>sp.zone[0]&&center()<sp.zone[1]&&scene==="clay"&&!(i===1&&gangOn);
+    if(!inZone){l4.sp[i]=Math.min(l4.sp[i],1.4);return}
+    l4.sp[i]-=dt;if(l4.sp[i]<=0){l4.sp[i]=sp.every;l4.balls.push({x:sp.x,y:floorAt(sp.x)??G,dir:sp.dir,speed:sp.speed,rot:0,fall:false,vy:0});shake=Math.max(shake,.12);
+      if(!l4.rumbled[i]){l4.rumbled[i]=true;sayToast(i===0?"Rumble rumble…":"Rumble rumble… from up the hill.")}}});
+  const R=32;
+  for(const b of l4.balls){b.x+=b.dir*b.speed*dt;b.rot+=b.dir*b.speed*dt/R;
+    if(!b.fall){const fy=ballFloor(b.x);if(fy==null){b.fall=true;b.vy=60}else b.y+=(fy-b.y)*Math.min(1,dt*30)}
+    else{b.vy+=1400*dt;b.y+=b.vy*dt;if(b.y>H+900)b.dead=true}
+    if(b.x<CL_SPAWN[1].zone[0]-200&&b.dir<0)b.dead=true;if(b.x>CL_SPAWN[0].zone[1]+100&&b.dir>0)b.dead=true;
+    if(!b.fall&&s.inv<=0&&scene==="clay"){const cx=b.x,cy=b.y-R,px=clamp(cx,s.x,s.x+s.w),py=clamp(cy,s.y,s.y+s.h);if(Math.hypot(cx-px,cy-py)<R-6)hurt3(cx,"SPLAT! A clay delivery rolls right over you. (-1 health)")}}
+  l4.balls=l4.balls.filter(b=>!b.dead);
+}
+function breakPot(i,how){const p=CL_POTS[i];l4.pots[i]=true;burst(p.x,p.y+16,16,["#c8643c","#e8a87c","#fff","#8d5a36"]);
+  if(p.coin){coins+=p.coin;xpPops.push({scene,x:p.x,y:p.y-10,t:0,text:"+"+p.coin+" coin"+(p.coin>1?"s":"")})}
+  if(!l4.potTip){l4.potTip=true;sayToast(how==="head"?"BONK! Sarah headbutts the cracked pot to pieces"+(p.coin?" and a coin pops out!":"."):"CRUNCH! The cracked pot shatters"+(p.coin?" and a coin pops out!":". Nothing inside. Just pot."))}}
+function updatePots(oldFeet){
+  const oldHead=oldFeet-s.h;
+  CL_POTS.forEach((p,i)=>{if(l4.pots[i])return;const w=30,h=34;if(!(s.x+s.w>p.x-w/2+2&&s.x<p.x+w/2-2))return;
+    if(s.vy>0&&oldFeet<=p.y+3&&s.y+s.h>=p.y){s.y=p.y-s.h;s.vy=-400;s.ground=false;breakPot(i,"stomp");return}
+    if(s.vy<0&&oldHead>=p.y+h-4&&s.y<p.y+h){s.y=p.y+h;s.vy=80;breakPot(i,"head")}});
+}
+function updateTips(dt){
+  for(const p of CL_PLATS){if(!p.tip)continue;const st=tipS(p);
+    if(st.down>0){st.down-=dt;if(st.down<=0){st.down=0;st.t=0}continue}
+    if(s.ground&&s.plat===p){st.t+=dt;if(!l4.tipTip&&st.t>.2){l4.tipTip=true;sayToast("Whoa! This shelf is tipping!")}
+      if(st.t>1.05){st.down=2.4;s.plat=null;s.ground=false;s.vy=40;burst(p.x+p.w/2,p.y,10,["#c58a52","#fff"])}}
+    else if(st.t>0)st.t=Math.max(0,st.t-dt*.6)}
+}
+function updateFoes4(dt,oldFeet){
+  for(const f of l4.foes){if(!f.alive){f.flat=Math.min(1,f.flat+dt*3);continue}
+    f.t+=dt;if(f.flip>0)f.flip-=dt;else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}}
+    const top=f.base-34;
+    if(s.x+s.w>f.x-24&&s.x<f.x+24&&s.y+s.h>top&&s.y<f.base){
+      if(s.vy>0&&oldFeet<=top+14){killFoe4(f);s.vy=-430}
+      else hurt3(f.x,"Ouch! A clay creature bumps you. (-1 health)")}}
+}
+function updateGulls4(dt,oldFeet){
+  const near=center()>5380&&center()<6640;
+  for(const f of l4.gulls){if(!f.alive){f.flat=Math.min(1,f.flat+dt*3);continue}f.t+=dt;const hy=f.base-150;
+    if(f.mode==="swoop"){f.st+=dt;const k=f.st/1.4;f.x+=f.sdir*170*dt;f.y=hy+(f.base-30-hy)*Math.sin(Math.min(1,k)*Math.PI);if(k>=1){f.mode="fly";f.cool=3.6+Math.random()*2;f.stole=false}}
+    else{f.x+=f.dir*90*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}f.y=hy+Math.sin(f.t*2)*10;f.cool-=dt;
+      if(near&&f.cool<=0&&Math.abs(center()-f.x)<260&&Math.abs(s.y+s.h-f.base)<70){f.mode="swoop";f.st=0;f.sdir=Math.sign(center()-f.x)||1;f.dir=f.sdir}}
+    if(s.x+s.w>f.x-24&&s.x<f.x+24&&s.y+s.h>f.y-20&&s.y<f.y+8){
+      if(s.vy>0&&oldFeet<=f.y-8){killFoe(f);s.vy=-430;continue}
+      if(f.mode==="swoop"&&!f.stole){f.stole=true;if(coins>0){coins--;f.carry=(f.carry||0)+1;sayToast("SQUAWK! A Gull snatched a coin!")}
+        else if(s.inv<=0){s.inv=1.3;shake=.3;const real=hurtHP();if(health<=0){respawnL3();sayToast("Sarah crumples… then uncrumples back at your last checkpoint.")}else if(real)sayToast("SQUAWK! Pecked by a Gull! (-1 health)")}}}}
+}
+function mkWare(kind,x,min,max,base,sc,hp,i){return{kind,x,min,max,base,sc,hp,max:hp,i,alive:true,flat:0,t:i*.7,dir:i%2?1:-1,inv:0,hop:0,hv:0,w:kind==="pot"?60:44,h:kind==="pot"?50:36,speed:kind==="pot"?40:60}}
+function mkGang(){const b=G-620;return[mkWare("pot",GANG_X[1],9700,10380,b,1.9,5,-1),mkWare("cup",GANG_X[0],9700,10380,b,1.35,3,-2),mkWare("cup",GANG_X[2],9700,10380,b,1.35,3,-3)].map(f=>({...f,gang:1}))}
+const allWares=()=>[...(l4.wares||[]),...(l4.gangFoes||[])];
+function hitWare(f){if(f.inv>0||!f.alive)return;f.hp--;f.inv=.45;const top=f.base-f.h*f.sc;
+  if(f.hp>0){burst(f.x,top+10,8,["#fff","#cfd8e0",INK]);return}
+  f.alive=false;burst(f.x,f.base-f.h*f.sc/2,22,["#fff","#f4f1ea","#6aa6d8","#e8b0c8",INK]);
+  if(f.gang){coins+=f.kind==="pot"?5:2}else{l4.wdead[f.i]=true;coins++}
+  gainXP(f.kind==="pot"?"Teapot Monster":"Teacup Monster",f.x,top-20);
+  if(f.gang&&l4.gangFoes.every(g=>!g.alive))setTimeout(gangBeaten,700)}
+function updateWares(dt,oldFeet){
+  for(const f of allWares()){if(!f.alive){f.flat=Math.min(1,f.flat+dt*3);continue}
+    f.t+=dt;f.inv=Math.max(0,f.inv-dt);
+    if(f.gang)moveGang(f,dt);
+    else{f.x+=f.dir*f.speed*dt;if(f.x<f.min||f.x>f.max){f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}
+      if(f.kind==="cup"&&f.hop===0&&f.t%2.4<dt)f.hv=-300}
+    if(f.hv||f.hop<0){f.hv+=1450*dt;f.hop+=f.hv*dt;if(f.hop>=0){f.hop=0;f.hv=0}}
+    const hw=(f.w/2-4)*f.sc,top=f.base+f.hop-f.h*f.sc;
+    if(s.x+s.w>f.x-hw&&s.x<f.x+hw&&s.y+s.h>top&&s.y<f.base+f.hop){
+      if(s.vy>0&&oldFeet<=top+16){s.vy=-460;hitWare(f)}
+      else if(f.inv<=0)hurt3(f.x,f.kind==="pot"?"Ow! Hot teapot! (-1 health)":"Ow! A teacup bonks you. (-1 health)")}}
+  updateSteam(dt);
+  if((l4.gang==="fight"||l4.gang==="fight2")&&s.x>9600&&s.y+s.h<=G-600){s.x=clamp(s.x,9680,10420-s.w)}
+}
+// the teapot gang moves around: teacups bounce all over the courtyard, the big teapot paces and blows steam
+function moveGang(f,dt){
+  const sx=center();
+  if(f.kind==="cup"){
+    f.next=(f.next??(.4+Math.random()*.6))-dt;
+    if(f.hop===0&&f.next<=0){f.next=.9+Math.random()*.8;const toward=Math.random()<.55?Math.sign(sx-f.x)||1:(Math.random()<.5?-1:1);f.vx=toward*(140+Math.random()*140);f.hv=-(420+Math.random()*200);f.dir=Math.sign(f.vx)}
+    if(f.hop<0||f.hv<0){f.x+=f.vx*dt;if(f.x<f.min||f.x>f.max){f.vx*=-1;f.dir*=-1;f.x=clamp(f.x,f.min,f.max)}}
+    return}
+  // big teapot
+  if(f.steam>0){f.steam-=dt;f.dir=f.steamDir;
+    if(f.steam<1.1){const sp=f.x+f.dir*34*f.sc,y0=f.base-f.h*f.sc*.95,x0=f.dir>0?sp:sp-230,x1=f.dir>0?sp+230:sp;
+      if(Math.random()<dt*30)l4.steamP.push({x:sp,y:y0+Math.random()*10,vx:f.dir*(260+Math.random()*80),vy:-20+Math.random()*30,t:0});
+      if(s.x+s.w>x0&&s.x<x1&&s.y<y0+38&&s.y+s.h>y0-26)hurt3(f.x,"HISSSS! A blast of hot steam! (-1 health)")}
+    if(f.steam<=0){f.steam=0;f.cool=2.4+Math.random()*1.6}
+    return}
+  f.cool=(f.cool??2)-dt;f.goal??=f.x;
+  if(f.cool<=0&&Math.abs(sx-f.x)<300){f.steam=1.7;f.steamDir=Math.sign(sx-f.x)||1;f.dir=f.steamDir;return}
+  if(Math.abs(f.goal-f.x)<8){f.goal=clamp(sx+(Math.random()<.5?-1:1)*(120+Math.random()*200),f.min+40,f.max-40)}
+  const d=Math.sign(f.goal-f.x);f.dir=d||f.dir;f.x+=d*110*dt;
+  if(f.hop===0&&Math.random()<dt*.4)f.hv=-380;
+}
+function updateSteam(dt){if(!l4.steamP)l4.steamP=[];for(const q of l4.steamP){q.t+=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=1-dt*1.5}l4.steamP=l4.steamP.filter(q=>q.t<.8)}
+function drawSteam(){for(const f of l4.gangFoes||[])if(f.alive&&f.steam>1.1){const sp=f.x+f.dir*34*f.sc,y0=f.base-f.h*f.sc*.95;g.save();g.globalAlpha=.7;g.fillStyle="#fff";for(let i=0;i<3;i++){circle(sp+f.dir*(6+i*6),y0-4-i*7+Math.sin(time*20+i)*2,4+i*2);g.fill()}g.restore()}
+  for(const q of l4.steamP||[]){g.save();g.globalAlpha=.75*(1-q.t/.8);g.fillStyle="#fff";g.strokeStyle="rgba(150,160,180,.6)";g.lineWidth=2;circle(q.x,q.y,10+q.t*26);g.fill();g.stroke();g.restore()}}
+function drawCupBody(k){
+  g.save();g.translate(4,2);
+  g.fillStyle="#f4f1ea";g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.moveTo(2,4);g.lineTo(40,4);g.quadraticCurveTo(38,30,28,33);g.lineTo(14,33);g.quadraticCurveTo(4,30,2,4);g.closePath();g.fill();g.stroke();
+  g.lineWidth=4;g.beginPath();g.arc(40,15,7,-1.3,1.4);g.stroke();g.strokeStyle="#f4f1ea";g.lineWidth=2;g.beginPath();g.arc(40,15,7,-1.3,1.4);g.stroke();
+  g.fillStyle="#6aa6d8";g.fillRect(3,6,36,4);g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.ellipse(21,4,19,3,0,0,7);g.stroke();
+  g.fillStyle="#fff";circle(14,17,4.5);g.fill();g.stroke();circle(28,17,4.5);g.fill();g.stroke();g.fillStyle=INK;circle(15,18,2);g.fill();circle(27,18,2);g.fill();
+  g.lineWidth=2.5;g.beginPath();g.moveTo(9,10);g.lineTo(18,13);g.moveTo(33,10);g.lineTo(24,13);g.stroke();
+  g.fillStyle="#cfe3f2";g.beginPath();g.ellipse(21,35,15,3.5,0,0,7);g.fill();g.stroke();
+  crackLines(k,[[8,22,14,28,10,32],[30,8,26,16,32,24],[18,26,23,31,20,34]]);g.restore()}
+function drawPotBody(k){
+  g.save();g.translate(4,2);g.strokeStyle=INK;g.lineWidth=2.5;
+  g.fillStyle="#e8b0c8";g.beginPath();g.moveTo(46,26);g.quadraticCurveTo(58,22,60,8);g.lineTo(55,8);g.quadraticCurveTo(54,18,46,20);g.closePath();g.fill();g.stroke();
+  g.lineWidth=4;g.beginPath();g.arc(6,26,9,1.8,4.6);g.stroke();
+  g.lineWidth=2.5;g.fillStyle="#e8b0c8";g.beginPath();g.ellipse(26,28,22,18,0,0,7);g.fill();g.stroke();
+  g.fillStyle="#d48aa8";g.beginPath();g.ellipse(26,11,12,4,0,0,7);g.fill();g.stroke();g.beginPath();circle(26,6,3.5);g.fill();g.stroke();
+  g.fillStyle="#fff";g.fillRect(8,30,36,3);
+  g.fillStyle="#fff";circle(19,23,5);g.fill();g.stroke();circle(33,23,5);g.fill();g.stroke();g.fillStyle=INK;circle(20,24,2.2);g.fill();circle(32,24,2.2);g.fill();
+  g.lineWidth=2.5;g.beginPath();g.moveTo(13,15);g.lineTo(23,19);g.moveTo(39,15);g.lineTo(29,19);g.moveTo(20,36);g.quadraticCurveTo(26,32,32,36);g.stroke();
+  crackLines(k,[[10,26,16,32,12,38],[38,30,34,36,40,42],[24,40,28,44,25,46],[30,12,34,16,31,19],[6,20,12,22,8,28]]);g.restore()}
+function crackLines(k,L){g.strokeStyle=INK;g.lineWidth=1.6;for(let i=0;i<Math.min(k,L.length);i++){const c=L[i];g.beginPath();g.moveTo(c[0],c[1]);g.lineTo(c[2],c[3]);g.lineTo(c[4],c[5]);g.stroke()}}
+function drawWare(f){const sc=f.sc,w=(f.w+8)*sc,h=(f.h+6)*sc,k=f.max-f.hp,body=()=>{g.scale(sc,sc);(f.kind==="pot"?drawPotBody:drawCupBody)(f.gang?k:k*2)};
+  if(!f.alive){if(f.flat<1)sprite(f.x,f.base+2,w,h,body,{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat});return}
+  groundShadow(f.x,f.base+2,f.w*sc*.4);
+  sprite(f.x,f.base+2+f.hop,w,h,body,{sx:f.dir>0?1:-1})}
+// ---- the teapot gang (just before the Clay Store) ----
+function gangTalk(){
+  l4.gang="talk";l4.balls=[];const n=l4.pots.filter(Boolean).length;s.face=1;
+  const fight=()=>start([["Big Teapot","Teacups, GET HER!"]],()=>{l4.gang="fight";l4.gangFoes=mkGang()});
+  const ask3=()=>start([["Big Teapot","Then WHO was it?!",["It was the person at the beginning of the floor!","It was me."],k=>{if(k===0)later();else fight()}]]);
+  const cousins=n?n+" of our cousins, smashed!":"We heard the crashing all the way up here!";
+  const ask2=()=>start([["Teacup",cousins+" And you've got pot crumbs on your shoes!",["Nope. Not me.","Okay, okay. It was me."],k=>{if(k===0)ask3();else fight()}]]);
+  const ask1=(again)=>start([["Big Teapot",again?"So. Was it you?":"HALT! You're the one who's been breaking pots all the way up the hill!",
+    again?["That wasn't me!","Yes, it was me. Sorry!"]:["That wasn't me!","Yes, it was me. Sorry!","Who's asking?"],
+    k=>{if(k===0)ask2();else if(k===1)start([["Big Teapot","At least you're honest. But we're still here for REVENGE!"]],fight);else start([["Teacup","We're the teapot gang! "+cousins]],()=>ask1(true))}]]);
+  const later=()=>start([
+    ["Big Teapot","The villager by the drying rack?! I KNEW she had a shifty look."],
+    ["Teacup","Let's go have a word with her."],
+    ["Big Teapot","And YOU. If we find out you fibbed, we'll be back."],
+    ["Narrator","The teapot gang clatters off down the hill."],
+    ["Dab","…Sarah."],["Sarah","I know. I know."]],()=>{l4.gang="later"});
+  start([["Narrator","A rattle of china. A big teapot and two teacups march out from behind the kilns and block the way to the Clay Store."]],()=>ask1(false));
+}
+function gangBeaten(){
+  if(l4.gang==="fight"){l4.gang="won";start([["Big Teapot","Okay! Okay! We give up. Go do your shopping."],["Teacup","We're going to go lie down in a cupboard."]],()=>sayToast("The teapot gang is broken up!"));return}
+  if(l4.gang==="fight2"){l4.gang="won2";start([["Narrator","The last teacup topples over with a sad little clink."],["Sarah","Now. Where were we? Oh right. Our door."]],()=>finishL4())}}
+function gangReturns(){
+  l4.gang="talk2";l4.balls=[];s.face=1;
+  start([
+    ["Narrator","A rattle of china, coming back up the hill. The teapot gang is back, and they look even crankier."],
+    ["Big Teapot","We asked the villager. She's been at her drying rack all day! You FIBBED!",["…Okay. That was me. I'm sorry.","She must be fibbing!","Can we do this later? Someone just stole my door!"],k=>{
+      const go=()=>{l4.gang="fight2";l4.gangFoes=mkGang()};
+      start([[ "Big Teapot",["Too late for sorry!","The villager doesn't fib. YOU fib.","Later? LATER?! We've waited all afternoon!"][k]],["Big Teapot","Teacups, GET HER!"]],go)}]]);
+}
+function finishL4(){l4.done=true;flash=.4;setTimeout(()=>{complete=true;showEndScreen=true;endT=0},500)}
+function killFoe4(f){f.alive=false;l4.dead[f.i]=true;burst(f.x,f.base-20,16,["#c8643c","#e8a87c","#fff",INK]);coins++;gainXP("Clay Creature",f.x,f.base-60)}
+function l4Jab(hx){if(scene!=="clay")return false;let hit=false;
+  for(const f of l4.gulls){if(f.alive&&Math.abs(f.x-hx)<46&&s.y+s.h>f.y-80&&s.y<f.y+20){hit=true;killFoe(f)}}
+  for(const f of l4.foes){if(!f.alive)continue;if(Math.abs(f.x-hx)<46&&s.y+s.h>f.base-90&&s.y<f.base+10){hit=true;
+    killFoe4(f)}}
+  for(const f of allWares())if(f.alive&&Math.abs(f.x-hx)<24*f.sc+22&&s.y+s.h>f.base-f.h*f.sc-60&&s.y<f.base+10){hit=true;hitWare(f)}
+  return hit}
+function updateClay(dt,oldFeet){
+  if(scene==="nook"){s.x=clamp(s.x,40,W-40-s.w);return}
+  if(s.ground&&(!s.plat||(!s.plat.mover&&!s.plat.tip&&!s.plat.ferry&&!s.plat.crack)))l4.safe={x:s.x,y:s.y};
+  CL_CHECKS.forEach(([x,y],i)=>{if(i>l4.cp&&s.ground&&!s.plat&&center()>x&&Math.abs(s.y+s.h-y)<6){l4.cp=i;checkpoint=s.x;checkpointY=s.y;checkpointScene="clay"}});
+  for(const gp of CL_GAPS)if(center()>gp.x0&&center()<gp.x1&&s.y+s.h>gp.y){
+    if(gp.kind==="water"){burst(center(),CL_WATER,20,["#7cc6f2","#fff"]);clayHurt("SPLASH! Sarah fishes herself out of the canal. (-1 health)")}
+    else clayHurt("Oof! Down into the collection pit. Sarah climbs back out, a little clay-colored. (-1 health)");return}
+  updateTips(dt);updateCracks(dt);updatePots(oldFeet);updateBalls(dt);updateFoes4(dt,oldFeet);updateWares(dt,oldFeet);updateGulls4(dt,oldFeet);
+  if(l4.gang==null&&!l4.order&&s.ground&&center()>9700&&scene==="clay"){gangTalk();return}
+  if(!l4.crossed&&center()>5220)l4.crossed=true;
+  CL_COINS.forEach(([x,y],i)=>{if(!l4.coins[i]&&Math.abs(center()-x)<22&&s.y<y+12&&s.y+s.h>y-12){l4.coins[i]=true;coins++;burst(x,y,8,["#f4c84f","#fff"])}});
+  // crawl (duck + walk) under the footprint shelter to find the hidden nook
+  if(s.duck&&s.ground&&!s.plat&&Math.abs(center()-CL_NOOK)<26&&(keys.has("a")||keys.has("d")||keys.has("ArrowLeft")||keys.has("ArrowRight"))){enterNook();return}
+  if(s.x<=CL_MIN+1&&(keys.has("a")||keys.has("ArrowLeft"))&&!l4.edgeTip){l4.edgeTip=true;sayToast("Just a railing and a long drop to the rooftops. Nothing more back this way.")}
+  if(s.x+s.w>=CL_W-1&&l4.done&&!l4.endTip){l4.endTip=true;sayToast("The path past the kilns is still being drawn. (Chapter 2-2 is coming soon!)")}
+}
+function enterNook(){goScene("nook",150);s.face=1;
+  if(!l4.nook){l4.nook=true;start([
+    ["Narrator","Sarah crawls along the painted footprints, through a low, dusty passage… and pops out in a forgotten little pottery nook."],
+    ["Dab","Somebody used to work in here, a long time ago. Ooh, and I smell a doodle."]])}
+  else sayToast("Back in the hidden pottery nook.")}
+function leaveNook(){clayGo(CL_NOOK+50,floorAt(CL_NOOK+50));s.face=1;sayToast("Back out on the delivery road.")}
+
+// ---- interactions ----
+function clayInteract(){
+  if(fish.ph>0||!s.ground)return null;const T=(l,f)=>[l,f,true];
+  if(s.plat===l4.fer&&l4.ferryGo==null)return[hasReel?"Hook the hoop on the "+(l4.ferry<.5?"far":"near")+" bank with Reel":"Look across the canal",ferryRide];
+  if(s.plat)return null;
+  const c=center();
+  if(!l4.doorGone&&near(CL_DOOR,40)&&s.y+s.h>G-4)return["Go back through the door to town",clayToTown];
+  if(near(CL_VILL,34))return T("Talk to the Villager",villager);
+  if(!l4.lchest&&near(CL_LCHEST,40))return["Open the chest",()=>{l4.lchest=true;coins+=20;addItem("Health Potion");burst(CL_LCHEST,G-40,22,["#f4c84f","#fff","#ff6f9c"]);sayToast("A secret chest behind the landing! 20 coins and a Health Potion!")}];
+  if(near(CL_SIGN,30))return["Read the sign",()=>start(l4.sign?[["Sign","CLAY STORE →"]]:[["Narrator","The sign at the fork is so faded you can't read a single letter."],["Dab","Faded paint? That's my department."]])];
+  if(near(CL_PEEK,26))return["Peek through the gap in the wall",()=>{l4.peek=true;start([["Narrator","Through a gap in the bricks, Sarah spots a treasure chest sitting in a little room behind the wall."],["Sarah","There's no door on this side. There must be another way in."]])}];
+  if(c>5440&&c<5560&&l4.ferry>.5&&l4.ferryGo==null)return[hasReel?"Hook the ferry's ring with Reel":"Look at the ferry",hookFerry];
+  if(c>6530&&c<6610&&l4.ferry<.5&&l4.ferryGo==null)return[hasReel?"Hook the ferry with Reel":"Look at the ferry",hookFerry];
+  if(near(CL_DOCK,40)&&hasReel)return["Cast your line",()=>castLine(canalSpot())];
+  if(near(CL_STORE,30)&&!l4.done&&l4.gang!=="fight"&&l4.gang!=="fight2"&&l4.gang!=="talk2"&&!l4.order)return["Go inside the Clay Store",()=>{l4.inStore=true;enterShop("clay")}];
+  if(near(CL_STORE,30)&&l4.done)return["Go inside the Clay Store",()=>enterShop("clay")];
+  if(l4.keeperOut&&near(CL_KEEPER_OUT,34))return T("Talk to the Shopkeeper",keeperOutside);
+  return null;
+}
+function nookInteract(){
+  if(!s.ground)return null;
+  if(near(90,50)&&s.y+s.h>G-4)return["Crawl back out to the delivery road",leaveNook];
+  if(!l4.nchest&&near(NOOK_CHEST,40)&&Math.abs(s.y+s.h-NOOK_LEDGE.y)<4)return["Open the chest",()=>{l4.nchest=true;coins+=10;addItem("Bait",3);burst(NOOK_CHEST,NOOK_LEDGE.y-40,22,["#f4c84f","#fff","#c98a5a"]);
+    start([["Narrator","Inside: 10 coins and three tins of wriggly Bait."],["Narrator","Through a crack in the wall, Sarah can see the fork in the road, way back near the start. This is the chest she spotted behind the wall!"],["Reel","Bait! Now THAT is a useful treasure. To the canal!"]],()=>sayToast("Got 10 coins and Bait ×3!"))}];
+  return null;
+}
+function dabClay(){
+  if(scene==="nook"){if(!l4.nookStairs&&center()<760){l4.nookStairs=true;for(const p of NOOK_STAIRS)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#f4c84f"]);start([["Dab","A doodle staircase! Somebody drew a way up to that ledge and then forgot about it."],["Dab","There's a chest up there. Climb!"]]);return true}return false}
+  if(!l4.sign&&Math.abs(center()-CL_SIGN)<260){l4.sign=true;burst(CL_SIGN,G-110,24,["#f4c84f","#e5577b","#7cc6f2","#fff"]);start([["Dab","Color incoming!"],["Sign","CLAY STORE →"],["Sarah","To the right it is."]]);return true}
+  if(!l4.stairs&&center()>6620&&center()<7010){l4.stairs=true;for(const p of CL_PLATS)if(p.faded)burst(p.x+p.w/2,p.y,10,["#3bb6c4","#fff","#c58a52"]);start([["Dab","Missing steps? I can fix that. A little brown, a little more brown…"]]);return true}
+  return false;
+}
+function clayReelQ(){const c=center();
+  if(s.ground&&s.plat===l4.fer&&l4.ferryGo==null){ferryRide();return true}
+  if(s.ground&&!s.plat&&((c>5440&&c<5560&&l4.ferry>.5)||(c>6530&&c<6610&&l4.ferry<.5))&&l4.ferryGo==null){hookFerry();return true}
+  if(s.ground&&near(CL_DOCK,40)){castLine(canalSpot());return true}
+  return false}
+function canalSpot(){s.face=-1;return 6050+Math.random()*170}
+function hookFerry(){
+  if(!hasReel){sayToast("The ferry is way over on the other side. You'd need something long to reach it…");return}
+  equipped="Reel";l4.hookT=3;const toNear=l4.ferry>.5;l4.ferryGo=toNear?0:1;s.face=toNear?1:-1;
+  l4.pull=null;if(!l4.hooked){l4.hooked=true;start([["Reel","One ring, one hook, one very strong fishing pole. Watch this!"],["Narrator","Reel's line sails across the canal and catches the ferry's ring. Sarah reels the little ferry over."]])}}
+function ferryRide(){if(!hasReel){sayToast("The other bank is a long way off. You'd need something long to reach it…");return}
+  equipped="Reel";l4.ferryGo=l4.ferry<.5?1:0;l4.pull=l4.ferryGo;l4.hookT=0;s.face=l4.ferryGo?1:-1;burst(HOOPS[l4.pull].x,HOOPS[l4.pull].y,8,["#fff","#f4c84f"])}
+function villager(){const n=l4.villager++;
+  if(n===0){start([
+    ["Villager","Oh! A visitor! Welcome to the pottery village."],
+    ["Villager","Heading to the Clay Store? It's all the way at the top of the hill."],
+    ["Villager","Funny thing: a tall gray fellow in a gray top hat came through this morning. Bought a whole cart of gray clay. Who buys GRAY clay?"],
+    ["Dab","…A gray top hat?"]]);return}
+  const l=["Deliveries have right of way. It's practically our town motto.","Gray clay. Honestly. Clay is supposed to be clay-colored.","The Clay Store is at the very top of the hill. You can't miss it. Well, you can. But try not to."];
+  start([["Villager",l[(n-1)%3]]]);
+}
+// ---- the Clay Store (an interior, using the shop system) ----
+function clayKeeper(){
+  if(l4.done){const l=["That gray fellow went off past the kilns. I'd hurry, if I were you.","Come back any time. We always have clay. It's kind of our whole thing."];start([["Shopkeeper",l[(l4.kTalk=(l4.kTalk||0)+1)%2]]]);return}
+  if(l4.order)return;
+  const asked=new Set();
+  const OPTS=[["What is the clay for?",[["Shopkeeper","Inka's art store goes through clay like nobody's business. Pots, bowls, little clay frogs. The frogs are very popular."]]],
+    ["Has anyone else been in today?",[["Shopkeeper","Just one other customer. A tall fellow, all in gray, with a gray top hat. Bought every brick of gray clay I had."],["Sarah","Gray clay? Who even wants gray clay?"],["Shopkeeper","That's what I said! He didn't laugh."]]],
+    ["Do you make all of this yourself?",[["Shopkeeper","Every pot on these shelves. My hands haven't been clean since I was six."]]]];
+  const menu=first=>{const left=OPTS.filter(o=>!asked.has(o[0]));const ch=[...left.map(o=>o[0]),"That's everything, thanks!"];
+    start([["Shopkeeper",first?"Ah, the town order! Already paid for. Anything you want to know while you're here?":"Anything else?",ch,k=>{if(k>=left.length){wrap();return}asked.add(left[k][0]);start(left[k][1],()=>menu(false))}]])};
+  const wrap=()=>start([
+    ["Shopkeeper","Give me one moment while I wrap it up."],
+    ["Narrator","The shopkeeper bustles around the back, stacking bricks of fresh clay into a sturdy parcel."],
+    ["Dab","That's it? No boss? No tentacles? Just… shopping?"],
+    ["Nib","I'm a little disappointed. And a little relieved."],
+    ["Shopkeeper","Here you go! One clay order, wrapped and ready. Careful, it's heavy."],
+    ["Narrator","Sarah turns to go. Through the shop window, far down the hill, something gray moves beside the landing where she arrived."],
+    ["Sarah","Wait. Is that… a top hat?"]
+  ],()=>{l4.order=true;addItem("Clay Order");sayToast("Got the Clay Order! (It's in Key Items.)");setTimeout(montyTakesDoor,0)});
+  start([
+    ["Shopkeeper","Welcome to the Clay Store! Mind the dust. Clay is ninety percent dust and ten percent opinions."],
+    ["Sarah","Hi! I'm picking up an order for Mrs. Maple. For Inka's art store, back in town."]
+  ],()=>menu(true));
+}
+function montyTakesDoor(){
+  leaveShop();s.x=9720-s.w/2;s.face=-1;l4.monty=1;l4.keeperOut=true;l4.inStore=false;camY=clamp(s.y-(G-s.h),-640,240);
+  start([
+    ["Narrator","Sarah bursts out of the Clay Store and runs to the edge of the courtyard. Far, far below, at the landing where she arrived…"],
+    ["Narrator","…a tall figure in a gray coat and a gray top hat is standing beside the return door."],
+    ["Sarah","HEY! That's our door!"],
+    ["Narrator","The stranger tips his hat up the hill toward her. Then he grips the edge of the door… and RRRIIIP. He tears it right out of the page."],
+    ["Narrator","He folds the door up like a letter, tucks it under his arm, and strolls off out of sight."],
+    ["Dab","He tore it out. That door was our way home!"],
+    ["Nib","So… we're stuck here?"],
+    ["Shopkeeper","That's the fellow who bought all my gray clay this morning! He went off that way, past the kilns."],
+    ["Sarah","Then that's where we're going. We're getting our door back."]
+  ],()=>{l4.monty=2;l4.doorGone=true;if(l4.gang==="later")setTimeout(gangReturns,300);else finishL4()});
+}
+function keeperOutside(){start([["Shopkeeper","He went off past the kilns, that way. To the right! Good luck, dear. And don't drop that clay."]])}
+function fishCatchCanal(){l4.fishN++;const n=rollFish("canal",fish.bait);l4.lastCatch=n;addItem(n);burst(fish.bx,CL_WATER+6,18,["#7cc6f2","#fff","#f4c84f"]);
+  sayToast("You caught a "+fishLine4(n)+" (That's "+count(n)+" now.)")}
+
+// ---- objective + hints ----
+function objectiveL4(){
+  if(l4.done)return"Follow the stranger in the gray top hat past the kilns. (Chapter 2-2 is still being drawn!)";
+  if(scene==="shop")return"Pick up Mrs. Maple's clay order from the Shopkeeper.";
+  if(scene==="nook")return l4.nchest?"Crawl back out (far left) to the delivery road.":l4.nookStairs?"Climb the doodle staircase to the chest.":"Use Dab (Q) to look for a way up to that ledge.";
+  if(l4.gang==="fight"||l4.gang==="fight2")return"Break up the teapot gang!";
+  if(l4.order)return"See who's down by the door.";
+  return"Pick up Mrs. Maple's clay order at the Clay Store.";
+}
+function beatsL4(){return[["Restore the faded sign",l4.sign],["Find the chest behind the landing (secret)",l4.lchest],["Make it down the delivery road",l4.crossed],["Find the hidden pottery nook (secret)",l4.nchest],["Ride the ferry across the canal",l4.ferried],["Restore the faded staircase",l4.stairs],["Deal with the teapot gang",l4.gang==="won"||l4.gang==="won2"],["Pick up the clay order",l4.order],["See who was at the door",l4.done]]}
+
+// ---- drawing ----
+const CL_HOUSES=[[0,"#f0c9a0","#c8643c"],[260,"#e8b38a","#b5523a"],[520,"#f3d7b5","#c8643c"],[800,"#e2a77f","#a8483a"],[1060,"#f0c9a0","#b5523a"],[1300,"#e8b38a","#c8643c"]];
+// sign text that always fits inside its board
+function fitText(t,x,y,maxW,size,style="bold "){let z=size;g.font=style+z+"px "+FONT;while(z>8&&g.measureText(t).width>maxW){z--;g.font=style+z+"px "+FONT}g.fillText(t,x,y)}
+function drawClayBody(flipped){
+  g.strokeStyle=INK;g.lineWidth=2;
+  if(flipped){g.save();g.translate(27,24);g.rotate(Math.PI);g.translate(-27,-24)}
+  g.fillStyle="#c8643c";g.beginPath();g.moveTo(4,40);g.quadraticCurveTo(0,14,16,8);g.quadraticCurveTo(27,0,40,8);g.quadraticCurveTo(54,14,50,40);g.closePath();g.fill();g.stroke();
+  g.fillStyle="#e8a87c";g.beginPath();g.ellipse(20,16,7,4,-.4,0,7);g.fill();
+  g.fillStyle="#fff";circle(19,24,5);g.fill();g.stroke();circle(35,24,5);g.fill();g.stroke();g.fillStyle=INK;circle(20,25,2.2);g.fill();circle(36,25,2.2);g.fill();
+  g.lineWidth=2.5;g.beginPath();g.moveTo(13,16);g.lineTo(23,19);g.moveTo(41,16);g.lineTo(31,19);g.stroke();
+  g.lineWidth=1.5;g.strokeStyle="#8d5a36";g.beginPath();g.moveTo(10,34);g.lineTo(16,30);g.moveTo(44,33);g.lineTo(40,28);g.stroke();
+  if(flipped){g.fillStyle="#f3d2b4";g.beginPath();g.ellipse(27,40,20,6,0,0,7);g.fill();g.strokeStyle=INK;g.lineWidth=2;g.stroke();for(let i=0;i<4;i++){const w=Math.sin(time*20+i)*4;g.beginPath();g.moveTo(14+i*9,42);g.lineTo(12+i*9+w,50);g.stroke()}g.restore()}
+}
+function drawPot(p,cracked){const w=30,h=34,x=p.x,y=p.y;
+  if(p.hang){g.strokeStyle="#6b4a35";g.lineWidth=2;g.beginPath();g.moveTo(x,y);g.lineTo(x,y-26);g.stroke();cut(()=>rr(x-14,y-32,28,7,3),"#8d5a36",{edge:3,shadow:false})}
+  cut(()=>{g.beginPath();g.moveTo(x-8,y);g.lineTo(x-7,y+6);g.quadraticCurveTo(x-w/2-4,y+12,x-w/2+2,y+h-4);g.quadraticCurveTo(x,y+h+2,x+w/2-2,y+h-4);g.quadraticCurveTo(x+w/2+4,y+12,x+7,y+6);g.lineTo(x+8,y);g.closePath()},"#d07a4a",{edge:5});
+  g.fillStyle="#e8a87c";g.fillRect(x-10,y+12,6,10);
+  if(cracked){g.strokeStyle=INK;g.lineWidth=1.8;g.beginPath();g.moveTo(x+2,y+4);g.lineTo(x-3,y+12);g.lineTo(x+4,y+18);g.lineTo(x-1,y+26);g.stroke()}}
+function drawBall(b){const R=32;g.save();g.translate(b.x,b.y-R);
+  cut(()=>{g.beginPath();g.arc(0,0,R,0,7)},"#b9734a",{edge:6});g.rotate(b.rot);g.strokeStyle="#8d5a36";g.lineWidth=3;g.beginPath();g.arc(0,0,R*.55,0,4.2);g.stroke();g.beginPath();g.arc(6,4,R*.25,1,5);g.stroke();
+  g.restore();g.fillStyle="rgba(255,255,255,.3)";circle(b.x-11,b.y-R-12,7);g.fill()}
+function drawChute(sp,i){const fy=floorAt(sp.x),x=sp.x-sp.dir*30,warn=l4.sp[i]<.8&&center()>sp.zone[0]&&center()<sp.zone[1];
+  cut(()=>{g.beginPath();g.moveTo(x-50,fy-170);g.lineTo(x+50,fy-170);g.lineTo(x+34,fy-80);g.lineTo(x-34,fy-80);g.closePath()},"#8d5a36",{edge:7});
+  cut(()=>rr(x-30,fy-80,60,80,4),"#6b4a35",{edge:5});g.fillStyle="#2b2540";rr(x-20,fy-64,40,64,8);g.fill();
+  cut(()=>{g.beginPath();g.arc(x+40,fy-150,9,0,7)},warn&&Math.floor(time*8)%2?"#e5463f":"#7a3a2a",{edge:3,shadow:false})}
+function drawFloor4(){
+  const bot=camY+H+40;
+  for(const [x0,y0,x1,y1] of CL_FLOOR){const a=Math.max(x0,camera-30),b=Math.min(x1,camera+W+30);if(b<=a)continue;
+    const ya=y0+(y1-y0)*(a-x0)/(x1-x0),yb=y0+(y1-y0)*(b-x0)/(x1-x0),high=y0<G-100;
+    const col=x0>=5200&&x0<7000?"#cfa37a":high?"#e3b48a":"#d9a27a";
+    g.fillStyle=col;g.beginPath();g.moveTo(a,ya);g.lineTo(b,yb);g.lineTo(b,bot);g.lineTo(a,bot);g.closePath();g.fill();
+    // paper edge + ink only along the top, and down any cliff side where the next ground is lower
+    const edges=[[a,ya,b,yb]];if(a===x0){const ny=floorAt(x0-1);if(ny==null||ny>y0+2)edges.push([x0,y0,x0,ny??bot])}if(b===x1){const ny=floorAt(x1);if(ny==null||ny>y1+2)edges.push([x1,y1,x1,ny??bot])}
+    for(const [lw,st] of[[7,"#fff"],[2.5,INK]]){g.lineWidth=lw;g.strokeStyle=st;g.lineCap="round";g.beginPath();for(const [ex0,ey0,ex1,ey1] of edges){g.moveTo(ex0,ey0);g.lineTo(ex1,ey1)}g.stroke()}
+    g.fillStyle="rgba(141,90,54,.18)";for(let x=Math.ceil(a/60)*60;x<b;x+=60){const yy=y0+(y1-y0)*(x-x0)/(x1-x0);g.fillRect(x+8,yy+22+(x/60%3)*16,22,5);g.fillRect(x+34,yy+58,14,5)}}
+  // pit interiors
+  for(const gp of CL_GAPS){if(gp.kind!=="pit"||gp.x1<camera-40||gp.x0>camera+W+40)continue;const ty=Math.max(floorAt(gp.x0-1),floorAt(gp.x1));
+    g.fillStyle="#3a2a24";g.fillRect(gp.x0,ty+4,gp.x1-gp.x0,bot-ty);for(let i=0;i<4;i++){g.fillStyle="#8d5a36";circle(gp.x0+20+i*((gp.x1-gp.x0-40)/3),ty+150+(i%2)*20,22);g.fill()}}
+}
+function drawCanal(){const x0=5560,x1=6440;if(x1<camera-20||x0>camera+W+20)return;const bot=camY+H+40,wy=CL_WATER;
+  const gr=g.createLinearGradient(0,wy,0,wy+200);gr.addColorStop(0,"#6fb7c9");gr.addColorStop(1,"#3f7f9a");g.fillStyle=gr;g.fillRect(x0,wy,x1-x0,bot-wy);
+  // reflections of the village rooftops
+  g.save();g.globalAlpha=.28;for(let i=0;i<8;i++){const rx=x0+40+i*110,c=["#c8643c","#f0c9a0","#e8b38a"][i%3];g.fillStyle=c;g.fillRect(rx+Math.sin(time*1.3+i)*5,wy+14,60,30+(i%3)*12)}g.restore();
+  g.strokeStyle="rgba(255,255,255,.8)";g.lineWidth=2;for(let i=0;i<12;i++){const x=x0+30+i*72+Math.sin(time+i)*8;g.beginPath();g.moveTo(x,wy+30+i%3*24);g.quadraticCurveTo(x+12,wy+24+i%3*24,x+24,wy+30+i%3*24);g.stroke()}
+  g.strokeStyle=INK;g.lineWidth=2;g.beginPath();for(let x=x0;x<=x1;x+=16)g.lineTo(x,wy+Math.sin(x*.08+time*2)*2);g.stroke();
+  // reeds along both banks
+  for(const rx of[x0+10,x0+40,x0+70,x1-80,x1-50,x1-20]){for(let k=0;k<3;k++){const sw=Math.sin(time*1.5+rx+k)*4;g.strokeStyle="#4f8a5a";g.lineWidth=3;g.beginPath();g.moveTo(rx+k*8,wy+10);g.quadraticCurveTo(rx+k*8+sw,wy-30,rx+k*8+sw*1.5,wy-58+k*8);g.stroke();cut(()=>{g.beginPath();g.ellipse(rx+k*8+sw*1.5,wy-58+k*8,4,10,0,0,7)},"#8d5a36",{edge:3,shadow:false})}}
+}
+function drawFerry(){const f=l4.fer,x=f.x,y=f.y;
+  cut(()=>{g.beginPath();g.moveTo(x-6,y);g.lineTo(x+f.w+6,y);g.lineTo(x+f.w-14,y+26);g.lineTo(x+14,y+26);g.closePath()},"#a8714a",{edge:6});
+  cut(()=>rr(x,y,f.w,12,3),"#c58a52",{edge:5,shadow:false});g.strokeStyle="#8d5a36";g.lineWidth=1.5;for(let k=x+20;k<x+f.w;k+=24){g.beginPath();g.moveTo(k,y+2);g.lineTo(k,y+10);g.stroke()}
+  // a metal ring on each end of the ferry
+  for(const rx of[x-14,x+f.w+14]){g.strokeStyle="#8f8aa0";g.lineWidth=5;g.beginPath();g.arc(rx,y+4,11,0,7);g.stroke();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.arc(rx,y+4,13.5,0,7);g.stroke();g.beginPath();g.arc(rx,y+4,8.5,0,7);g.stroke()}
+  if(l4.ferryGo!=null){let ex,ey;if(l4.pull!=null){ex=HOOPS[l4.pull].x;ey=HOOPS[l4.pull].y}else if(l4.hookT>0){ex=center()<x?x-14:x+f.w+14;ey=y+4}
+    if(ex!=null){const [tx,ty]=rodTip();g.strokeStyle="rgba(255,255,255,.95)";g.lineWidth=1.8;g.beginPath();g.moveTo(tx,ty);g.quadraticCurveTo((tx+ex)/2,Math.min(ty,ey)-24,ex,ey);g.stroke()}}
+}
+function drawHoops(){for(const h of HOOPS){if(h.x<camera-60||h.x>camera+W+60)continue;const fy=G+220;
+  cut(()=>rr(h.x-5,h.y+12,10,fy-h.y-12,3),"#8d5a36",{edge:4});g.strokeStyle="#c9a23a";g.lineWidth=6;g.beginPath();g.arc(h.x,h.y,13,0,7);g.stroke();g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();g.arc(h.x,h.y,16,0,7);g.stroke();g.beginPath();g.arc(h.x,h.y,10,0,7);g.stroke()}}
+function drawPlat4(p){
+  if(p.crack){const c=crackS(p);if(c.gone>0&&c.fy>700)return;const sh=c.gone>0?0:c.t>0?Math.sin(time*60)*2.2*c.t/.6:0;g.save();g.translate(sh,c.gone>0?c.fy:0);if(c.gone>0)g.globalAlpha=Math.max(0,1-c.fy/500);
+    cut(()=>rr(p.x,p.y,p.w,14,4),p.plank?"#c58a52":"#e3a878",{edge:5});g.strokeStyle=p.plank?"#8d5a36":"#a8483a";g.lineWidth=1.6;g.beginPath();
+    g.moveTo(p.x+p.w*.28,p.y+1);g.lineTo(p.x+p.w*.36,p.y+8);g.lineTo(p.x+p.w*.3,p.y+13);g.moveTo(p.x+p.w*.7,p.y+1);g.lineTo(p.x+p.w*.64,p.y+7);g.lineTo(p.x+p.w*.72,p.y+13);g.moveTo(p.x+p.w*.5,p.y+2);g.lineTo(p.x+p.w*.54,p.y+10);g.stroke();g.restore();return}
+  if(p.faded&&!l4.stairs){g.save();g.globalAlpha=.28+Math.sin(time*2+p.stair)*.08;g.strokeStyle="#fff";g.lineWidth=2;g.setLineDash([6,6]);g.strokeRect(p.x,p.y,p.w,14);g.restore();return}
+  if(p.block){g.save();const bot=p.h>60?floorAt(p.x+p.w)+6:p.y+p.h;cut(()=>rr(p.x,p.y,p.w,bot-p.y,3),"#c8643c",{edge:6});g.strokeStyle="#8d4a2a";g.lineWidth=1.5;for(let y=p.y+13;y<bot-2;y+=13){g.beginPath();g.moveTo(p.x+2,y);g.lineTo(p.x+p.w-2,y);g.stroke();for(let x=p.x+((y-p.y)/13%2?12:26);x<p.x+p.w-4;x+=28){g.beginPath();g.moveTo(x,y-13);g.lineTo(x,y);g.stroke()}}g.restore();return}
+  if(p.tip){const st=tipS(p);const ang=st.down>0?.75:Math.min(.32,st.t*.3)+(st.t>0?Math.sin(time*40)*.02:0);g.save();g.translate(p.x+4,p.y+7);g.rotate(ang);
+    cut(()=>rr(-4,-7,p.w,14,4),"#d9a86a",{edge:5});g.strokeStyle="#a8714a";g.lineWidth=1.5;g.beginPath();g.moveTo(p.w*.4,-5);g.lineTo(p.w*.46,1);g.lineTo(p.w*.42,6);g.moveTo(p.w*.75,-6);g.lineTo(p.w*.7,4);g.stroke();g.restore();
+    cut(()=>{g.beginPath();g.moveTo(p.x,p.y+14);g.lineTo(p.x+18,p.y+14);g.lineTo(p.x,p.y+36);g.closePath()},"#8d5a36",{edge:3,shadow:false});return}
+  if(p.shelter){const fy=floorAt(p.x+p.w/2);for(const px of[p.x+8,p.x+p.w-14])cut(()=>rr(px,p.y+12,6,fy-p.y-10,2),"#8d5a36",{edge:3});cut(()=>rr(p.x,p.y,p.w,14,4),"#c58a52",{edge:5});g.fillStyle="#fff3d6";g.fillRect(p.x+10,p.y+5,p.w-20,3);return}
+  if(p.bridge){cut(()=>rr(p.x,p.y,p.w,12,3),"#c58a52",{edge:5});g.strokeStyle="#8d5a36";g.lineWidth=2;g.beginPath();g.moveTo(p.x,p.y-30);g.quadraticCurveTo(p.x+p.w/2,p.y-18,p.x+p.w,p.y-30);g.stroke();for(const px of[p.x+4,p.x+p.w-8])cut(()=>rr(px,p.y-34,6,34,2),"#8d5a36",{edge:3,shadow:false});return}
+  if(p.stone){cut(()=>rr(p.x,p.y,p.w,16,3),"#b8b0a8",{edge:5});g.fillStyle="rgba(255,255,255,.3)";g.fillRect(p.x+6,p.y+4,p.w-12,3);return}
+  if(p.stair!=null){const fy=floorAt(p.x+p.w/2);cut(()=>rr(p.x,p.y,p.w,14,2),l4.stairs&&p.faded?"#d9a86a":"#c58a52",{edge:4});if(p.stair%2===0)cut(()=>rr(p.x+p.w/2-3,p.y+14,6,fy-p.y-14,2),"#8d5a36",{edge:2,shadow:false});return}
+  if(p.rack){g.strokeStyle="#8d5a36";g.lineWidth=3;for(const px of[p.x+6,p.x+p.w-6]){g.beginPath();g.moveTo(px,p.y);g.lineTo(px,p.y+70);g.stroke()}cut(()=>rr(p.x,p.y,p.w,8,3),"#a8714a",{edge:4});
+    for(let x=p.x+12;x<p.x+p.w-8;x+=22){cut(()=>rr(x,p.y+18,14,10,2),"#e8b38a",{edge:2,shadow:false})}g.strokeStyle="#8d5a36";g.lineWidth=2;g.beginPath();g.moveTo(p.x+4,p.y+28);g.lineTo(p.x+p.w-4,p.y+28);g.stroke();return}
+  if(p.table){cut(()=>rr(p.x+8,p.y+10,8,G-p.y-10,2),"#8d5a36",{edge:3});cut(()=>rr(p.x+p.w-16,p.y+10,8,G-p.y-10,2),"#8d5a36",{edge:3});cut(()=>rr(p.x,p.y,p.w,14,4),"#c58a52",{edge:5});
+    cut(()=>{g.beginPath();g.ellipse(p.x+p.w/2,p.y-8,18,8,0,0,7)},"#b9734a",{edge:3,shadow:false});return}
+  cut(()=>rr(p.x,p.y,p.w,14,4),"#d9a86a",{edge:5});cut(()=>{g.beginPath();g.moveTo(p.x+p.w/2-8,p.y+14);g.lineTo(p.x+p.w/2,p.y+30);g.lineTo(p.x+p.w/2+8,p.y+14);g.closePath()},"#a8714a",{edge:3,shadow:false});
+}
+function drawStack(x,base,n,sc=1){for(let i=0;i<n;i++){const y=base-i*30*sc,w=(34-(i%3)*4)*sc;cut(()=>{g.beginPath();g.ellipse(x+Math.sin(i*1.7)*4,y-14*sc,w/2,15*sc,0,0,7)},["#d07a4a","#e8b38a","#c8643c"][i%3],{edge:4,shadow:false})}}
+function drawCottage(x,base,w,h,wall,roof,i){
+  cut(()=>rr(x,base-h,w,h,4),wall,{edge:7});
+  cut(()=>rr(x+w*.62,base-h-46,16,40,2),"#a8483a",{edge:4});if(i%2===0)cut(()=>rr(x+w*.62-4,base-h-50,24,8,2),"#8d3a2a",{edge:3,shadow:false});
+  cut(()=>{g.beginPath();g.moveTo(x-12,base-h+8);g.lineTo(x+w/2+(i%2?6:-6),base-h-40);g.lineTo(x+w+12,base-h+8);g.closePath()},roof,{edge:7});
+  cut(()=>rr(x+w/2-14,base-50,28,50,10),"#8d5a36",{edge:4,shadow:false});cut(()=>rr(x+12,base-h+24,22,20,3),"#a6def5",{edge:4,shadow:false});
+}
+function drawMontyInset(){
+  const cx=790,cy=300,r=118,k=l4.tearK;g.save();
+  cut(()=>{g.beginPath();g.arc(cx,cy,r+6,0,7)},"#fffdf6",{edge:10});g.beginPath();g.arc(cx,cy,r,0,7);g.clip();
+  const gr=g.createLinearGradient(0,cy-r,0,cy+r);gr.addColorStop(0,"#f7d9b8");gr.addColorStop(1,"#fdf1e0");g.fillStyle=gr;g.fillRect(cx-r,cy-r,r*2,r*2);
+  g.fillStyle="#d9a27a";g.fillRect(cx-r,cy+50,r*2,r);g.strokeStyle=INK;g.lineWidth=2;g.beginPath();g.moveTo(cx-r,cy+50);g.lineTo(cx+r,cy+50);g.stroke();
+  for(let i=0;i<5;i++){g.strokeStyle="#c9a07a";g.lineWidth=3;g.beginPath();g.moveTo(cx-r+i*55,cy+50);g.lineTo(cx-r+i*55,cy+18);g.stroke()}g.beginPath();g.moveTo(cx-r,cy+20);g.lineTo(cx+r,cy+20);g.stroke();
+  const dx=cx-30;if(k<1){g.save();g.translate(dx,cy+50);g.rotate(-k*.5);g.scale(1-k*.6,1-k*.2);cut(()=>rr(-28,-110,56,110,6),"#2f2a4a",{edge:7});g.fillStyle="#0f0c1d";rr(-20,-102,40,102,4);g.fill();g.restore()}
+  else{g.save();g.strokeStyle="#fff";g.lineWidth=2;g.setLineDash([5,4]);g.beginPath();for(let y=0;y<=110;y+=10)g.lineTo(dx-28+(y/10%2?5:0),cy+50-y);g.lineTo(dx+28,cy-60);for(let y=110;y>=0;y-=10)g.lineTo(dx+28-(y/10%2?5:0),cy+50-y);g.stroke();g.restore()}
+  drawProf(cx+34+k*30,cy+52,1.15);
+  if(k>0&&k<1){g.fillStyle="#fff";for(let i=0;i<6;i++){g.save();g.translate(dx+(Math.random()-.5)*60,cy-20+(Math.random()-.5)*90);g.rotate(Math.random()*3);g.fillRect(-4,-2,8,4);g.restore()}}
+  g.restore();g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.arc(cx,cy,r,0,7);g.stroke();
+  g.fillStyle=INK;g.font="bold 12px "+FONT;g.textAlign="center";cut(()=>rr(cx-70,cy+r-6,140,22,11),"#fffdf6",{edge:4,shadow:false});g.fillStyle=INK;g.fillText("far below…",cx,cy+r+9);g.textAlign="left";
+}
+function drawClay(){
+  // sky + distant village (parallax)
+  const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,"#f7d2b0");gr.addColorStop(1,"#fdf1e0");g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.save();g.translate(860,90);g.rotate(time*.12);g.fillStyle="#ffe48f";for(let i=0;i<12;i++){g.rotate(Math.PI/6);g.beginPath();g.moveTo(-8,-40);g.lineTo(0,-56);g.lineTo(8,-40);g.fill()}g.restore();
+  cut(()=>{g.beginPath();g.arc(860,90,34,0,7)},"#ffd65c",{edge:8});
+  {const oy=-camY*.25;g.fillStyle="#e9c4a2";g.beginPath();g.moveTo(0,330+oy);for(let x=0;x<=W;x+=40)g.lineTo(x,300+oy+Math.sin((x+camera*.12)*.006)*40);g.lineTo(W,H);g.lineTo(0,H);g.fill();
+    for(let i=0;i<14;i++){const span=1560,x=((i*120-camera*.18)%span+span)%span-140,yb=330+oy+(i%3)*14,[,wall,roof]=CL_HOUSES[i%6];g.save();g.globalAlpha=.75;
+      g.fillStyle=wall;g.fillRect(x,yb-46-(i%2)*14,64,60);g.fillStyle=roof;g.beginPath();g.moveTo(x-8,yb-40-(i%2)*14);g.lineTo(x+32,yb-70-(i%2)*14);g.lineTo(x+72,yb-40-(i%2)*14);g.fill();g.fillStyle="#a8483a";g.fillRect(x+44,yb-78-(i%2)*14,10,24);g.restore()}}
+  g.save();g.translate(-camera,-camY);
+  // mid scenery
+  // the landing: balustrade + return door
+  for(let x=CL_MIN;x<640;x+=60){if(x<camera-80||x>camera+W+80)continue;cut(()=>rr(x+20,G-54,12,54,4),"#e8dcc8",{edge:4,shadow:false})}
+  if(camera<700)cut(()=>rr(CL_MIN,G-64,1540,12,4),"#f3ead8",{edge:5});
+  if(!l4.doorGone){const x=CL_DOOR;cut(()=>rr(x-38,G-150,76,150,8),"#2f2a4a",{edge:9});g.fillStyle="#0f0c1d";rr(x-28,G-140,56,140,5);g.fill();g.fillStyle="#f4c84f";for(let i=0;i<5;i++){g.globalAlpha=.5+Math.sin(time*3+i)*.4;star(x-18+(i*17)%40,G-120+i*22,3,1.2);g.fill()}g.globalAlpha=1;doorLabel(x,G-180,"TO TOWN","#3bb6c4")}
+  else{const x=CL_DOOR;g.save();g.strokeStyle="#fff";g.lineWidth=2.5;g.setLineDash([6,5]);g.beginPath();g.moveTo(x-38,G);for(let y=0;y<=150;y+=12)g.lineTo(x-38+(y/12%2?6:0),G-y);for(let y=150;y>=0;y-=12)g.lineTo(x+38-(y/12%2?6:0),G-y);g.stroke();g.restore();
+    g.fillStyle="rgba(43,37,64,.12)";rr(x-36,G-150,72,150,6);g.fill()}
+  // secret chest past the left edge of the landing
+  drawChest(CL_LCHEST-29,G-38,l4.lchest,"#b9693c");if(!l4.lchest){g.fillStyle="#fff6a8";star(CL_LCHEST+22,G-50,5+Math.sin(time*6)*2,2);g.fill()}
+  // the villager's drying rack
+  g.strokeStyle="#8d5a36";g.lineWidth=3;g.beginPath();g.moveTo(540,G);g.lineTo(540,G-90);g.moveTo(640,G);g.lineTo(640,G-90);g.moveTo(534,G-86);g.lineTo(646,G-86);g.moveTo(534,G-50);g.lineTo(646,G-50);g.stroke();
+  for(const px of[556,588,620])drawStack(px,G-52,1,.7);
+  // the fork sign
+  {const x=CL_SIGN;cut(()=>rr(x-4,G-90,8,90,2),"#a8714a");cut(()=>rr(x-62,G-132,124,48,6),l4.sign?"#fff3d6":"#d8d4cc",{edge:5});
+    if(l4.sign){g.fillStyle="#c8643c";g.textAlign="center";fitText("CLAY STORE →",x,G-102,104,17);g.textAlign="left"}
+    else{g.fillStyle="rgba(140,130,120,.35)";g.fillRect(x-44,G-116,88,6);g.fillRect(x-36,G-102,72,4)}}
+  // the side path: a glimpse of a chest through a gap in a brick wall
+  {const x=960;g.fillStyle="#7a4a3a";rr(x+52,G-112,56,44,4);g.fill();drawChest(CL_PEEK-22,G-98,false,"#b9693c");
+    g.save();g.beginPath();g.rect(x,G-150,160,150);g.rect(x+56,G-108,48,36);g.clip("evenodd");cut(()=>rr(x,G-150,160,150,4),"#c8643c",{edge:6});g.strokeStyle="#8d4a2a";g.lineWidth=1.5;for(let y=G-138;y<G;y+=13){g.beginPath();g.moveTo(x+2,y);g.lineTo(x+158,y);g.stroke()}g.restore();
+    g.strokeStyle=INK;g.lineWidth=2;g.strokeRect(x+56,G-108,48,36)}
+  // pottery yard props: kiln, stacks, the fallen rack
+  cut(()=>{g.beginPath();g.moveTo(1150,G);g.lineTo(1150,G-110);g.quadraticCurveTo(1200,G-170,1250,G-110);g.lineTo(1250,G);g.closePath()},"#b5523a",{edge:7});g.fillStyle="#2b2540";rr(1180,G-60,40,60,14);g.fill();g.fillStyle="#f08a3c";g.globalAlpha=.6+Math.sin(time*5)*.2;rr(1186,G-30,28,26,8);g.fill();g.globalAlpha=1;
+  for(const [x,n] of[[1610,3],[1760,4],[1930,2],[2210,5],[2540,6]])drawStack(x,G,n);
+  cut(()=>{g.beginPath();g.moveTo(2560,G);g.lineTo(2600,G);g.lineTo(2520,G-260);g.lineTo(2490,G-250);g.closePath()},"#8d5a36",{edge:5});
+  // narrow passage: tall pottery stacks on both sides and a beam overhead
+  for(let x=2620;x<3300;x+=120){drawStack(x,G-8,8,.95);drawStack(x+60,G-8,6,.8)}
+  cut(()=>rr(2600,G-300,720,24,4),"#8d5a36",{edge:6});
+  // the delivery road: chutes, sign, footprints + low passage to the nook
+  CL_SPAWN.forEach(drawChute);
+  {const fy=floorAt(CL_NOOK);g.fillStyle="#2b2540";g.beginPath();g.moveTo(CL_NOOK-26,fy);g.lineTo(CL_NOOK-26,fy-28);g.quadraticCurveTo(CL_NOOK,fy-48,CL_NOOK+26,fy-28);g.lineTo(CL_NOOK+26,fy);g.closePath();g.fill();
+    g.fillStyle="#e5577b";for(let i=0;i<4;i++){const x=CL_NOOK-80+i*22;g.beginPath();g.ellipse(x,floorAt(x)+6+(i%2)*3,4,2.4,0,0,7);g.fill()}}
+  // canal, ferry, the fishing dock
+  drawCanal();
+  {const x=CL_DOCK,fy=G+220;cut(()=>rr(x-44,fy-6,96,10,3),"#c58a52",{edge:4});cut(()=>rr(x+40,fy-34,6,34,2),"#a8714a");cut(()=>rr(x+40,fy-8,6,40,2),"#8d5a36",{edge:3,shadow:false})}
+  // far bank: a cottage on the canal-side balcony, upper village cottages, the wide landing tiles
+  drawCottage(6660,G+80,100,110,"#f0c9a0","#c8643c",0);
+  drawCottage(7050,G,120,150,"#e8b38a","#b5523a",1);
+  {g.fillStyle="rgba(255,255,255,.25)";for(let x=8010;x<8600;x+=40)g.fillRect(x,G-296,30,3)}
+  // courtyard: displays, the Clay Store, the kilns and the path onward
+  for(const [x,n] of[[9690,2],[9880,3],[9940,2]])drawStack(x,G-620,n);
+  {const x=CL_STORE,fy=G-620;g.save();g.translate(0,fy-G);
+    cut(()=>rr(x-110,G-190,220,190,8),"#f0c9a0",{edge:8});cut(()=>{g.beginPath();g.moveTo(x-130,G-182);g.lineTo(x,G-250);g.lineTo(x+130,G-182);g.closePath()},"#c8643c",{edge:8});
+    cut(()=>rr(x+44,G-262,20,50,2),"#a8483a",{edge:4});for(let i=0;i<3;i++){g.save();g.globalAlpha=.4;g.fillStyle="#fff";circle(x+54+Math.sin(time+i)*6,G-280-i*18-((time*20)%18),8+i*2);g.fill();g.restore()}
+    cut(()=>rr(x-96,G-176,192,26,6),"#fff3d6",{edge:5});g.fillStyle="#c8643c";g.textAlign="center";fitText("THE CLAY STORE",x,G-157,176,16);g.textAlign="left";
+    cut(()=>rr(x-90,G-130,60,46,6),"#a6def5",{edge:5,shadow:false});cut(()=>rr(x+30,G-130,60,46,6),"#a6def5",{edge:5,shadow:false});
+    cut(()=>{g.beginPath();g.moveTo(x-22,G);g.lineTo(x-22,G-64);g.arc(x,G-64,22,Math.PI,0);g.lineTo(x+22,G);g.closePath()},"#8d5a36",{edge:5,shadow:false});g.fillStyle="#f4c84f";circle(x+12,G-34,3);g.fill();
+    for(const px of[x-80,x+80])drawStack(px,G,2,.8);
+    cut(()=>{g.beginPath();g.moveTo(CL_KILNS+40,G);g.lineTo(CL_KILNS+40,G-80);g.quadraticCurveTo(CL_KILNS+80,G-130,CL_KILNS+120,G-80);g.lineTo(CL_KILNS+120,G);g.closePath()},"#b5523a",{edge:6});
+    g.restore()}
+  // floor and platforms
+  drawFloor4();
+  for(const b of l4.balls)if(b.x>camera-60&&b.x<camera+W+60)drawBall(b);
+  for(const p of CL_PLATS)if(p.x+p.w>camera-40&&p.x<camera+W+40&&!p.block)drawPlat4(p);
+  for(const p of CL_BLOCKS)if(p.x+p.w>camera-40&&p.x<camera+W+40)drawPlat4(p);
+  drawHoops();if(l4.fer.x+l4.fer.w>camera-60&&l4.fer.x<camera+W+60)drawFerry();
+  CL_POTS.forEach((p,i)=>{if(!l4.pots[i]&&p.x>camera-40&&p.x<camera+W+40)drawPot(p,true)});
+  CL_COINS.forEach(([x,y],i)=>{if(!l4.coins[i]&&x>camera-30&&x<camera+W+30)drawCoin(x,y+Math.sin(time*3+i)*3,9)});
+  if(CL_VILL>camera-60&&CL_VILL<camera+W+60)npc("Villager",CL_VILL);
+  if(l4.keeperOut){groundShadow(CL_KEEPER_OUT,G-618,18);npc("Shopkeeper",CL_KEEPER_OUT,undefined,-620)}
+  for(const f of l4.foes){if(f.x<camera-60||f.x>camera+W+60)continue;
+    if(!f.alive){if(f.flat<1)sprite(f.x,f.base+2,54,42,()=>drawClayBody(false),{sy:Math.max(.05,.2-f.flat*.2),sx:1.4,alpha:1-f.flat});continue}
+    groundShadow(f.x,f.base+2,20);sprite(f.x,f.base+2,54,42,()=>drawClayBody(f.flip>0),{sx:f.dir>0?-1:1,sy:1+Math.sin(f.t*8)*.04})}
+  for(const f of allWares())if(f.x>camera-80&&f.x<camera+W+80)drawWare(f);
+  drawSteam();
+  if(l4.gang==="talk"||l4.gang==="talk2")GANG_X.forEach((x,i)=>drawWare({...mkWare(i===1?"pot":"cup",x,x,x,G-620,i===1?1.9:1.35,1,0),dir:-1,t:time}));
+  for(const f of l4.gulls)if(f.x>camera-60&&f.x<camera+W+60)drawFoe(f);
+  drawParticles();drawSarah();
+  if(fish.ph>0)drawFishing(CL_WATER+2,l4.lastCatch);
+  g.restore();
+  if(l4.monty===1&&dlg.on){if(/RRRIIIP/.test(curPage()))l4.tearK=Math.min(1,l4.tearK+.012);else if(l4.tearK>0)l4.tearK=1;drawMontyInset()}
+}
+function drawNook(){
+  wallpaper("#8d6a52","#7d5c46","stripes");floorBlocks("#6b4a35","#5b3a28");
+  // the low passage back out
+  g.fillStyle="#2b2540";g.beginPath();g.moveTo(50,G);g.lineTo(50,G-40);g.quadraticCurveTo(90,G-70,130,G-40);g.lineTo(130,G);g.closePath();g.fill();
+  // dusty shelves, an old pottery wheel, cobwebs
+  for(const y of[170,250]){cut(()=>rr(190,y,250,12,4),"#5b3a28",{edge:5});for(let i=0;i<5;i++)drawStack(215+i*48,y,1,.7)}
+  cut(()=>{g.beginPath();g.ellipse(300,G-30,46,12,0,0,7)},"#8d5a36",{edge:5});cut(()=>rr(292,G-30,16,30,3),"#6b4a35",{edge:4});cut(()=>{g.beginPath();g.ellipse(300,G-44,16,10,0,0,7)},"#b9734a",{edge:3,shadow:false});
+  g.strokeStyle="rgba(255,255,255,.4)";g.lineWidth=1;for(let i=0;i<5;i++){g.beginPath();g.moveTo(W-40,40);g.lineTo(W-40-i*18,40+(4-i)*16);g.stroke()}
+  // the crack in the wall (light from the fork outside)
+  g.save();g.globalAlpha=.55+Math.sin(time*2)*.1;g.fillStyle="#fff6c8";g.beginPath();g.moveTo(905,G-420);g.lineTo(918,G-380);g.lineTo(908,G-350);g.lineTo(922,G-318);g.lineTo(912,G-318);g.lineTo(898,G-350);g.lineTo(908,G-380);g.closePath();g.fill();g.restore();
+  // doodle staircase (after Dab), the ledge, the chest
+  if(l4.nookStairs)for(const p of NOOK_STAIRS){g.save();g.setLineDash([7,5]);cut(()=>rr(p.x,p.y,p.w,12,4),"#bfeef2",{edge:5,ink:"#3bb6c4"});g.restore()}
+  else{g.save();g.globalAlpha=.12+Math.sin(time*2)*.05;g.strokeStyle="#fff";g.lineWidth=2;g.setLineDash([6,6]);for(const p of NOOK_STAIRS)g.strokeRect(p.x,p.y,p.w,12);g.restore()}
+  cut(()=>rr(NOOK_LEDGE.x,NOOK_LEDGE.y,NOOK_LEDGE.w,14,4),"#a8714a",{edge:5});
+  drawChest(NOOK_CHEST-29,NOOK_LEDGE.y-38,l4.nchest,"#f4c84f");if(!l4.nchest){g.fillStyle="#fff6a8";star(NOOK_CHEST+22,NOOK_LEDGE.y-50,5+Math.sin(time*6)*2,2);g.fill()}
+  drawParticles();drawSarah();
+}
+// ---- Clay Store interior decor (drawn by drawShop) ----
+function drawClayShopDecor(){
+  for(const y of[170,250]){cut(()=>rr(190,y,360,14,4),"#8d5a36",{edge:6});for(let i=0;i<6;i++){const x=215+i*58;cut(()=>rr(x-18,y-24,36,24,3),["#c8643c","#b9734a","#e8b38a"][i%3],{edge:3,shadow:false})}}
+  for(const [x,n] of[[240,3],[320,2],[420,4]])drawStack(x,G,n,.9);
+  cut(()=>{g.beginPath();g.ellipse(520,G-30,44,11,0,0,7)},"#8d5a36",{edge:5});cut(()=>rr(512,G-30,16,30,3),"#6b4a35",{edge:4});
+  if(!l4.order){cut(()=>rr(COUNTER.x+120,G-86,70,30,4),"#c98a5a",{edge:4});g.strokeStyle="#fff3d6";g.lineWidth=3;g.beginPath();g.moveTo(COUNTER.x+155,G-86);g.lineTo(COUNTER.x+155,G-56);g.stroke()}
+}
+
+// ---- level 4 cheats ----
+function cheat4(x,feet){cheatHub();titleMenu=null;dlg.on=false;l2.hubStep=Math.max(l2.hubStep,2);l2.clayErrand=true;l4.started=false;startLevel4();dlg.on=false;chapterCard=null;
+  if(x!=null){clayGo(x,feet);checkpoint=s.x;checkpointY=s.y;l4.safe={x:s.x,y:s.y}}}
+SHOPS.clay={name:"THE CLAY STORE",keeper:"Shopkeeper",from:"clay",door:CL_STORE,wall:["#f6e3cf","#efd5bb","stripes"],floor:["#b5713f","#a8653a"],trim:"#c8643c"};
+SHOP_TALK.clay=()=>clayKeeper();
+function afterL4End(){showEndScreen=false;complete=false;sayToast("The stranger went off past the kilns, to the right. (Chapter 2-2 is still being drawn!)")}
+function lockedDoor(){sayToast("Locked tight. This page is still torn out. Each door opens once the page before it is restored.")}
+function drawFloorDoors(){const fy=FLOOR2.y;
+  for(let i=1;i<6;i++){const x=DOOR_SLOTS[i],open=i===1&&l2.door2;if(x<camera-80||x>camera+W+80)continue;
+    cut(()=>rr(x-38,fy-150,76,150,8),"#2f2a4a",{edge:9});
+    if(open){g.fillStyle="#0f0c1d";rr(x-28,fy-140,56,140,5);g.fill();g.fillStyle="#e8a87c";for(let k=0;k<5;k++){g.globalAlpha=.6;circle(x-14+k*7,fy-110+Math.sin(time*2+k)*30,2);g.fill()}g.globalAlpha=1}
+    else{cut(()=>rr(x-28,fy-140,56,140,5),"#7a8a9a",{edge:0,line:2,shadow:false});cut(()=>rr(x-10,fy-80,20,16,3),"#c9a23a",{edge:3,shadow:false});g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.arc(x,fy-80,7,Math.PI,0);g.stroke()}
+    g.save();g.translate(x,fy-112);g.rotate(Math.sin(time*1.4+i)*.04);cut(()=>rr(-32,-12,64,24,4),"#fff3d6",{edge:4,shadow:false});g.fillStyle=open?"#c8643c":"#8d8578";g.font="bold 11px "+FONT;g.textAlign="center";g.fillText(open?"LEVEL 2":"LEVEL "+(i+1),0,4);g.restore();g.textAlign="left"}}
 
 // ---- Admin cheats ----
 function cheatBase(){items=[];for(const k in counts)delete counts[k];addItem("Turnip");addItem("Festival Pin");hasDab=true;hasNib=false;hasReel=false;pinWorn=false;dogOn=false;balloonOn=false;
@@ -3089,8 +3753,15 @@ const CHEATS={
   coins:()=>{coins+=20;sayToast("+20 coins (cheater!)")},
   l3:()=>cheat3(),
   hub:()=>cheatHub(),
+  homeL1:()=>cheatHomeL1(),
   shop:()=>{cheatHub();titleMenu=null;dlg.on=false;l2.hubStep=3;enterShop("odds");s.x=COUNTER.x-20-s.w;addItem("Bait",3);addItem("Catfish");addItem("Golden Koi");addItem("Sea Bass",2);addItem("Seashell",2);coins+=10;sayToast("Cheat: hub, by the general store, with fish + bait.")},
   clearsave:()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}sayToast("Saved game cleared.")},
+  c21:()=>cheat4(),
+  c21road:()=>{cheat4(3220,G);l4.sign=true},
+  c21canal:()=>{cheat4(5480,G+220);l4.sign=l4.crossed=true},
+  c21upper:()=>{cheat4(7040,G);l4.sign=l4.crossed=l4.hooked=l4.ferried=l4.stairs=true;l4.ferry=1},
+  c21gang:()=>{cheat4(9560,floorAt(9560));l4.sign=l4.crossed=l4.hooked=l4.ferried=l4.stairs=true;l4.ferry=1},
+  c21store:()=>{cheat4(9760,G-620);l4.sign=l4.crossed=l4.hooked=l4.ferried=l4.stairs=true;l4.ferry=1},
   l3replay:()=>{cheatHub();dlg.on=false;startLevel3(true);dlg.on=false},
   l3wreck:()=>{cheat3();l3.dock=true;cheatBeach(CHEST_X+50,WRECK.y)},
   l3dock:()=>{cheat3();cheatBeach(3990)},
@@ -3118,7 +3789,7 @@ document.querySelectorAll("[data-cheat]").forEach(b=>b.addEventListener("click",
 let last=0;
 function frame(t){const dt=Math.min((t-(last||t))/1000,.033);last=t;update(dt);
   g.save();if(shake>0)g.translate((Math.random()-.5)*14*shake,(Math.random()-.5)*10*shake);
-  if(scene==="bedroom")drawBedroom();else if(scene==="resident")drawResident();else if(scene==="festival")drawFestival();else if(scene==="orchard")drawOrchard();else if(scene==="lake")drawLake();else if(scene==="under")drawUnder();else if(scene==="shop")drawShop();else if(scene==="beach")drawBeach();else if(scene==="lighthouse")drawLighthouse();else drawOutside();
+  if(scene==="bedroom")drawBedroom();else if(scene==="resident")drawResident();else if(scene==="festival")drawFestival();else if(scene==="orchard")drawOrchard();else if(scene==="lake")drawLake();else if(scene==="under")drawUnder();else if(scene==="shop")drawShop();else if(scene==="beach")drawBeach();else if(scene==="lighthouse")drawLighthouse();else if(scene==="clay")drawClay();else if(scene==="nook")drawNook();else drawOutside();
   g.restore();
   g.save();g.fillStyle=grain;g.fillRect(0,0,W,H);g.restore();
   if(flash>0){g.fillStyle=`rgba(255,255,255,${Math.min(.95,flash)})`;g.fillRect(0,0,W,H)}
@@ -3134,7 +3805,7 @@ start([
   ["Narrator","(So many things.)"]
 ],()=>sayToast("Walk to the wardrobe and press Space to open it."));
 requestAnimationFrame(frame);
-window.__game={get titleMenu(){return titleMenu},saveGame,readSave,applySave,rollFish,tally,polly,get coins(){return coins},get items(){return items},count:n=>count(n),get scene(){return scene},get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},get l3(){return l3},get mini(){return mini},get book(){return book},returnHome:()=>returnHome(),endL2:()=>{level=2;l2.done=true;complete=true;showEndScreen=true;endT=2},get LH(){return LH_STATIC},spawnInklet:x=>spawnInklet(x),get shield(){return shield},get camY(){return camY},gainXP:(n)=>gainXP(n,center(),s.y)};
+window.__game={get titleMenu(){return titleMenu},saveGame,readSave,applySave,rollFish,tally,polly,get coins(){return coins},get items(){return items},count:n=>count(n),get scene(){return scene},get fish(){return fish},giveNib:()=>{hasNib=true;l2.nibMet=true},get fsm(){return fsm},teleY:(x,y)=>{s.x=x-s.w/2;s.y=y-s.h;s.vy=0},get l2(){return l2},get dlg(){return dlg},cheat:k=>CHEATS[k](),get s(){return s},get state(){return{scene,level,items,counts,coins,health,hasDab,hasNib,equipped,gateKey,complete,stormDone,flowerRestored,showEndScreen,dlg:dlg.on}},interact:()=>{const it=getInteract();if(it)it[1]();return it&&it[0]},advanceAll:()=>{let n=0;while(dlg.on&&n++<60){dlg.chars=1e9;advance()}},tele:(x,sc)=>{if(sc)scene=sc;s.x=x-s.w/2;s.y=G-s.h;s.vy=0},openInv:(t)=>{invOpen=true;inv.tab=t||0},get xp(){return{xp,plv,journal,lvlUp:!!lvlUp,maxHealth,health}},get l3(){return l3},get mini(){return mini},get book(){return book},returnHome:()=>returnHome(),endL2:()=>{level=2;l2.done=true;complete=true;showEndScreen=true;endT=2},get LH(){return LH_STATIC},spawnInklet:x=>spawnInklet(x),get shield(){return shield},get camY(){return camY},get l4(){return l4},floorAt:x=>floorAt(x),gainXP:(n)=>gainXP(n,center(),s.y)};
 })();
 </script>
 </body>
