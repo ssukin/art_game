@@ -97,12 +97,11 @@ When the lamp is lit, its beam swings up to point at the sky, right where Sarah 
 The Professor is glimpsed three times before the reveal: a gray figure on a far hill during the first storm (Part 1), a gray-gloved hand poking out of the tear above the stage (Part 2), and a figure in a gray top hat rowing away with the tiny squid after The Blot (Level 1).
 
 **Coming home, step by step:**
-1. The beam drops Sarah out of the page door, and **Gus's newly fixed elevator** carries her straight down to the ground floor. Gus welcomes her home, explains that the festival is over and some shops have reopened, and suggests taking her new fishing pole (Reel) to the lake. Dab recognizes the man in the rowboat. (Ride the elevator back up to the second floor any time.)
-2. **Mrs. Maple**, at the far right end of town, tells the story of Grandma, Monty and the sketchbook world, and mentions she has a favor to ask whenever Sarah is ready.
+1. The beam drops Sarah out of the page door, and **Gus's newly fixed elevator** carries her straight down to the ground floor. Gus welcomes her home, explains that the festival is over and some shops have reopened, and suggests taking her new fishing pole (Reel) to the lake. (Ride the elevator back up to the second floor any time.)
+2. **Mrs. Maple** comes hurrying over and asks Sarah, whenever she's ready, to pick up a delivery: a prepaid **clay order** for Inka's art store from the Clay Store, through the second door. (There's no Grandma or Professor Monochrome story after Chapter 1.)
 3. The town opens up to explore. **Quill**, outside the library, can show you **The Great Sketchbook** (optional): the Watercolor Coast page is back, five pages are still torn out.
-4. When you're ready, talk to Mrs. Maple again. She asks Sarah to pick up a prepaid **clay order** for Inka's art store from the Clay Store, through the second door.
 
-**Doors on the second floor.** All six doors are there from the start. The Level 1 door can be replayed (see above). The Level 2 door unlocks once the coast is restored and leads to Chapter 2-1 once Mrs. Maple has given you the errand. Doors 3 to 6 are padlocked.
+**Doors on the second floor.** All six doors are there from the start. The Level 1 door can be replayed (see above). The Level 2 door unlocks once the coast is restored and leads to Chapter 2-1 (Mrs. Maple gives you the errand as soon as you get home). Doors 3 to 6 are padlocked.
 
 **Things to do in town now:** The festival is over: the registration table, sculptures, contest stage, bunting and booths are packed away (except Chef Crumb's kitchen and the Art Supplies booth, which stay open). Mr. Biscuits the cat now suns himself outside the pet store. Shops that are closed have an **ON VACATION** sign.
 

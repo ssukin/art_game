@@ -56,10 +56,10 @@ This file gives an AI (or a person) picking up the project everything needed to 
   - **Replayable** from its door: no boss, gems already in place, ride the beam home at the top.
 - **Back in town after Level 1:**
   - The beam drops Sarah out the page door. Gus's fixed elevator brings her to the ground floor. Gus explains the festival is over and some shops have reopened.
-  - Dab recognizes the man in the rowboat; Mrs. Maple tells the Grandma/Monty story; the sketchbook is shown; a second door appears.
+  - (Old notes said Dab and Mrs. Maple tell the Grandma/Monty story here. Sarah removed that on 2026-11-24.)
   - The festival is packed away (stage, sculptures, registration, bunting, Clay Corner booth). **Chef Crumb's Kitchen and Inka's Art Supplies stay open.** Mr. Biscuits sits outside the pet store. Closed shops say **ON VACATION**.
   - **Open shops have interiors** (walk in, talk to the keeper behind the counter): Paws & Claws (Polly: Dog Food, Bait), Odds & Ends (Mr. Tally: buys almost any non-key item), Lost & Found (Mr. Pocket: Old Sketch), Arcade (Pixel: "Stop the Smudge" mini-game), Alchemy (Madame Fizz: fish + seashell → Health Potion).
-  - **Gus** gives the welcome-home speech (festival over, shops reopened, take the new fishing pole to the lake). **Mrs. Maple** tells the Monty story, then later gives the **clay errand** whenever Sarah is ready (`l2.clayErrand`). Quill and the sketchbook are optional now.
+  - **Gus** gives the welcome-home speech (festival over, shops reopened, take the new fishing pole to the lake). Then **Mrs. Maple** comes over and asks Sarah to pick up the clay delivery through the second door whenever she's ready (`l2.clayErrand`). Sarah decided (2026-11-24): no Grandma / Professor Monochrome story after Chapter 1. Quill and the sketchbook are optional now.
 - **Level 2 door** (door 2) is unlocked once Level 1 is done and leads to Chapter 2-1 once Mrs. Maple has given the errand. Doors 3–6 are padlocked.
   - Still closed on purpose: Grimy Grotto, orchard apples, the mysterious gate.
 
@@ -85,7 +85,7 @@ Built from Sarah's `walkthrough.docx` (in her local Game folder). Summary: landi
 
 - Sarah's decisions: Nib only jabs unless a creature's spec says it flips (clay creatures do NOT need flipping, per her 2026-11-24 change); teacup and teapot monsters take 2 hits (crack, then break), the gang's big teapot 5 and its teacups 3; no shovel yet; the left chest has 20 coins.
 - Sarah's playtest changes (2026-11-24): fewer signs, and sign text must fit its board; less explaining of what to do in each section (especially the delivery road); dialogue choices with the Shopkeeper; **Monty is not named in 2-1** (he's just a mysterious stranger in a gray top hat); the ferry is crossed by hooking a hoop on the far bank, both ways; gulls like Chapter 1's during the ferry; **no Save Blocks in 2-1, and never save without a Save Block** (respawn checkpoints only); more and longer cracking/falling platform sections.
-- Note: Mrs. Maple's hub story still names Monty (that text was already on main).
+- Mrs. Maple's hub story (which named Monty) was removed on 2026-11-24. The Lost & Found **Old Sketch** still names Monty and Grandma.
 - Still to plan: Chapter 2-2 and beyond (where Monty went, the shovel, digging, clay puzzles).
 
 ### Older Level 2 notes (before the walkthrough)

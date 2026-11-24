@@ -52,6 +52,7 @@
     <button class="button" data-cheat="nib">L0-2: after the chase (Nib trail)</button>
     <button class="button" data-cheat="results">L0-2: contest results</button>
     <button class="button" data-cheat="fight">L0-2: Smudge fight</button>
+    <button class="button" data-cheat="homeL1">Return home from Chapter 1 (plays the scene)</button>
     <button class="button" data-cheat="hub">Hub: back in town after Level 1</button>
     <button class="button" data-cheat="shop">Hub: general store (fish + bait)</button>
     <button class="button" data-cheat="clearsave">Clear saved game</button>
@@ -2932,8 +2933,8 @@ function returnHome(){
   const land=()=>{goScene("festival",1115,G-s.h);s.face=1;camY=0;checkpoint=700-s.w/2;checkpointY=null;checkpointScene="festival"};
   if(l2.hub&&l2.hubStep!=null){level=2;complete=false;showEndScreen=false;invOpen=false;dogOn=false;balloonOn=false;fish.ph=0;health=maxHealth;parts=[];loot=[];land();
     start([["Narrator","The beam carries Sarah up through the inky dark and out the page door on the second floor. The elevator is waiting with its doors open. Ding! Ground floor."]]);return}
-  finishL2State();level=2;l2.hub=true;l2.hubStep=1;l2.door2=true;complete=false;showEndScreen=false;invOpen=false;dogOn=false;balloonOn=false;fish.ph=0;
-  l2.maple=2980;l2.doorOpen=true;l2.doorY=FLOOR2.y;health=maxHealth;parts=[];loot=[];land();
+  finishL2State();level=2;l2.hub=true;l2.hubStep=2;l2.door2=true;complete=false;showEndScreen=false;invOpen=false;dogOn=false;balloonOn=false;fish.ph=0;
+  l2.maple=1290;l2.doorOpen=true;l2.doorY=FLOOR2.y;health=maxHealth;parts=[];loot=[];land();
   start([
     ["Narrator","The beam carries Sarah up and up, through the inky dark, and straight out through the page door she fell in by, onto the second floor."],
     ["Narrator","Right beside her, the old elevator gives a cheerful DING. Its lights are on. Someone fixed it! Down it goes, all the way to the ground floor."],
@@ -2942,11 +2943,13 @@ function returnHome(){
     ["Gus","And now that the festival's done, some of the shops have opened back up. The pet store, the new general store by the entrance, and the shops down in Undertown. Chef Crumb and Inka kept their booths open too. Everyone else is on vacation."],
     ["Gus","Oh, and is that a new fishing pole? Take it down to the lake! Those fish have been bored all festival."],
     ["Sarah","We made it! The coast is colorful again, and we're… home."],
-    ["Dab","Sarah. That man in the rowboat. Gray coat, gray hat, gray everything. I know him."],
-    ["Dab","His name is Professor Monochrome. A long time ago, he painted with me. And with your Grandma."],
-    ["Sarah","With GRANDMA?!"],
-    ["Dab","Mrs. Maple knows the whole story. She's at the far right end of town, waving like a windmill."]
-  ],()=>{chapterCard={t:0,title:"Level 0",sub:"Back in Town"}});
+    ["Narrator","Mrs. Maple comes hurrying over, waving."],
+    ["Mrs. Maple","Sarah! You're back! And you smell like the seaside."],
+    ["Mrs. Maple","I have a little favor to ask, whenever you're ready. Inka's art store ran clean out of clay during the festival, and she has a big order waiting at the Clay Store."],
+    ["Mrs. Maple","The Clay Store is through the second door, up on the walkway. The order's already paid for. You only need to pick up the delivery."],
+    ["Sarah","A clay pickup? Easy! I'll be back before you know it."],
+    ["Mrs. Maple","No rush, dear. Enjoy town first! Gus's elevator will take you up to the walkway when you're ready."]
+  ],()=>{l2.clayErrand=true;chapterCard={t:0,title:"Level 0",sub:"Back in Town"}});
 }
 function hubInteract(){
   if(onF2()){
@@ -2965,28 +2968,8 @@ function hubInteract(){
   return null;
 }
 function hubMaple(){
-  if(l2.hubStep>=2&&!l2.clayErrand){start([["Mrs. Maple","Oh, Sarah! Are you ready for that favor I mentioned? No rush at all.",["I'm ready!","Not just yet"],k=>{
-    if(k!==0){start([["Mrs. Maple","Whenever you're ready, dear. Enjoy town first! Reel looks like he's itching to fish."]]);return}
-    l2.clayErrand=true;start([
-      ["Mrs. Maple","Wonderful! Inka's art store ran clean out of clay during the festival, and she has a big order waiting at the Clay Store."],
-      ["Mrs. Maple","The Clay Store is through the second door, up on the walkway. The order's already paid for. You only need to pick it up."],
-      ["Sarah","A clay pickup? Easy! I'll be back before you know it."],
-      ["Dab","A whole page made of pottery. I can't wait!"]
-    ],()=>sayToast("New errand: pick up the clay order through the second door. Ride Gus's elevator up to the walkway."))}]]);return}
-  if(l2.hubStep>=2){const l=["The Clay Store is through the second door, dear. Already paid for!","Every page you bring back makes the world a little brighter, dear.","Your Grandma used to say: \"Gray is just color that's waiting.\""];start([["Mrs. Maple",l[(l2.mapleTalk=(l2.mapleTalk||0)+1)%3]]]);return}
-  start([
-    ["Mrs. Maple","Sarah! You came back through the door! And you smell like the seaside."],
-    ["Sarah","Mrs. Maple, Dab says you know about Grandma… and someone called Professor Monochrome?"],
-    ["Mrs. Maple","Oh, dear. Sit down. Well — stand. There's nowhere to sit, it's a festival."],
-    ["Mrs. Maple","Long ago, your Grandma and a young painter named Monty were the best of friends. With little Dab, they kept this whole world colorful."],
-    ["Mrs. Maple","You see, the world is one enormous sketchbook. Every place is a page. And the three of them painted every single one."],
-    ["Mrs. Maple","Then Monty entered the Town Art Festival… and a certain cat gave his painting a very, VERY bad review."],
-    ["Narrator","Somewhere nearby, Mr. Biscuits sneezes. He is not sorry."],
-    ["Mrs. Maple","Monty decided color was messy. Cheating, even. He went gray, called himself Professor Monochrome, and started ripping pages out of the world."],
-    ["Dab","Every torn-out page makes a door. Every page we stitch back in makes the world whole again."],
-    ["Mrs. Maple","Quill keeps the Great Sketchbook in the library. Go see how many pages are still missing, dear."],
-    ["Mrs. Maple","Oh, and when you're ready, I have a little favor to ask. No rush. Enjoy town first!"]
-  ],()=>{l2.hubStep=Math.max(l2.hubStep,2)});
+  if(!l2.clayErrand){l2.clayErrand=true;start([["Mrs. Maple","Sarah! Could you pick up a delivery for me? Inka's clay order is waiting at the Clay Store, through the second door. It's already paid for."]]);return}
+  const l=["The Clay Store is through the second door, dear. Already paid for!","No rush, dear. Inka can wait a little. Clay doesn't go anywhere.","Every page you bring back makes the world a little brighter, dear."];start([["Mrs. Maple",l[(l2.mapleTalk=(l2.mapleTalk||0)+1)%3]]]);
 }
 function quill(){
   if(l2.hubStep<2){start([["Quill","Shhh. …Sorry. Habit. The library's closed for the festival, but I'm guarding something important. Come back later."]]);return}
@@ -3098,11 +3081,12 @@ function drawHubFestival(){
 function drawHubUnder(){}
 function objectiveHub(){
   if(l2.hubStep===0)return"Take Gus's elevator down. It's at the far left end of the second floor.";
-  if(l2.hubStep===1)return"Find Mrs. Maple at the far right end of town.";
-  if(!l2.clayErrand)return"Enjoy town as long as you like: the shops are open, Reel can fish at the lake, and Quill has the Great Sketchbook. When you're ready, talk to Mrs. Maple again about her favor.";
+  if(!l2.clayErrand)return"Talk to Mrs. Maple.";
   return"Pick up Mrs. Maple's clay order: ride Gus's elevator up to the walkway and go through the second door.";
 }
-function beatsHub(){return[["Come home from Level 1",true],["Ride Gus's elevator down",l2.hubStep>=1],["Hear Mrs. Maple's story",l2.hubStep>=2],["See the Great Sketchbook (optional)",l2.hubStep>=3],["Get Mrs. Maple's clay errand",!!l2.clayErrand],["Bring Waffles some dog food (optional)",!!l2.wafflesFed],["Visit the Lost & Found (optional)",!!l2.sketchGot]]}
+function beatsHub(){return[["Come home from Level 1",true],["Get Mrs. Maple's clay errand",!!l2.clayErrand],["See the Great Sketchbook (optional)",l2.hubStep>=3],["Bring Waffles some dog food (optional)",!!l2.wafflesFed],["Visit the Lost & Found (optional)",!!l2.sketchGot]]}
+// play the real return-home scene after Chapter 1 (Gus + Mrs. Maple), for testing
+function cheatHomeL1(){cheat3();for(const n of["Heart Necklace","Blue Gem","Green Gem"])removeItem(n);hasReel=true;l3.lit=true;l2.hub=false;l2.hubStep=null;l2.clayErrand=false;titleMenu=null;returnHome()}
 function cheatHub(){cheat3();for(const n of["Heart Necklace","Blue Gem","Green Gem"])removeItem(n);hasReel=true;l3.lit=true;returnHome();dlg.on=false;chapterCard=null}
 
 // ===========================================================================
@@ -3745,6 +3729,7 @@ const CHEATS={
   coins:()=>{coins+=20;sayToast("+20 coins (cheater!)")},
   l3:()=>cheat3(),
   hub:()=>cheatHub(),
+  homeL1:()=>cheatHomeL1(),
   shop:()=>{cheatHub();titleMenu=null;dlg.on=false;l2.hubStep=3;enterShop("odds");s.x=COUNTER.x-20-s.w;addItem("Bait",3);addItem("Catfish");addItem("Golden Koi");addItem("Sea Bass",2);addItem("Seashell",2);coins+=10;sayToast("Cheat: hub, by the general store, with fish + bait.")},
   clearsave:()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}sayToast("Saved game cleared.")},
   c21:()=>cheat4(),
